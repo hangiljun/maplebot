@@ -1,8 +1,9 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { Search } from "lucide-react"
-import { fetchCharacter, MAIN_STATS, BATTLE_STATS, DETAIL_STATS, type StatItem } from "@/lib/maple"
+import { fetchCharacter } from "@/lib/maple"
 import CharacterImage from "./CharacterImage"
+import CharacterTabs from "./CharacterTabs"
 
 interface Props {
   params: Promise<{ name: string }>
@@ -13,32 +14,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const decoded = decodeURIComponent(name)
   return {
     title: `${decoded} 캐릭터 조회`,
-    description: `메이플스토리 캐릭터 ${decoded}의 레벨, 직업, 스탯 정보를 확인하세요.`,
+    description: `메이플스토리 캐릭터 ${decoded}의 레벨, 직업, 장비, 유니온, 스킬 정보를 확인하세요.`,
   }
-}
-
-function pickStats(stats: StatItem[], keys: string[]) {
-  return keys
-    .map((key) => stats.find((s) => s.stat_name === key))
-    .filter(Boolean) as StatItem[]
-}
-
-function StatGrid({ title, items }: { title: string; items: StatItem[] }) {
-  if (!items.length) return null
-  return (
-    <section>
-      <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{title}</h3>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        {items.map((item) => (
-          <div key={item.stat_name}
-            className="bg-white rounded-xl px-4 py-3 border border-gray-100">
-            <p className="text-[11px] text-gray-400 mb-0.5 font-medium">{item.stat_name}</p>
-            <p className="text-[15px] font-bold text-[#191F28]">{item.stat_value ?? "-"}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  )
 }
 
 export default async function CharacterDetailPage({ params }: Props) {
@@ -62,26 +39,21 @@ export default async function CharacterDetailPage({ params }: Props) {
     )
   }
 
-  const { basic, stats } = data
-  const expRate    = Math.min(Math.max(parseFloat(basic.character_exp_rate) || 0, 0), 100)
-  const joinDate   = basic.character_date_create
-    ? new Date(basic.character_date_create).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })
+  const { basic } = data
+  const expRate = Math.min(Math.max(parseFloat(basic.character_exp_rate) || 0, 0), 100)
+  const joinDate = basic.character_date_create
+    ? new Date(basic.character_date_create).toLocaleDateString("ko-KR", {
+        year: "numeric", month: "long", day: "numeric",
+      })
     : null
-  const mainStats   = pickStats(stats, MAIN_STATS)
-  const battleStats = pickStats(stats, BATTLE_STATS)
-  const detailStats = pickStats(stats, DETAIL_STATS)
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
+    <div className="max-w-3xl mx-auto px-4 py-8 space-y-4">
 
       {/* 프로필 카드 */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-
-        {/* 상단 컬러 배너 */}
         <div className="h-20 bg-gradient-to-r from-blue-500 to-blue-400" />
-
         <div className="px-6 pb-6">
-          {/* 이미지 + 이름 */}
           <div className="flex items-end gap-4 -mt-10 mb-4">
             <div className="rounded-2xl border-4 border-white shadow-md bg-white shrink-0">
               <CharacterImage src={basic.character_image} name={basic.character_name} />
@@ -94,7 +66,6 @@ export default async function CharacterDetailPage({ params }: Props) {
             </div>
           </div>
 
-          {/* 태그들 */}
           <div className="flex flex-wrap gap-2 mb-5">
             <span className="bg-blue-50 text-blue-600 text-xs font-semibold px-2.5 py-1 rounded-full">
               🌍 {basic.world_name}
@@ -111,26 +82,20 @@ export default async function CharacterDetailPage({ params }: Props) {
             )}
           </div>
 
-          {/* 경험치 */}
           <div>
             <div className="flex justify-between text-xs text-gray-400 font-medium mb-1.5">
               <span>Lv.{basic.character_level} 경험치</span>
               <span>{basic.character_exp_rate}%</span>
             </div>
             <div className="w-full bg-gray-100 rounded-full h-1.5">
-              <div
-                className="bg-[#3182F6] h-1.5 rounded-full transition-all"
-                style={{ width: `${expRate}%` }}
-              />
+              <div className="bg-[#3182F6] h-1.5 rounded-full" style={{ width: `${expRate}%` }} />
             </div>
           </div>
         </div>
       </div>
 
-      {/* 스탯 */}
-      <StatGrid title="기본 능력치" items={mainStats} />
-      <StatGrid title="전투 능력치" items={battleStats} />
-      <StatGrid title="전투 상세"   items={detailStats} />
+      {/* 탭 (기본정보 / 장비 / 유니온 / 헥사 스킬) */}
+      <CharacterTabs data={data} />
 
       {/* 다시 검색 */}
       <div className="flex justify-center pt-2">
