@@ -154,27 +154,29 @@ export async function fetchCharacter(name: string): Promise<CharacterData | null
   if (!idData?.ocid) return null
   const { ocid } = idData
 
-  // 2. 병렬 조회
+  // 2. 요청을 두 묶음으로 나눠서 Rate Limit 방지
   const q = `ocid=${ocid}`
 
-  const results = await Promise.allSettled([
+  // 1묶음: 핵심 정보
+  const [basicR, popularityR, statR, equipR] = await Promise.all([
     nexonFetch(`/maplestory/v1/character/basic?${q}`),
     nexonFetch(`/maplestory/v1/character/popularity?${q}`),
     nexonFetch(`/maplestory/v1/character/stat?${q}`),
     nexonFetch(`/maplestory/v1/character/item-equipment?${q}`),
+  ])
+
+  if (!basicR) return null
+
+  // 2묶음: 상세 정보 (짧은 간격 후 요청)
+  await new Promise((r) => setTimeout(r, 200))
+
+  const [abilityR, symbolR, hyperR, unionR, skillR] = await Promise.all([
     nexonFetch(`/maplestory/v1/character/ability?${q}`),
     nexonFetch(`/maplestory/v1/character/symbol-equipment?${q}`),
     nexonFetch(`/maplestory/v1/character/hyper-stat?${q}`),
     nexonFetch(`/maplestory/v1/user/union?${q}`),
     nexonFetch(`/maplestory/v1/character/skill?${q}&character_skill_grade=6`),
   ])
-
-  const [
-    basicR, popularityR, statR, equipR,
-    abilityR, symbolR, hyperR, unionR, skillR,
-  ] = results.map((r) => (r.status === "fulfilled" ? r.value : null))
-
-  if (!basicR) return null
 
   // 하이퍼스탯: 프리셋1 사용
   const hyperStats: HyperStatItem[] = hyperR?.character_hyper_stat_preset_1 ?? []
