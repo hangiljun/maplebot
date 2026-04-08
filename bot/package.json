@@ -1,0 +1,21 @@
+{
+  "name": "maplebot-discord",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "ts-node src/deploy.ts",
+    "start": "ts-node src/index.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@discordjs/rest": "^2.4.0",
+    "discord-api-types": "^0.37.97",
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.0.0"
+  }
+}
