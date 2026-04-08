@@ -22,19 +22,6 @@ export interface StatItem {
 }
 
 // ── 장비 ───────────────────────────────────────────────────
-export interface ItemTotalOption {
-  str: string
-  dex: string
-  int: string
-  luk: string
-  max_hp: string
-  max_mp: string
-  attack_power: string
-  magic_power: string
-  armor: string
-  [key: string]: string
-}
-
 export interface EquipmentItem {
   item_equipment_part: string
   item_equipment_slot: string
@@ -50,7 +37,43 @@ export interface EquipmentItem {
   additional_potential_option_1: string | null
   additional_potential_option_2: string | null
   additional_potential_option_3: string | null
-  item_total_option: ItemTotalOption
+  item_total_option: Record<string, string>
+}
+
+// ── 어빌리티 ───────────────────────────────────────────────
+export interface AbilityLine {
+  ability_no: string
+  ability_grade: string
+  ability_value: string
+}
+
+export interface AbilityInfo {
+  ability_grade: string
+  ability_info: AbilityLine[]
+}
+
+// ── 심볼 ───────────────────────────────────────────────────
+export interface SymbolItem {
+  symbol_name: string
+  symbol_icon: string
+  symbol_description: string
+  symbol_force: string
+  symbol_level: number
+  symbol_str: string
+  symbol_dex: string
+  symbol_int: string
+  symbol_luk: string
+  symbol_hp: string
+  symbol_growth_count: number
+  symbol_require_growth_count: number
+}
+
+// ── 하이퍼스탯 ─────────────────────────────────────────────
+export interface HyperStatItem {
+  stat_type: string
+  stat_point: number | null
+  stat_level: number
+  stat_increase: string | null
 }
 
 // ── 유니온 ─────────────────────────────────────────────────
@@ -74,8 +97,12 @@ export interface SkillItem {
 // ── 전체 캐릭터 데이터 ────────────────────────────────────
 export interface CharacterData {
   basic: CharacterBasic
+  popularity: number
   stats: StatItem[]
   equipment: EquipmentItem[]
+  ability: AbilityInfo | null
+  symbols: SymbolItem[]
+  hyperStats: HyperStatItem[]
   union: UnionInfo | null
   skills: SkillItem[]
 }
@@ -88,7 +115,7 @@ export const DETAIL_STATS = ["보스 몬스터 데미지", "방어율 무시", "
 // 포텐셜 등급 색상
 export const POTENTIAL_COLORS: Record<string, string> = {
   "레전드리": "#FF8C00",
-  "유니크":   "#FFD700",
+  "유니크":   "#EAB308",
   "에픽":     "#A855F7",
   "레어":     "#3B82F6",
 }
@@ -112,7 +139,7 @@ async function nexonFetch(path: string) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// 캐릭터 전체 조회 (기본정보 + 스탯 + 장비 + 유니온 + 스킬)
+// 캐릭터 전체 조회
 // ─────────────────────────────────────────────────────────────
 export async function fetchCharacter(name: string): Promise<CharacterData | null> {
   if (!name?.trim()) return null
@@ -125,46 +152,56 @@ export async function fetchCharacter(name: string): Promise<CharacterData | null
   const { ocid } = idData
 
   // 2. 병렬 조회
-  const [basicData, statData, equipData, unionData, skillData] = await Promise.allSettled([
+  const results = await Promise.allSettled([
     nexonFetch(`/maplestory/v1/character/basic?ocid=${ocid}`),
+    nexonFetch(`/maplestory/v1/character/popularity?ocid=${ocid}`),
     nexonFetch(`/maplestory/v1/character/stat?ocid=${ocid}`),
     nexonFetch(`/maplestory/v1/character/item-equipment?ocid=${ocid}`),
+    nexonFetch(`/maplestory/v1/character/ability?ocid=${ocid}`),
+    nexonFetch(`/maplestory/v1/character/symbol-equipment?ocid=${ocid}`),
+    nexonFetch(`/maplestory/v1/character/hyper-stat?ocid=${ocid}`),
     nexonFetch(`/maplestory/v1/user/union?ocid=${ocid}`),
     nexonFetch(`/maplestory/v1/character/skill?ocid=${ocid}&character_skill_grade=6`),
   ])
 
-  const basic = basicData.status === "fulfilled" ? basicData.value : null
-  if (!basic) return null
+  const [
+    basicR, popularityR, statR, equipR,
+    abilityR, symbolR, hyperR, unionR, skillR,
+  ] = results.map((r) => (r.status === "fulfilled" ? r.value : null))
 
-  const stat     = statData.status   === "fulfilled" ? statData.value   : null
-  const equip    = equipData.status  === "fulfilled" ? equipData.value  : null
-  const union    = unionData.status  === "fulfilled" ? unionData.value  : null
-  const skill    = skillData.status  === "fulfilled" ? skillData.value  : null
+  if (!basicR) return null
+
+  // 하이퍼스탯: 프리셋1 사용
+  const hyperStats: HyperStatItem[] = hyperR?.character_hyper_stat_preset_1 ?? []
 
   return {
     basic: {
-      character_name:        basic.character_name,
-      world_name:            basic.world_name,
-      character_class:       basic.character_class,
-      character_class_level: basic.character_class_level,
-      character_level:       basic.character_level,
-      character_exp:         basic.character_exp,
-      character_exp_rate:    basic.character_exp_rate,
-      character_guild_name:  basic.character_guild_name ?? "",
-      character_image:       basic.character_image ?? "",
-      character_date_create: basic.character_date_create ?? "",
+      character_name:        basicR.character_name,
+      world_name:            basicR.world_name,
+      character_class:       basicR.character_class,
+      character_class_level: basicR.character_class_level,
+      character_level:       basicR.character_level,
+      character_exp:         basicR.character_exp,
+      character_exp_rate:    basicR.character_exp_rate,
+      character_guild_name:  basicR.character_guild_name ?? "",
+      character_image:       basicR.character_image ?? "",
+      character_date_create: basicR.character_date_create ?? "",
     },
-    stats:     stat?.final_stat ?? [],
-    equipment: equip?.item_equipment ?? [],
-    union: union
+    popularity: popularityR?.popularity ?? 0,
+    stats:      statR?.final_stat ?? [],
+    equipment:  equipR?.item_equipment ?? [],
+    ability:    abilityR ?? null,
+    symbols:    symbolR?.character_symbol ?? [],
+    hyperStats: hyperStats.filter((h: HyperStatItem) => h.stat_level > 0),
+    union: unionR
       ? {
-          union_level:           union.union_level,
-          union_grade:           union.union_grade,
-          union_artifact_level:  union.union_artifact_level ?? 0,
-          union_artifact_exp:    union.union_artifact_exp ?? 0,
-          union_artifact_point:  union.union_artifact_point ?? 0,
+          union_level:          unionR.union_level,
+          union_grade:          unionR.union_grade,
+          union_artifact_level: unionR.union_artifact_level ?? 0,
+          union_artifact_exp:   unionR.union_artifact_exp ?? 0,
+          union_artifact_point: unionR.union_artifact_point ?? 0,
         }
       : null,
-    skills: skill?.character_skill ?? [],
+    skills: skillR?.character_skill ?? [],
   }
 }

@@ -75,6 +75,11 @@ export default async function CharacterDetailPage({ params }: Props) {
                 🛡️ {basic.character_guild_name}
               </span>
             )}
+            {data.popularity !== 0 && (
+              <span className="bg-pink-50 text-pink-500 text-xs font-semibold px-2.5 py-1 rounded-full">
+                ❤️ 인기도 {data.popularity.toLocaleString()}
+              </span>
+            )}
             {joinDate && (
               <span className="bg-gray-50 text-gray-500 text-xs font-medium px-2.5 py-1 rounded-full">
                 📅 {joinDate}
