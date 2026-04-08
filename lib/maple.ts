@@ -52,30 +52,6 @@ export interface AbilityInfo {
   ability_info: AbilityLine[]
 }
 
-// ── 심볼 ───────────────────────────────────────────────────
-export interface SymbolItem {
-  symbol_name: string
-  symbol_icon: string
-  symbol_description: string
-  symbol_force: string
-  symbol_level: number
-  symbol_str: string
-  symbol_dex: string
-  symbol_int: string
-  symbol_luk: string
-  symbol_hp: string
-  symbol_growth_count: number
-  symbol_require_growth_count: number
-}
-
-// ── 하이퍼스탯 ─────────────────────────────────────────────
-export interface HyperStatItem {
-  stat_type: string
-  stat_point: number | null
-  stat_level: number
-  stat_increase: string | null
-}
-
 // ── 유니온 ─────────────────────────────────────────────────
 export interface UnionInfo {
   union_level: number
@@ -85,15 +61,6 @@ export interface UnionInfo {
   union_artifact_point: number
 }
 
-// ── 스킬 ───────────────────────────────────────────────────
-export interface SkillItem {
-  skill_name: string
-  skill_description: string
-  skill_level: number
-  skill_effect: string | null
-  skill_icon: string
-}
-
 // ── 전체 캐릭터 데이터 ────────────────────────────────────
 export interface CharacterData {
   basic: CharacterBasic
@@ -101,16 +68,14 @@ export interface CharacterData {
   stats: StatItem[]
   equipment: EquipmentItem[]
   ability: AbilityInfo | null
-  symbols: SymbolItem[]
-  hyperStats: HyperStatItem[]
   union: UnionInfo | null
-  skills: SkillItem[]
 }
 
 // 표시할 주요 스탯
 export const MAIN_STATS   = ["STR", "DEX", "INT", "LUK"]
 export const BATTLE_STATS = ["HP", "MP", "공격력", "마력"]
 export const DETAIL_STATS = ["보스 몬스터 데미지", "방어율 무시", "크리티컬 확률", "크리티컬 데미지", "방어력"]
+export const COMBAT_POWER_STAT = "전투력"
 
 // 포텐셜 등급 색상
 export const POTENTIAL_COLORS: Record<string, string> = {
@@ -167,19 +132,13 @@ export async function fetchCharacter(name: string): Promise<CharacterData | null
 
   if (!basicR) return null
 
-  // 2묶음: 상세 정보 (짧은 간격 후 요청)
+  // 2묶음: 어빌리티 + 유니온
   await new Promise((r) => setTimeout(r, 200))
 
-  const [abilityR, symbolR, hyperR, unionR, skillR] = await Promise.all([
+  const [abilityR, unionR] = await Promise.all([
     nexonFetch(`/maplestory/v1/character/ability?${q}`),
-    nexonFetch(`/maplestory/v1/character/symbol-equipment?${q}`),
-    nexonFetch(`/maplestory/v1/character/hyper-stat?${q}`),
     nexonFetch(`/maplestory/v1/user/union?${q}`),
-    nexonFetch(`/maplestory/v1/character/skill?${q}&character_skill_grade=6`),
   ])
-
-  // 하이퍼스탯: 프리셋1 사용
-  const hyperStats: HyperStatItem[] = hyperR?.character_hyper_stat_preset_1 ?? []
 
   return {
     basic: {
@@ -198,8 +157,6 @@ export async function fetchCharacter(name: string): Promise<CharacterData | null
     stats:      statR?.final_stat ?? [],
     equipment:  equipR?.item_equipment ?? [],
     ability:    abilityR ?? null,
-    symbols:    symbolR?.character_symbol ?? [],
-    hyperStats: hyperStats.filter((h: HyperStatItem) => h.stat_level > 0),
     union: unionR
       ? {
           union_level:          unionR.union_level,
@@ -209,6 +166,5 @@ export async function fetchCharacter(name: string): Promise<CharacterData | null
           union_artifact_point: unionR.union_artifact_point ?? 0,
         }
       : null,
-    skills: skillR?.character_skill ?? [],
   }
 }

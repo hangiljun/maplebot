@@ -1,21 +1,15 @@
 "use client"
 import { useState } from "react"
-import { CharacterData, MAIN_STATS, BATTLE_STATS, DETAIL_STATS, type StatItem } from "@/lib/maple"
-import EquipmentTab  from "./tabs/EquipmentTab"
-import AbilityTab    from "./tabs/AbilityTab"
-import SymbolTab     from "./tabs/SymbolTab"
-import HyperStatTab  from "./tabs/HyperStatTab"
-import UnionTab      from "./tabs/UnionTab"
-import SkillTab      from "./tabs/SkillTab"
+import { CharacterData, MAIN_STATS, BATTLE_STATS, DETAIL_STATS, COMBAT_POWER_STAT, type StatItem } from "@/lib/maple"
+import EquipmentTab from "./tabs/EquipmentTab"
+import AbilityTab   from "./tabs/AbilityTab"
+import UnionTab     from "./tabs/UnionTab"
 
 const TABS = [
   { key: "stat",      label: "기본 정보" },
   { key: "equipment", label: "장비" },
   { key: "ability",   label: "어빌리티" },
-  { key: "symbol",    label: "심볼" },
-  { key: "hyper",     label: "하이퍼스탯" },
   { key: "union",     label: "유니온" },
-  { key: "skill",     label: "헥사 스킬" },
 ]
 
 function pickStats(stats: StatItem[], keys: string[]) {
@@ -41,17 +35,19 @@ function StatGrid({ title, items }: { title: string; items: StatItem[] }) {
 
 export default function CharacterTabs({ data }: { data: CharacterData }) {
   const [tab, setTab] = useState("stat")
-  const { stats, equipment, ability, symbols, hyperStats, union, skills } = data
+  const { stats, equipment, ability, union } = data
+
+  const combatPower = stats.find((s) => s.stat_name === COMBAT_POWER_STAT)
 
   return (
     <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
-      {/* 탭 바 - 스크롤 가능 */}
-      <div className="flex border-b border-gray-100 overflow-x-auto scrollbar-none">
+      {/* 탭 바 */}
+      <div className="flex border-b border-gray-100 overflow-x-auto">
         {TABS.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`flex-none px-4 py-3 text-sm font-semibold transition-colors whitespace-nowrap ${
+            className={`flex-1 py-3 text-sm font-semibold transition-colors whitespace-nowrap ${
               tab === t.key
                 ? "text-[#3182F6] border-b-2 border-[#3182F6] bg-blue-50/50"
                 : "text-gray-400 hover:text-gray-600"
@@ -66,6 +62,15 @@ export default function CharacterTabs({ data }: { data: CharacterData }) {
       <div className="p-4">
         {tab === "stat" && (
           <div className="space-y-5">
+            {/* 전투력 */}
+            {combatPower?.stat_value && (
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl px-5 py-4 flex items-center justify-between">
+                <span className="text-sm font-bold text-[#191F28]">⚔️ 전투력</span>
+                <span className="text-xl font-extrabold text-[#3182F6]">
+                  {Number(combatPower.stat_value).toLocaleString()}
+                </span>
+              </div>
+            )}
             <StatGrid title="기본 능력치" items={pickStats(stats, MAIN_STATS)} />
             <StatGrid title="전투 능력치" items={pickStats(stats, BATTLE_STATS)} />
             <StatGrid title="전투 상세"   items={pickStats(stats, DETAIL_STATS)} />
@@ -73,10 +78,7 @@ export default function CharacterTabs({ data }: { data: CharacterData }) {
         )}
         {tab === "equipment" && <EquipmentTab items={equipment} />}
         {tab === "ability"   && <AbilityTab ability={ability} />}
-        {tab === "symbol"    && <SymbolTab symbols={symbols} />}
-        {tab === "hyper"     && <HyperStatTab hyperStats={hyperStats} />}
         {tab === "union"     && <UnionTab union={union} />}
-        {tab === "skill"     && <SkillTab skills={skills} />}
       </div>
     </div>
   )
