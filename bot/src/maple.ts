@@ -26,6 +26,31 @@ export interface CharacterSummary {
   dateCreate: string
 }
 
+export interface EquipItem {
+  slot: string
+  name: string
+  starforce: number
+  potential: string
+  icon: string
+}
+
+export async function fetchEquipment(name: string): Promise<EquipItem[] | null> {
+  const idData = await nexonFetch(`/maplestory/v1/id?character_name=${encodeURIComponent(name)}`)
+  if (!idData?.ocid) return null
+  const q = `ocid=${idData.ocid}`
+
+  const data = await nexonFetch(`/maplestory/v1/character/item-equipment?${q}`)
+  if (!data?.item_equipment) return null
+
+  return data.item_equipment.map((item: any) => ({
+    slot:      item.item_equipment_slot ?? "",
+    name:      item.item_name ?? "",
+    starforce: Number(item.starforce ?? 0),
+    potential: item.potential_option_grade ?? "",
+    icon:      item.item_icon ?? "",
+  }))
+}
+
 export async function fetchCharacterSummary(name: string): Promise<CharacterSummary | null> {
   // ocid 조회
   const idData = await nexonFetch(`/maplestory/v1/id?character_name=${encodeURIComponent(name)}`)

@@ -11,10 +11,19 @@ client.once(Events.ClientReady, (c) => {
 })
 
 client.on(Events.InteractionCreate, async (interaction) => {
-  if (!interaction.isChatInputCommand()) return
+  if (interaction.isChatInputCommand()) {
+    if (interaction.commandName === "정보") {
+      await infoCommand.execute(interaction as ChatInputCommandInteraction)
+    }
+    return
+  }
 
-  if (interaction.commandName === "정보") {
-    await infoCommand.execute(interaction as ChatInputCommandInteraction)
+  if (interaction.isButton()) {
+    const [action, ...rest] = interaction.customId.split(":")
+    const charName = rest.join(":")
+    if (action === "equip") {
+      await infoCommand.handleEquipButton(interaction, charName)
+    }
   }
 })
 
