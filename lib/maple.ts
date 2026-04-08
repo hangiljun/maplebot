@@ -125,20 +125,13 @@ export const POTENTIAL_COLORS: Record<string, string> = {
 // ─────────────────────────────────────────────────────────────
 const BASE_URL = "https://open.api.nexon.com"
 
-// KST 어제 날짜 반환 (Nexon API는 전날 데이터 기준)
-function getKSTYesterday(): string {
-  const kst = new Date(Date.now() + 9 * 60 * 60 * 1000)
-  kst.setDate(kst.getDate() - 1)
-  return kst.toISOString().slice(0, 10)
-}
-
 async function nexonFetch(path: string) {
   const apiKey = process.env.NEXON_API_KEY
   if (!apiKey) throw new Error("NEXON_API_KEY 환경변수가 설정되지 않았습니다")
 
   const res = await fetch(`${BASE_URL}${path}`, {
     headers: { "x-nxopen-api-key": apiKey },
-    next: { revalidate: 3600 },
+    cache: "no-store", // 항상 최신 데이터 (빈 결과 캐시 방지)
   })
 
   if (!res.ok) {
@@ -161,9 +154,8 @@ export async function fetchCharacter(name: string): Promise<CharacterData | null
   if (!idData?.ocid) return null
   const { ocid } = idData
 
-  // 2. 병렬 조회 (date 파라미터 필수)
-  const date = getKSTYesterday()
-  const q = `ocid=${ocid}&date=${date}`
+  // 2. 병렬 조회
+  const q = `ocid=${ocid}`
 
   const results = await Promise.allSettled([
     nexonFetch(`/maplestory/v1/character/basic?${q}`),
