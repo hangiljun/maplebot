@@ -39,8 +39,6 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       return
     }
 
-    const expBar = buildExpBar(parseFloat(char.expRate))
-
     const embed = new EmbedBuilder()
       .setColor(0x3182f6)
       .setTitle(`🍁 ${char.name}`)
@@ -52,7 +50,6 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         { name: "길드",   value: char.guild || "없음",       inline: true },
         { name: "인기도", value: `${char.popularity}`,       inline: true },
         { name: "전투력", value: `**${Number(char.combatPower).toLocaleString()}**`, inline: true },
-        { name: `경험치 ${char.expRate}%`, value: expBar,   inline: false },
       )
 
     const button = new ButtonBuilder()
@@ -132,7 +129,3 @@ export async function handleEquipButton(interaction: ButtonInteraction, charName
   }
 }
 
-function buildExpBar(rate: number): string {
-  const filled = Math.round(Math.min(Math.max(rate, 0), 100) / 10)
-  return "🟦".repeat(filled) + "⬛".repeat(10 - filled)
-}
