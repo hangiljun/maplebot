@@ -2,9 +2,6 @@ import {
   ChatInputCommandInteraction,
   SlashCommandBuilder,
   EmbedBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  ActionRowBuilder,
 } from "discord.js"
 import { fetchCharacterSummary } from "../maple"
 
@@ -36,7 +33,6 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const embed = new EmbedBuilder()
       .setColor(0x3182f6)
       .setTitle(`🍁 ${char.name}`)
-      .setURL(`https://maplebot.co.kr/character/${encodeURIComponent(char.name)}`)
       .setThumbnail(char.image || null)
       .addFields(
         { name: "레벨",   value: `Lv.**${char.level}**`,    inline: true },
@@ -47,18 +43,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         { name: "전투력", value: `**${Number(char.combatPower).toLocaleString()}**`, inline: true },
         { name: `경험치 ${char.expRate}%`, value: expBar,   inline: false },
       )
-      .setFooter({ text: "maplebot.co.kr" })
-      .setTimestamp()
 
-    const button = new ButtonBuilder()
-      .setLabel("자세히 보기")
-      .setStyle(ButtonStyle.Link)
-      .setURL(`https://maplebot.co.kr/character/${encodeURIComponent(char.name)}`)
-      .setEmoji("🔍")
-
-    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(button)
-
-    await interaction.editReply({ embeds: [embed], components: [row] })
+    await interaction.editReply({ embeds: [embed] })
   } catch (err) {
     console.error(err)
     await interaction.editReply("❌ 캐릭터 정보 조회 중 오류가 발생했어요.")
