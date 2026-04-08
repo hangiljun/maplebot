@@ -125,6 +125,13 @@ export const POTENTIAL_COLORS: Record<string, string> = {
 // ─────────────────────────────────────────────────────────────
 const BASE_URL = "https://open.api.nexon.com"
 
+// KST 어제 날짜 반환 (Nexon API는 전날 데이터 기준)
+function getKSTYesterday(): string {
+  const kst = new Date(Date.now() + 9 * 60 * 60 * 1000)
+  kst.setDate(kst.getDate() - 1)
+  return kst.toISOString().slice(0, 10)
+}
+
 async function nexonFetch(path: string) {
   const apiKey = process.env.NEXON_API_KEY
   if (!apiKey) throw new Error("NEXON_API_KEY 환경변수가 설정되지 않았습니다")
@@ -134,7 +141,10 @@ async function nexonFetch(path: string) {
     next: { revalidate: 3600 },
   })
 
-  if (!res.ok) return null
+  if (!res.ok) {
+    console.error(`Nexon API 오류 [${res.status}]:`, path)
+    return null
+  }
   return res.json()
 }
 
@@ -151,17 +161,20 @@ export async function fetchCharacter(name: string): Promise<CharacterData | null
   if (!idData?.ocid) return null
   const { ocid } = idData
 
-  // 2. 병렬 조회
+  // 2. 병렬 조회 (date 파라미터 필수)
+  const date = getKSTYesterday()
+  const q = `ocid=${ocid}&date=${date}`
+
   const results = await Promise.allSettled([
-    nexonFetch(`/maplestory/v1/character/basic?ocid=${ocid}`),
-    nexonFetch(`/maplestory/v1/character/popularity?ocid=${ocid}`),
-    nexonFetch(`/maplestory/v1/character/stat?ocid=${ocid}`),
-    nexonFetch(`/maplestory/v1/character/item-equipment?ocid=${ocid}`),
-    nexonFetch(`/maplestory/v1/character/ability?ocid=${ocid}`),
-    nexonFetch(`/maplestory/v1/character/symbol-equipment?ocid=${ocid}`),
-    nexonFetch(`/maplestory/v1/character/hyper-stat?ocid=${ocid}`),
-    nexonFetch(`/maplestory/v1/user/union?ocid=${ocid}`),
-    nexonFetch(`/maplestory/v1/character/skill?ocid=${ocid}&character_skill_grade=6`),
+    nexonFetch(`/maplestory/v1/character/basic?${q}`),
+    nexonFetch(`/maplestory/v1/character/popularity?${q}`),
+    nexonFetch(`/maplestory/v1/character/stat?${q}`),
+    nexonFetch(`/maplestory/v1/character/item-equipment?${q}`),
+    nexonFetch(`/maplestory/v1/character/ability?${q}`),
+    nexonFetch(`/maplestory/v1/character/symbol-equipment?${q}`),
+    nexonFetch(`/maplestory/v1/character/hyper-stat?${q}`),
+    nexonFetch(`/maplestory/v1/user/union?${q}`),
+    nexonFetch(`/maplestory/v1/character/skill?${q}&character_skill_grade=6`),
   ])
 
   const [
