@@ -42,7 +42,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const embed = new EmbedBuilder()
       .setColor(0x3182f6)
       .setTitle(`🍁 ${char.name}`)
-      .setImage(char.image || null)
+      .setThumbnail(char.image || null)
       .addFields(
         { name: "레벨",   value: `Lv.**${char.level}**`,    inline: true },
         { name: "직업",   value: char.characterClass,        inline: true },
@@ -54,9 +54,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     const button = new ButtonBuilder()
       .setCustomId(`equip:${char.name}`)
-      .setLabel("장비 보기")
+      .setLabel("🛡️ 장비 보기")
       .setStyle(ButtonStyle.Secondary)
-      .setEmoji("🛡️")
 
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(button)
 
