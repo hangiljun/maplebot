@@ -1,16 +1,10 @@
 @import "tailwindcss";
 
-:root {
-  --background: #F9FAFB;
-  --foreground: #191F28;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: #F5F6FA;
+  color: #191F28;
 }

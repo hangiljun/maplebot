@@ -6,7 +6,7 @@ export default function CharacterImage({ src, name }: { src: string; name: strin
 
   if (!src || error) {
     return (
-      <div className="w-28 h-28 rounded-2xl bg-[#F2F4F6] flex items-center justify-center text-5xl shrink-0">
+      <div className="w-24 h-24 flex items-center justify-center text-4xl bg-gray-50 rounded-xl">
         🍁
       </div>
     )
@@ -15,8 +15,8 @@ export default function CharacterImage({ src, name }: { src: string; name: strin
   return (
     <img
       src={src}
-      alt={`${name} 캐릭터 이미지`}
-      className="w-28 h-28 rounded-2xl object-contain bg-[#F2F4F6] shrink-0"
+      alt={`${name} 캐릭터`}
+      className="w-24 h-24 object-contain rounded-xl bg-gray-50"
       onError={() => setError(true)}
     />
   )
