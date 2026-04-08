@@ -32,7 +32,7 @@ function StatCard({ title, items }: { title: string; items: StatItem[] }) {
         {items.map((item) => (
           <div key={item.stat_name} className="bg-[#F9FAFB] rounded-xl px-4 py-3">
             <p className="text-xs text-[#8B95A1] mb-0.5">{item.stat_name}</p>
-            <p className="text-base font-bold text-[#191F28]">{item.stat_value}</p>
+            <p className="text-base font-bold text-[#191F28]">{item.stat_value ?? "-"}</p>
           </div>
         ))}
       </div>

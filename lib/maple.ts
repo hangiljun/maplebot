@@ -1,6 +1,5 @@
 // ─────────────────────────────────────────────────────────────
-// 메이플스토리 캐릭터 데이터 타입 & fetch 함수
-// API 코드를 받으면 fetchCharacter 함수 내부를 교체하세요
+// 메이플스토리 캐릭터 데이터 타입 & Nexon OpenAPI fetch 함수
 // ─────────────────────────────────────────────────────────────
 
 export interface CharacterBasic {
@@ -32,40 +31,58 @@ export const BATTLE_STATS = ["HP", "MP", "공격력", "마력"]
 export const DETAIL_STATS = ["보스 몬스터 데미지", "방어율 무시", "크리티컬 확률", "크리티컬 데미지", "방어력"]
 
 // ─────────────────────────────────────────────────────────────
-// TODO: 아래 함수를 Nexon API 코드로 교체하세요
+// Nexon OpenAPI 내부 fetch 헬퍼
+// ─────────────────────────────────────────────────────────────
+const BASE_URL = "https://open.api.nexon.com"
+
+async function nexonFetch(path: string) {
+  const apiKey = process.env.NEXON_API_KEY
+  if (!apiKey) throw new Error("NEXON_API_KEY 환경변수가 설정되지 않았습니다")
+
+  const res = await fetch(`${BASE_URL}${path}`, {
+    headers: { "x-nxopen-api-key": apiKey },
+    next: { revalidate: 3600 }, // 1시간 캐시
+  })
+
+  if (!res.ok) return null
+  return res.json()
+}
+
+// ─────────────────────────────────────────────────────────────
+// 캐릭터 조회 메인 함수
 // ─────────────────────────────────────────────────────────────
 export async function fetchCharacter(name: string): Promise<CharacterData | null> {
   if (!name?.trim()) return null
 
-  // ↓↓↓ 여기를 실제 Nexon API 호출 코드로 교체 ↓↓↓
+  // 1. 캐릭터 식별자(ocid) 조회
+  const idData = await nexonFetch(
+    `/maplestory/v1/id?character_name=${encodeURIComponent(name)}`
+  )
+  if (!idData?.ocid) return null
+
+  const { ocid } = idData
+
+  // 2. 기본 정보 + 스탯 병렬 조회
+  const [basicData, statData] = await Promise.all([
+    nexonFetch(`/maplestory/v1/character/basic?ocid=${ocid}`),
+    nexonFetch(`/maplestory/v1/character/stat?ocid=${ocid}`),
+  ])
+
+  if (!basicData) return null
+
   return {
     basic: {
-      character_name: name,
-      world_name: "스카니아",
-      character_class: "아크메이지(불,독)",
-      character_class_level: "6",
-      character_level: 250,
-      character_exp: 23456789012,
-      character_exp_rate: "67.89",
-      character_guild_name: "TestGuild",
-      character_image: "",
-      character_date_create: "2020-03-15T00:00:00.000+09:00",
+      character_name:       basicData.character_name,
+      world_name:           basicData.world_name,
+      character_class:      basicData.character_class,
+      character_class_level: basicData.character_class_level,
+      character_level:      basicData.character_level,
+      character_exp:        basicData.character_exp,
+      character_exp_rate:   basicData.character_exp_rate,
+      character_guild_name: basicData.character_guild_name ?? "",
+      character_image:      basicData.character_image ?? "",
+      character_date_create: basicData.character_date_create ?? "",
     },
-    stats: [
-      { stat_name: "STR",              stat_value: "550" },
-      { stat_name: "DEX",              stat_value: "550" },
-      { stat_name: "INT",              stat_value: "11,250" },
-      { stat_name: "LUK",              stat_value: "550" },
-      { stat_name: "HP",               stat_value: "42,850" },
-      { stat_name: "MP",               stat_value: "31,710" },
-      { stat_name: "공격력",            stat_value: "1,580" },
-      { stat_name: "마력",              stat_value: "3,120" },
-      { stat_name: "방어력",            stat_value: "6,200" },
-      { stat_name: "보스 몬스터 데미지", stat_value: "280%" },
-      { stat_name: "방어율 무시",        stat_value: "94%" },
-      { stat_name: "크리티컬 확률",      stat_value: "100%" },
-      { stat_name: "크리티컬 데미지",    stat_value: "60%" },
-    ],
+    stats: statData?.final_stat ?? [],
   }
-  // ↑↑↑ 여기까지 교체 ↑↑↑
 }
