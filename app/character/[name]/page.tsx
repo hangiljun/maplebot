@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const decoded = decodeURIComponent(name)
   return {
     title: `${decoded} 캐릭터 조회`,
-    description: `메이플스토리 캐릭터 ${decoded}의 레벨, 직업, 장비, 유니온, 스킬 정보를 확인하세요.`,
+    description: `메이플스토리 캐릭터 ${decoded}의 레벨, 직업, 장비, 유니온 정보를 확인하세요.`,
   }
 }
 
@@ -40,66 +40,42 @@ export default async function CharacterDetailPage({ params }: Props) {
   }
 
   const { basic } = data
-  const expRate = Math.min(Math.max(parseFloat(basic.character_exp_rate) || 0, 0), 100)
-  const joinDate = basic.character_date_create
-    ? new Date(basic.character_date_create).toLocaleDateString("ko-KR", {
-        year: "numeric", month: "long", day: "numeric",
-      })
-    : null
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 space-y-4">
 
-      {/* 프로필 카드 */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="h-20 bg-gradient-to-r from-blue-500 to-blue-400" />
-        <div className="px-6 pb-6">
-          <div className="flex items-end gap-4 -mt-10 mb-4">
-            <div className="rounded-2xl border-4 border-white shadow-md bg-white shrink-0">
-              <CharacterImage src={basic.character_image} name={basic.character_name} />
-            </div>
-            <div className="mb-1 min-w-0">
-              <h1 className="text-xl font-extrabold text-[#191F28] truncate">{basic.character_name}</h1>
-              <p className="text-sm text-gray-400 font-medium mt-0.5">
-                {basic.character_class} · Lv.{basic.character_level}
-              </p>
-            </div>
+      {/* 캐릭터 프로필 카드 */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
+        {/* 상단: 캐릭터 이미지 */}
+        <div className="flex flex-col items-center pt-8 pb-5 px-6">
+          <div className="bg-gradient-to-b from-blue-50 to-indigo-50 rounded-2xl w-36 h-36 flex items-center justify-center border border-blue-100 mb-4">
+            <CharacterImage src={basic.character_image} name={basic.character_name} size="lg" />
           </div>
+          <h1 className="text-2xl font-extrabold text-[#191F28]">{basic.character_name}</h1>
+          <p className="text-sm text-gray-500 font-medium mt-1">
+            {basic.character_class} · Lv.{basic.character_level}
+          </p>
 
-          <div className="flex flex-wrap gap-2 mb-5">
-            <span className="bg-blue-50 text-blue-600 text-xs font-semibold px-2.5 py-1 rounded-full">
+          {/* 배지 */}
+          <div className="flex flex-wrap justify-center gap-2 mt-3">
+            <span className="bg-blue-50 text-blue-600 text-xs font-semibold px-3 py-1.5 rounded-full">
               🌍 {basic.world_name}
             </span>
             {basic.character_guild_name && (
-              <span className="bg-gray-50 text-gray-600 text-xs font-semibold px-2.5 py-1 rounded-full">
+              <span className="bg-gray-50 text-gray-600 text-xs font-semibold px-3 py-1.5 rounded-full">
                 🛡️ {basic.character_guild_name}
               </span>
             )}
             {data.popularity !== 0 && (
-              <span className="bg-pink-50 text-pink-500 text-xs font-semibold px-2.5 py-1 rounded-full">
+              <span className="bg-pink-50 text-pink-500 text-xs font-semibold px-3 py-1.5 rounded-full">
                 ❤️ 인기도 {data.popularity.toLocaleString()}
               </span>
             )}
-            {joinDate && (
-              <span className="bg-gray-50 text-gray-500 text-xs font-medium px-2.5 py-1 rounded-full">
-                📅 {joinDate}
-              </span>
-            )}
-          </div>
-
-          <div>
-            <div className="flex justify-between text-xs text-gray-400 font-medium mb-1.5">
-              <span>Lv.{basic.character_level} 경험치</span>
-              <span>{basic.character_exp_rate}%</span>
-            </div>
-            <div className="w-full bg-gray-100 rounded-full h-1.5">
-              <div className="bg-[#3182F6] h-1.5 rounded-full" style={{ width: `${expRate}%` }} />
-            </div>
           </div>
         </div>
       </div>
 
-      {/* 탭 (기본정보 / 장비 / 유니온 / 헥사 스킬) */}
+      {/* 탭 (기본정보 / 장비 / 어빌리티 / 유니온) */}
       <CharacterTabs data={data} />
 
       {/* 다시 검색 */}

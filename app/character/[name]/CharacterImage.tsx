@@ -1,12 +1,22 @@
 "use client"
 import { useState } from "react"
 
-export default function CharacterImage({ src, name }: { src: string; name: string }) {
+interface Props {
+  src: string
+  name: string
+  size?: "sm" | "lg"
+}
+
+export default function CharacterImage({ src, name, size = "sm" }: Props) {
   const [error, setError] = useState(false)
+
+  const cls = size === "lg"
+    ? "w-32 h-32 object-contain"
+    : "w-24 h-24 object-contain rounded-xl bg-gray-50"
 
   if (!src || error) {
     return (
-      <div className="w-24 h-24 flex items-center justify-center text-4xl bg-gray-50 rounded-xl">
+      <div className={`flex items-center justify-center text-5xl ${size === "lg" ? "w-32 h-32" : "w-24 h-24"}`}>
         🍁
       </div>
     )
@@ -16,7 +26,7 @@ export default function CharacterImage({ src, name }: { src: string; name: strin
     <img
       src={src}
       alt={`${name} 캐릭터`}
-      className="w-24 h-24 object-contain rounded-xl bg-gray-50"
+      className={cls}
       onError={() => setError(true)}
     />
   )
