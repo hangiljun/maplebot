@@ -38,6 +38,7 @@ export default function RootLayout({
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
         />
+        <script type="text/javascript" src="https://openapi.nexon.com/js/analytics.js?app_id=262525" async />
       </head>
       <body style={{ fontFamily: "'Pretendard', sans-serif" }}
         className="bg-[#F5F6FA] text-[#191F28] antialiased min-h-screen">
