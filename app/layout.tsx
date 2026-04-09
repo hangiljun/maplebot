@@ -35,6 +35,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
         <link
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
