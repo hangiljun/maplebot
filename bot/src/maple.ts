@@ -4,8 +4,23 @@ dotenv.config()
 const BASE_URL = "https://open.api.nexon.com"
 const API_KEY  = process.env.NEXON_API_KEY!
 
+// ocid 캐시 (1시간)
+const ocidCache = new Map<string, { ocid: string; ts: number }>()
+const OCID_TTL  = 60 * 60 * 1000
+
+async function getOcid(name: string): Promise<string | null> {
+  const cached = ocidCache.get(name)
+  if (cached && Date.now() - cached.ts < OCID_TTL) return cached.ocid
+
+  const data = await nexonFetch(`/maplestory/v1/id?character_name=${encodeURIComponent(name)}`)
+  if (!data?.ocid) return null
+
+  ocidCache.set(name, { ocid: data.ocid, ts: Date.now() })
+  return data.ocid
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function nexonFetch(path: string, retry = 1): Promise<any> {
+async function nexonFetch(path: string, retry = 2): Promise<any> {
   if (!API_KEY) {
     console.error("❌ NEXON_API_KEY 환경변수가 설정되지 않았습니다")
     return null
@@ -15,7 +30,7 @@ async function nexonFetch(path: string, retry = 1): Promise<any> {
   })
   if (!res.ok) {
     if (res.status === 429 && retry > 0) {
-      await new Promise((r) => setTimeout(r, 1000))
+      await new Promise((r) => setTimeout(r, 2000))
       return nexonFetch(path, retry - 1)
     }
     console.error(`❌ Nexon API 오류 [${res.status}] ${path}`)
@@ -51,9 +66,9 @@ export interface EquipItem {
 }
 
 export async function fetchEquipment(name: string): Promise<EquipItem[] | null> {
-  const idData = await nexonFetch(`/maplestory/v1/id?character_name=${encodeURIComponent(name)}`)
-  if (!idData?.ocid) return null
-  const q = `ocid=${idData.ocid}`
+  const ocid = await getOcid(name)
+  if (!ocid) return null
+  const q = `ocid=${ocid}`
 
   const data = await nexonFetch(`/maplestory/v1/character/item-equipment?${q}`)
   if (!data?.item_equipment) return null
@@ -127,9 +142,9 @@ export interface CodiSummary {
 }
 
 export async function fetchCodi(name: string): Promise<CodiSummary | null> {
-  const idData = await nexonFetch(`/maplestory/v1/id?character_name=${encodeURIComponent(name)}`)
-  if (!idData?.ocid) return null
-  const q = `ocid=${idData.ocid}`
+  const ocid = await getOcid(name)
+  if (!ocid) return null
+  const q = `ocid=${ocid}`
 
   const [codiR, beautyR] = await Promise.all([
     nexonFetch(`/maplestory/v1/character/cashitem-equipment?${q}`),
@@ -154,9 +169,9 @@ export async function fetchCodi(name: string): Promise<CodiSummary | null> {
 }
 
 export async function fetchHexa(name: string): Promise<{ cores: HexaCore[]; stats: HexaStat[] } | null> {
-  const idData = await nexonFetch(`/maplestory/v1/id?character_name=${encodeURIComponent(name)}`)
-  if (!idData?.ocid) return null
-  const q = `ocid=${idData.ocid}`
+  const ocid = await getOcid(name)
+  if (!ocid) return null
+  const q = `ocid=${ocid}`
 
   const [coreR, statR] = await Promise.all([
     nexonFetch(`/maplestory/v1/character/hexamatrix?${q}`),
@@ -188,9 +203,8 @@ function kstDateString(daysAgo: number): string {
 }
 
 export async function fetchLevelHistory(name: string): Promise<{ expHistory: { date: string; value: number }[]; levelHistory: { date: string; value: number }[] } | null> {
-  const idData = await nexonFetch(`/maplestory/v1/id?character_name=${encodeURIComponent(name)}`)
-  if (!idData?.ocid) return null
-  const { ocid } = idData
+  const ocid = await getOcid(name)
+  if (!ocid) return null
 
   // 경험치: 최근 7일 (1~7일 전)
   const expDates = Array.from({ length: 7 }, (_, i) => kstDateString(i + 1))
@@ -240,10 +254,8 @@ export async function fetchLevelHistory(name: string): Promise<{ expHistory: { d
 }
 
 export async function fetchCharacterSummary(name: string): Promise<CharacterSummary | null> {
-  // ocid 조회
-  const idData = await nexonFetch(`/maplestory/v1/id?character_name=${encodeURIComponent(name)}`)
-  if (!idData?.ocid) return null
-  const { ocid } = idData
+  const ocid = await getOcid(name)
+  if (!ocid) return null
 
   const q = `ocid=${ocid}`
 
