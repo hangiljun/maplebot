@@ -96,8 +96,8 @@ export async function handleEquipButton(interaction: ButtonInteraction, charName
       ...items.filter((i) => !SLOT_ORDER.includes(i.slot)),
     ] as typeof items
 
-    // Discord 최대 10개 embed 제한
-    const visible = ordered.slice(0, 10)
+    // Discord 최대 10개 embed 제한 (헤더 1개 포함하므로 아이템은 9개)
+    const visible = ordered.slice(0, 9)
 
     const embeds = visible.map((item) => {
       const sf    = item.starforce > 0 ? `★${item.starforce}` : ""
@@ -132,8 +132,8 @@ export async function handleEquipButton(interaction: ButtonInteraction, charName
       .setColor(0x3182f6)
       .setTitle(`🛡️ ${charName}의 장비`)
       .setDescription(
-        ordered.length > 10
-          ? `총 ${ordered.length}개 장비 중 상위 10개 표시\n나머지는 [maplebot.co.kr](https://maplebot.co.kr/character/${encodeURIComponent(charName)}) 에서 확인하세요.`
+        ordered.length > 9
+          ? `총 ${ordered.length}개 장비 중 상위 9개 표시\n나머지는 [maplebot.co.kr](https://maplebot.co.kr/character/${encodeURIComponent(charName)}) 에서 확인하세요.`
           : `총 ${ordered.length}개 장비`
       )
 
