@@ -143,7 +143,7 @@ export const POTENTIAL_COLORS: Record<string, string> = {
 // ─────────────────────────────────────────────────────────────
 const BASE_URL = "https://open.api.nexon.com"
 
-// ocid 캐시 (1시간) — Vercel 인스턴스 단위지만 반복 호출 대폭 감소
+// ocid 캐시 (1시간)
 const ocidCache = new Map<string, { ocid: string; ts: number }>()
 const OCID_TTL  = 60 * 60 * 1000
 
@@ -158,19 +158,30 @@ async function getOcid(name: string): Promise<string | null> {
   return data.ocid
 }
 
-async function nexonFetch(path: string, retry = 2): Promise<any> {
-  const apiKey = process.env.NEXON_API_KEY
-  if (!apiKey) throw new Error("NEXON_API_KEY 환경변수가 설정되지 않았습니다")
+function getApiKeys(): string[] {
+  return [
+    process.env.NEXON_API_KEY,
+    process.env.NEXON_API_KEY_2,
+  ].filter(Boolean) as string[]
+}
 
+async function nexonFetch(path: string, keyIndex = 0): Promise<any> {
+  const keys = getApiKeys()
+  if (keys.length === 0) throw new Error("NEXON_API_KEY 환경변수가 설정되지 않았습니다")
+
+  const key = keys[keyIndex % keys.length]
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { "x-nxopen-api-key": apiKey },
+    headers: { "x-nxopen-api-key": key },
     cache: "no-store",
   })
 
   if (!res.ok) {
-    if (res.status === 429 && retry > 0) {
+    if (res.status === 429 && keyIndex + 1 < keys.length) {
+      return nexonFetch(path, keyIndex + 1)
+    }
+    if (res.status === 429 && keyIndex + 1 >= keys.length) {
       await new Promise((r) => setTimeout(r, 2000))
-      return nexonFetch(path, retry - 1)
+      return nexonFetch(path, 0)
     }
     console.error(`Nexon API 오류 [${res.status}]:`, path)
     return null

@@ -2,7 +2,10 @@ import * as dotenv from "dotenv"
 dotenv.config()
 
 const BASE_URL = "https://open.api.nexon.com"
-const API_KEY  = process.env.NEXON_API_KEY!
+const API_KEYS = [
+  process.env.NEXON_API_KEY,
+  process.env.NEXON_API_KEY_2,
+].filter(Boolean) as string[]
 
 // ocid 캐시 (1시간)
 const ocidCache = new Map<string, { ocid: string; ts: number }>()
@@ -20,18 +23,23 @@ async function getOcid(name: string): Promise<string | null> {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function nexonFetch(path: string, retry = 2): Promise<any> {
-  if (!API_KEY) {
+async function nexonFetch(path: string, keyIndex = 0): Promise<any> {
+  if (API_KEYS.length === 0) {
     console.error("❌ NEXON_API_KEY 환경변수가 설정되지 않았습니다")
     return null
   }
+  const key = API_KEYS[keyIndex % API_KEYS.length]
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { "x-nxopen-api-key": API_KEY },
+    headers: { "x-nxopen-api-key": key },
   })
   if (!res.ok) {
-    if (res.status === 429 && retry > 0) {
+    if (res.status === 429 && keyIndex + 1 < API_KEYS.length) {
+      // 다음 키로 재시도
+      return nexonFetch(path, keyIndex + 1)
+    }
+    if (res.status === 429 && keyIndex + 1 >= API_KEYS.length) {
       await new Promise((r) => setTimeout(r, 2000))
-      return nexonFetch(path, retry - 1)
+      return nexonFetch(path, 0)
     }
     console.error(`❌ Nexon API 오류 [${res.status}] ${path}`)
     return null
@@ -99,7 +107,7 @@ export async function fetchImageAsBase64(url: string): Promise<string> {
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), 5000)
     const res = await fetch(url, {
-      headers: { "x-nxopen-api-key": API_KEY },
+      headers: { "x-nxopen-api-key": API_KEYS[0] },
       signal: controller.signal,
     })
     clearTimeout(timer)
