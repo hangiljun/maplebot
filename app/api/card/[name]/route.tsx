@@ -27,9 +27,11 @@ async function loadFont(): Promise<ArrayBuffer | null> {
 
 async function toDataUrl(url: string): Promise<string> {
   try {
-    const res = await fetch(url)
+    const res = await fetch(url, { signal: AbortSignal.timeout(5000) })
+    if (!res.ok) return ""
+    const mime = res.headers.get("content-type") ?? ""
+    if (!mime.startsWith("image/")) return ""
     const buf = Buffer.from(await res.arrayBuffer())
-    const mime = res.headers.get("content-type") ?? "image/png"
     return `data:${mime};base64,${buf.toString("base64")}`
   } catch {
     return ""
@@ -127,6 +129,19 @@ function renderCard(
     ),
     { width: 400, height: 520, fonts }
   )
+}
+
+export async function POST(
+  req: Request,
+  { params }: { params: Promise<{ name: string }> }
+) {
+  const { name } = await params
+  const decoded = decodeURIComponent(name)
+  const body = await req.json()
+  const { level, cls, world, guild, cp, union, imageData } = body
+
+  const [font] = await Promise.all([loadFont()])
+  return renderCard(decoded, String(level), cls ?? "", world ?? "", guild ?? "", cp ?? "0", union ?? "", imageData ?? "", font)
 }
 
 export async function GET(

@@ -72,6 +72,22 @@ export async function fetchEquipment(name: string): Promise<EquipItem[] | null> 
   }))
 }
 
+export async function fetchImageAsBase64(url: string): Promise<string> {
+  if (!url) return ""
+  try {
+    const res = await fetch(url, {
+      headers: { "x-nxopen-api-key": API_KEY },
+      signal: AbortSignal.timeout(5000),
+    })
+    if (!res.ok) return ""
+    const mime = res.headers.get("content-type") ?? "image/png"
+    const buf = Buffer.from(await res.arrayBuffer())
+    return `data:${mime};base64,${buf.toString("base64")}`
+  } catch {
+    return ""
+  }
+}
+
 export async function fetchCharacterSummary(name: string): Promise<CharacterSummary | null> {
   // ocid 조회
   const idData = await nexonFetch(`/maplestory/v1/id?character_name=${encodeURIComponent(name)}`)

@@ -8,7 +8,7 @@ import {
   ButtonInteraction,
   AttachmentBuilder,
 } from "discord.js"
-import { fetchCharacterSummary, fetchEquipment } from "../maple"
+import { fetchCharacterSummary, fetchEquipment, fetchImageAsBase64 } from "../maple"
 
 export const data = new SlashCommandBuilder()
   .setName("정보")
@@ -34,20 +34,22 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       return
     }
 
-    const cardParams = new URLSearchParams({
-      level: String(char.level),
-      cls:   char.characterClass,
-      world: char.world,
-      guild: char.guild ?? "",
-      cp:    char.combatPower,
-      union: "",   // fetchCharacterSummary에 union 없으므로 빈값
-      img:   char.image ?? "",
-    })
-    const cardUrl = `https://maplebot.co.kr/api/card/${encodeURIComponent(char.name)}?${cardParams}`
+    const imageData = await fetchImageAsBase64(char.image ?? "")
 
-    console.log(`[card] fetching: ${cardUrl}`)
-    const imageRes = await fetch(cardUrl)
-    console.log(`[card] status: ${imageRes.status}, content-type: ${imageRes.headers.get("content-type")}`)
+    const cardUrl = `https://maplebot.co.kr/api/card/${encodeURIComponent(char.name)}`
+    const cardRes = await fetch(cardUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        level: char.level,
+        cls:   char.characterClass,
+        world: char.world,
+        guild: char.guild ?? "",
+        cp:    char.combatPower,
+        union: "",
+        imageData,
+      }),
+    })
 
     const button = new ButtonBuilder()
       .setCustomId(`equip:${char.name}`)
@@ -56,8 +58,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(button)
 
-    if (!imageRes.ok) {
-      console.error(`[card] fetch failed: ${imageRes.status}`)
+    if (!cardRes.ok) {
+      console.error(`[card] POST failed: ${cardRes.status}`)
       const embed = new EmbedBuilder()
         .setColor(0xf59e0b)
         .setTitle(char.name)
@@ -66,8 +68,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       return
     }
 
-    const imageBuffer = Buffer.from(await imageRes.arrayBuffer())
-    console.log(`[card] buffer size: ${imageBuffer.length}`)
+    const imageBuffer = Buffer.from(await cardRes.arrayBuffer())
     const attachment = new AttachmentBuilder(imageBuffer, { name: "card.png" })
 
     const embed = new EmbedBuilder()
