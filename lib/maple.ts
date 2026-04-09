@@ -61,6 +61,36 @@ export interface UnionInfo {
   union_artifact_point: number
 }
 
+// ── 심볼 ───────────────────────────────────────────────────
+export interface SymbolItem {
+  symbol_name: string
+  symbol_icon: string
+  symbol_force: string
+  symbol_level: number
+  symbol_exp: number
+  symbol_exp_required: number
+  symbol_item_count: number
+  symbol_growth_count: number
+  symbol_require_growth_count: number
+}
+
+// ── 헥사 ───────────────────────────────────────────────────
+export interface HexaCore {
+  hexa_core_name: string
+  hexa_core_level: number
+  hexa_core_type: string
+}
+
+export interface HexaStat {
+  slot_id: string
+  main_stat_name: string
+  sub_stat_name_1: string
+  sub_stat_name_2: string
+  main_stat_level: number
+  sub_stat_level_1: number
+  sub_stat_level_2: number
+}
+
 // ── 전체 캐릭터 데이터 ────────────────────────────────────
 export interface CharacterData {
   basic: CharacterBasic
@@ -69,6 +99,9 @@ export interface CharacterData {
   equipment: EquipmentItem[]
   ability: AbilityInfo | null
   union: UnionInfo | null
+  symbols: SymbolItem[]
+  hexaCores: HexaCore[]
+  hexaStats: HexaStat[]
 }
 
 // 표시할 주요 스탯
@@ -224,12 +257,15 @@ export async function fetchCharacter(name: string): Promise<CharacterData | null
 
   if (!basicR) return null
 
-  // 2묶음: 어빌리티 + 유니온
+  // 2묶음: 어빌리티 + 유니온 + 심볼 + 헥사
   await new Promise((r) => setTimeout(r, 200))
 
-  const [abilityR, unionR] = await Promise.all([
+  const [abilityR, unionR, symbolR, hexaCoreR, hexaStatR] = await Promise.all([
     nexonFetch(`/maplestory/v1/character/ability?${q}`),
     nexonFetch(`/maplestory/v1/user/union?${q}`),
+    nexonFetch(`/maplestory/v1/character/symbol-equipment?${q}`),
+    nexonFetch(`/maplestory/v1/character/hexamatrix?${q}`),
+    nexonFetch(`/maplestory/v1/character/hexamatrix-stat?${q}`),
   ])
 
   return {
@@ -249,14 +285,37 @@ export async function fetchCharacter(name: string): Promise<CharacterData | null
     stats:      statR?.final_stat ?? [],
     equipment:  equipR?.item_equipment ?? [],
     ability:    abilityR ?? null,
-    union: unionR
-      ? {
-          union_level:          unionR.union_level,
-          union_grade:          unionR.union_grade,
-          union_artifact_level: unionR.union_artifact_level ?? 0,
-          union_artifact_exp:   unionR.union_artifact_exp ?? 0,
-          union_artifact_point: unionR.union_artifact_point ?? 0,
-        }
-      : null,
+    union: unionR ? {
+      union_level:          unionR.union_level,
+      union_grade:          unionR.union_grade,
+      union_artifact_level: unionR.union_artifact_level ?? 0,
+      union_artifact_exp:   unionR.union_artifact_exp ?? 0,
+      union_artifact_point: unionR.union_artifact_point ?? 0,
+    } : null,
+    symbols: (symbolR?.symbol ?? []).map((s: SymbolItem) => ({
+      symbol_name:                 s.symbol_name,
+      symbol_icon:                 s.symbol_icon,
+      symbol_force:                s.symbol_force,
+      symbol_level:                s.symbol_level,
+      symbol_exp:                  s.symbol_exp,
+      symbol_exp_required:         s.symbol_exp_required,
+      symbol_item_count:           s.symbol_item_count,
+      symbol_growth_count:         s.symbol_growth_count,
+      symbol_require_growth_count: s.symbol_require_growth_count,
+    })),
+    hexaCores: (hexaCoreR?.character_hexa_core_equipment ?? []).map((h: HexaCore) => ({
+      hexa_core_name:  h.hexa_core_name,
+      hexa_core_level: h.hexa_core_level,
+      hexa_core_type:  h.hexa_core_type,
+    })),
+    hexaStats: (hexaStatR?.character_hexa_stat_core ?? []).map((s: HexaStat) => ({
+      slot_id:         s.slot_id,
+      main_stat_name:  s.main_stat_name,
+      sub_stat_name_1: s.sub_stat_name_1,
+      sub_stat_name_2: s.sub_stat_name_2,
+      main_stat_level: s.main_stat_level,
+      sub_stat_level_1: s.sub_stat_level_1,
+      sub_stat_level_2: s.sub_stat_level_2,
+    })),
   }
 }

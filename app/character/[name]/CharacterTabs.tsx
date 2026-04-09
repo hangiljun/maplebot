@@ -4,12 +4,16 @@ import { CharacterData, MAIN_STATS, BATTLE_STATS, DETAIL_STATS, COMBAT_POWER_STA
 import EquipmentTab from "./tabs/EquipmentTab"
 import AbilityTab   from "./tabs/AbilityTab"
 import UnionTab     from "./tabs/UnionTab"
+import SymbolTab    from "./tabs/SymbolTab"
+import HexaTab      from "./tabs/HexaTab"
 
 const TABS = [
   { key: "stat",      label: "기본 정보" },
   { key: "equipment", label: "장비" },
   { key: "ability",   label: "어빌리티" },
   { key: "union",     label: "유니온" },
+  { key: "symbol",    label: "심볼" },
+  { key: "hexa",      label: "헥사" },
 ]
 
 function pickStats(stats: StatItem[], keys: string[]) {
@@ -79,6 +83,8 @@ export default function CharacterTabs({ data }: { data: CharacterData }) {
         {tab === "equipment" && <EquipmentTab items={equipment} />}
         {tab === "ability"   && <AbilityTab ability={ability} />}
         {tab === "union"     && <UnionTab union={union} basic={data.basic} />}
+        {tab === "symbol"    && <SymbolTab symbols={data.symbols} />}
+        {tab === "hexa"      && <HexaTab hexaCores={data.hexaCores} hexaStats={data.hexaStats} />}
       </div>
     </div>
   )
