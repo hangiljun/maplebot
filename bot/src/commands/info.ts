@@ -33,7 +33,16 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       return
     }
 
-    const cardUrl = `https://maplebot.co.kr/api/card/${encodeURIComponent(char.name)}`
+    const cardParams = new URLSearchParams({
+      level: String(char.level),
+      cls:   char.characterClass,
+      world: char.world,
+      guild: char.guild ?? "",
+      cp:    char.combatPower,
+      union: "",   // fetchCharacterSummary에 union 없으므로 빈값
+      img:   char.image ?? "",
+    })
+    const cardUrl = `https://maplebot.co.kr/api/card/${encodeURIComponent(char.name)}?${cardParams}`
 
     const embed = new EmbedBuilder()
       .setColor(0xf59e0b)
