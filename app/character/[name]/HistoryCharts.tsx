@@ -15,8 +15,8 @@ function BarChart({ data }: { data: HistoryPoint[] }) {
         const pct = max === min ? 60 : ((point.value - min) / (max - min)) * 70 + 20
         return (
           <div key={i} className="flex-1 flex flex-col items-center gap-1">
-            <span className="text-[9px] leading-none" style={{ color: "var(--text-muted)" }}>{point.value.toFixed(3)}%</span>
-            <div className="w-full rounded-t-sm" style={{ height: `${pct}px`, background: "var(--blue)" }} />
+            <span className="text-[9px] leading-none" style={{ color: "var(--text-muted)" }}>{point.value.toFixed(2)}%</span>
+            <div className="w-full rounded-t-sm" style={{ height: `${pct}px`, background: "linear-gradient(to top, #1d4ed8, #60a5fa)" }} />
             <span className="text-[8px] whitespace-nowrap" style={{ color: "var(--text-muted)" }}>{point.date}</span>
           </div>
         )
@@ -49,9 +49,9 @@ function LineChart({ data }: { data: HistoryPoint[] }) {
       <path d={line} fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       {pts.map((p, i) => (
         <g key={i}>
-          <circle cx={p.x} cy={p.y} r="3.5" fill="#fff" stroke="#2563eb" strokeWidth="1.5" />
-          <text x={p.x} y={p.y - 7} textAnchor="middle" fontSize="9" fill="rgba(15,23,42,0.6)" fontWeight="600">{p.value}</text>
-          <text x={p.x} y={H + 24} textAnchor="middle" fontSize="8" fill="rgba(15,23,42,0.35)">{p.date}</text>
+          <circle cx={p.x} cy={p.y} r="3.5" fill="#0d1117" stroke="#60a5fa" strokeWidth="1.5" />
+          <text x={p.x} y={p.y - 7} textAnchor="middle" fontSize="9" fill="rgba(230,237,243,0.55)" fontWeight="600">{p.value}</text>
+          <text x={p.x} y={H + 24} textAnchor="middle" fontSize="8" fill="rgba(230,237,243,0.3)">{p.date}</text>
         </g>
       ))}
     </svg>

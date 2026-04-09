@@ -32,16 +32,53 @@ export default async function CharacterDetailPage({ params }: Props) {
 
   if (!data) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-4 text-center"
-        style={{ paddingTop: "56px" }}>
-        <div className="text-5xl mb-4">🔍</div>
-        <h2 className="text-xl font-bold text-white mb-2">캐릭터를 찾을 수 없어요</h2>
-        <p className="text-sm mb-8" style={{ color: "var(--text-sub)" }}>
-          &apos;{decoded}&apos; 캐릭터가 존재하지 않거나 API 조회에 실패했습니다.
-        </p>
-        <Link href="/" className="btn-primary inline-flex items-center gap-2 px-6 py-3 text-sm">
-          <Search size={14} /> 다시 검색
-        </Link>
+      <div className="min-h-screen flex items-center justify-center px-6" style={{ paddingTop: "56px" }}>
+        <div className="glass rounded-3xl p-10 max-w-md w-full text-center"
+          style={{ border: "1px solid rgba(239,68,68,0.15)" }}>
+          {/* 아이콘 */}
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
+            style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
+            <Search size={26} style={{ color: "#f87171" }} />
+          </div>
+
+          <h2 className="text-xl font-bold mb-2" style={{ color: "var(--text)" }}>
+            캐릭터를 찾을 수 없어요
+          </h2>
+          <p className="text-sm mb-2" style={{ color: "var(--text-sub)" }}>
+            <span style={{ color: "var(--blue-light)", fontWeight: 600 }}>&apos;{decoded}&apos;</span> 캐릭터가
+            존재하지 않거나 일시적으로 API 조회에 실패했습니다.
+          </p>
+          <p className="text-xs mb-7 leading-relaxed" style={{ color: "var(--text-muted)" }}>
+            Nexon 서버 점검 중이거나 API 호출 한도를 초과한 경우<br />
+            일시적으로 조회가 되지 않을 수 있습니다. 잠시 후 다시 시도해 주세요.
+          </p>
+
+          {/* 체크리스트 */}
+          <div className="rounded-xl p-4 text-left mb-7"
+            style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}>
+            <p className="text-xs font-semibold mb-2" style={{ color: "var(--text-muted)" }}>확인해 보세요</p>
+            {[
+              "닉네임 철자가 정확한지 확인",
+              "메이플스토리 공식 홈페이지에서 캐릭터 조회 후 복사",
+              "잠시 후(1~2분) 다시 시도",
+            ].map((tip, i) => (
+              <div key={i} className="flex items-center gap-2 text-xs mt-1.5"
+                style={{ color: "var(--text-sub)" }}>
+                <div className="w-1 h-1 rounded-full shrink-0" style={{ background: "var(--blue-light)" }} />
+                {tip}
+              </div>
+            ))}
+          </div>
+
+          <div className="flex gap-2 justify-center">
+            <Link href="/character" className="btn-primary px-5 py-2.5 text-sm">
+              다시 검색
+            </Link>
+            <Link href="/" className="btn-outline px-5 py-2.5 text-sm">
+              홈으로
+            </Link>
+          </div>
+        </div>
       </div>
     )
   }
