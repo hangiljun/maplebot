@@ -37,12 +37,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     const embed = new EmbedBuilder()
       .setColor(0xf59e0b)
-      .setTitle(char.name)
+      .setTitle(`${char.name}  lv${char.level}`)
       .setThumbnail(char.image || null)
       .setDescription(
         [
           `• 월드 : ${char.world}`,
-          `• 레벨 : ${char.level}`,
           `• 직업 : ${char.characterClass}`,
           `• 길드 : ${char.guild || "없음"}`,
           `• 인기도 : ${char.popularity.toLocaleString()}`,
