@@ -134,6 +134,8 @@ export async function fetchCodi(name: string): Promise<CodiSummary | null> {
 
   if (!codiR) return null
 
+  console.log("[fetchCodi] keys:", Object.keys(codiR))
+
   const mapItems = (arr: any[]): CodiPresetItem[] =>
     (arr ?? []).map((c: any) => ({
       part:  c.cash_item_equipment_part ?? "",
