@@ -4,6 +4,7 @@ import { Search } from "lucide-react"
 import { fetchCharacter, COMBAT_POWER_STAT } from "@/lib/maple"
 import CharacterImage from "./CharacterImage"
 import CharacterTabs from "./CharacterTabs"
+import HistoryCharts from "./HistoryCharts"
 
 interface Props {
   params: Promise<{ name: string }>
@@ -105,6 +106,9 @@ export default async function CharacterDetailPage({ params }: Props) {
           </div>
         </div>
       </div>
+
+      {/* 히스토리 차트 */}
+      <HistoryCharts name={decoded} />
 
       {/* 탭 (기본정보 / 장비 / 어빌리티 / 유니온) */}
       <CharacterTabs data={data} />

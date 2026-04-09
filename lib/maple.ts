@@ -107,6 +107,77 @@ async function nexonFetch(path: string) {
 }
 
 // ─────────────────────────────────────────────────────────────
+// 히스토리
+// ─────────────────────────────────────────────────────────────
+export interface HistoryPoint {
+  date: string
+  value: number
+}
+
+export interface CharacterHistory {
+  expHistory: HistoryPoint[]
+  levelHistory: HistoryPoint[]
+}
+
+function kstDateString(daysAgo: number): string {
+  const now = Date.now() + 9 * 60 * 60 * 1000 // UTC → KST
+  const d = new Date(now - daysAgo * 86400000)
+  return d.toISOString().split("T")[0]
+}
+
+function formatKoDate(dateStr: string): string {
+  const [, m, d] = dateStr.split("-")
+  return `${parseInt(m)}월 ${parseInt(d)}일`
+}
+
+export async function fetchHistory(name: string): Promise<CharacterHistory | null> {
+  const idData = await nexonFetch(
+    `/maplestory/v1/id?character_name=${encodeURIComponent(name)}`
+  )
+  if (!idData?.ocid) return null
+  const { ocid } = idData
+
+  // 경험치: 어제~7일 전 (1~7)
+  const expDates = Array.from({ length: 7 }, (_, i) => kstDateString(i + 1))
+
+  // 레벨: 최근 6개월 (매월 1일)
+  const levelDates: string[] = []
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(Date.now() + 9 * 60 * 60 * 1000)
+    d.setUTCMonth(d.getUTCMonth() - i, 1)
+    levelDates.push(d.toISOString().split("T")[0])
+  }
+
+  const [expResults, levelResults] = await Promise.all([
+    Promise.all(expDates.map(date =>
+      nexonFetch(`/maplestory/v1/character/basic?ocid=${ocid}&date=${date}`)
+        .catch(() => null)
+    )),
+    Promise.all(levelDates.map(date =>
+      nexonFetch(`/maplestory/v1/character/basic?ocid=${ocid}&date=${date}`)
+        .catch(() => null)
+    )),
+  ])
+
+  const expHistory: HistoryPoint[] = expDates
+    .map((date, i) => ({
+      date: formatKoDate(date),
+      value: parseFloat(expResults[i]?.character_exp_rate ?? "0"),
+    }))
+    .filter(e => e.value > 0)
+    .reverse()
+
+  const levelHistory: HistoryPoint[] = levelDates
+    .map((date, i) => ({
+      date: formatKoDate(date),
+      value: levelResults[i]?.character_level ?? 0,
+    }))
+    .filter(e => e.value > 0)
+
+  return { expHistory, levelHistory }
+}
+
+// ─────────────────────────────────────────────────────────────
 // 캐릭터 전체 조회
 // ─────────────────────────────────────────────────────────────
 export async function fetchCharacter(name: string): Promise<CharacterData | null> {
