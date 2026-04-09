@@ -104,21 +104,23 @@ export async function handleEquipButton(interaction: ButtonInteraction, charName
       const color = POTENTIAL_COLORS[item.potential] ?? 0x4b5563
 
       const lines: string[] = []
-      lines.push(`\`${item.slot}\``)
+      lines.push(`\`${item.slot || "기타"}\``)
       if (sf) lines.push(`**${sf}**`)
-      lines.push("")
 
-      if (item.potentials.length > 0) {
-        lines.push(`잠재  ${item.potentials.join(" · ")}`)
+      if (item.potentials?.length > 0) {
+        lines.push(`\n잠재  ${item.potentials.join(" · ")}`)
       }
-      if (item.additionalPotentials.length > 0) {
+      if (item.additionalPotentials?.length > 0) {
         lines.push(`에디  ${item.additionalPotentials.join(" · ")}`)
       }
 
+      const title       = (item.name || item.slot || "장비").slice(0, 256)
+      const description = lines.join("\n") || "\u200b"
+
       const embed = new EmbedBuilder()
         .setColor(color)
-        .setTitle(item.name)
-        .setDescription(lines.join("\n"))
+        .setTitle(title)
+        .setDescription(description)
 
       if (item.icon) embed.setThumbnail(item.icon)
 

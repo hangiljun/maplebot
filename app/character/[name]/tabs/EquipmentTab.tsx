@@ -1,6 +1,20 @@
 "use client"
 import { EquipmentItem, POTENTIAL_COLORS } from "@/lib/maple"
 
+const STAT_KO: Record<string, string> = {
+  str: "STR", dex: "DEX", int: "INT", luk: "LUK",
+  max_hp: "최대 HP", max_mp: "최대 MP",
+  attack_power: "공격력", magic_power: "마력",
+  armor: "방어력", speed: "이동속도", jump: "점프력",
+  boss_damage: "보스 데미지",
+  ignore_monster_armor: "방어율 무시",
+  critical_rate: "크리티컬 확률",
+  critical_damage: "크리티컬 데미지",
+  damage: "데미지", all_stat: "올스탯",
+  equipment_level_decrease: "착용 레벨 감소",
+  max_hp_rate: "최대 HP %", max_mp_rate: "최대 MP %",
+}
+
 // ── 슬롯 그리드 레이아웃 정의 (col 1-5, row 1-6) ──────────────
 const SLOT_LAYOUT: { slot: string; col: number; row: number }[] = [
   { slot: "반지1",       col: 1, row: 1 },
@@ -170,7 +184,7 @@ function SlotCell({ item, col }: { item: EquipmentItem | undefined; col: number 
                 <div className="border-t border-gray-700 pt-2 mb-2 space-y-0.5">
                   {stats.map(([k, v]) => (
                     <div key={k} className="flex justify-between">
-                      <span className="text-gray-300">{k}</span>
+                      <span className="text-gray-300">{STAT_KO[k] ?? k}</span>
                       <span className="text-white font-semibold">+{v}</span>
                     </div>
                   ))}
