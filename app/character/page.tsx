@@ -1,12 +1,12 @@
 "use client"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Search, AlertCircle, Info } from "lucide-react"
 
 export default function CharacterSearchPage() {
   const [query, setQuery] = useState("")
   const [warn, setWarn] = useState(false)
-  const [composing, setComposing] = useState(false)
+  const composingRef = useRef(false)
   const router = useRouter()
 
   const applyFilter = (v: string) => {
@@ -16,15 +16,15 @@ export default function CharacterSearchPage() {
   }
 
   const handleChange = (v: string) => {
-    if (composing) {
+    if (composingRef.current) {
       setQuery(v.slice(0, 12))
     } else {
       applyFilter(v)
     }
   }
 
-  const go = (v?: string) => {
-    const t = (v ?? query).trim()
+  const go = () => {
+    const t = query.trim()
     if (!t) return
     router.push(`/character/${encodeURIComponent(t)}`)
   }
@@ -41,16 +41,17 @@ export default function CharacterSearchPage() {
         </div>
 
         {/* 검색창 */}
-        <div className="glass flex items-center rounded-2xl overflow-hidden mb-3"
+        <form onSubmit={(e) => { e.preventDefault(); go() }}
+          className="glass flex items-center rounded-2xl overflow-hidden mb-3"
           style={{ border: warn ? "1px solid rgba(239,68,68,0.5)" : "1px solid rgba(59,130,246,0.2)" }}>
           <Search size={17} className="ml-4 shrink-0" style={{ color: "var(--text-muted)" }} />
           <input
             type="text"
             value={query}
             onChange={(e) => handleChange(e.target.value)}
-            onCompositionStart={() => setComposing(true)}
-            onCompositionEnd={(e) => { setComposing(false); applyFilter(e.currentTarget.value) }}
-            onKeyDown={(e) => e.key === "Enter" && !composing && go()}
+            onCompositionStart={() => { composingRef.current = true }}
+            onCompositionEnd={(e) => { composingRef.current = false; applyFilter(e.currentTarget.value) }}
+            onKeyDown={(e) => e.key === "Enter" && !composingRef.current && go()}
             placeholder="닉네임 입력 후 Enter 또는 조회하기"
             autoFocus
             className="flex-1 px-3 py-4 bg-transparent focus:outline-none text-[15px] placeholder:text-white/20"
@@ -62,12 +63,12 @@ export default function CharacterSearchPage() {
             </span>
           )}
           <button
-            onClick={() => go()}
+            type="submit"
             className="btn-primary m-2 px-6 py-2.5 text-sm shrink-0"
           >
             조회하기
           </button>
-        </div>
+        </form>
 
         {/* 경고 */}
         {warn && (

@@ -134,11 +134,11 @@ const UPDATES = [
 export default function HomePage() {
   const [query, setQuery] = useState("")
   const [activeCmd, setActiveCmd] = useState("/정보")
-  const [composing, setComposing] = useState(false)
+  const composingRef = useRef(false)
   const router = useRouter()
 
-  const go = (v?: string) => {
-    const t = (v ?? query).trim()
+  const go = () => {
+    const t = query.trim()
     if (!t) return
     router.push(`/character/${encodeURIComponent(t)}`)
   }
@@ -181,7 +181,7 @@ export default function HomePage() {
             </p>
 
             {/* 검색 */}
-            <form onSubmit={(e) => { e.preventDefault(); if (!composing) go() }}
+            <form onSubmit={(e) => { e.preventDefault(); go() }}
               className="flex items-center rounded-2xl overflow-hidden mb-4 max-w-lg lg:mx-0 mx-auto"
               style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 4px 24px rgba(0,0,0,0.3)" }}>
               <Search size={16} className="ml-4 shrink-0" style={{ color: "var(--text-muted)" }} />
@@ -189,8 +189,8 @@ export default function HomePage() {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                onCompositionStart={() => setComposing(true)}
-                onCompositionEnd={(e) => { setComposing(false); setQuery(e.currentTarget.value) }}
+                onCompositionStart={() => { composingRef.current = true }}
+                onCompositionEnd={(e) => { composingRef.current = false; setQuery(e.currentTarget.value) }}
                 placeholder="캐릭터 닉네임 검색"
                 autoFocus
                 className="flex-1 px-3 py-4 bg-transparent focus:outline-none text-[15px] placeholder:text-white/20"
