@@ -27,6 +27,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
       await infoCommand.handleLevelButton(interaction, charName)
     } else if (action === "hexa") {
       await infoCommand.handleHexaButton(interaction, charName)
+    } else if (action === "codi") {
+      await infoCommand.handleCodiButton(interaction, charName)
     }
   }
 })

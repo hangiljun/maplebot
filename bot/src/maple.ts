@@ -109,6 +109,50 @@ export interface HexaStat {
   sub_stat_level_2: number
 }
 
+export interface CodiPresetItem {
+  part: string
+  name: string
+  label: string | null
+}
+
+export interface CodiSummary {
+  hair: string
+  face: string
+  skin: string
+  preset1: CodiPresetItem[]
+  preset2: CodiPresetItem[]
+  preset3: CodiPresetItem[]
+}
+
+export async function fetchCodi(name: string): Promise<CodiSummary | null> {
+  const idData = await nexonFetch(`/maplestory/v1/id?character_name=${encodeURIComponent(name)}`)
+  if (!idData?.ocid) return null
+  const q = `ocid=${idData.ocid}`
+
+  const [codiR, beautyR] = await Promise.all([
+    nexonFetch(`/maplestory/v1/character/cashitem-equipment?${q}`),
+    nexonFetch(`/maplestory/v1/character/beauty-equipment?${q}`),
+  ])
+
+  if (!codiR) return null
+
+  const mapItems = (arr: any[]): CodiPresetItem[] =>
+    (arr ?? []).map((c: any) => ({
+      part:  c.cash_item_equipment_part ?? "",
+      name:  c.cash_item_name ?? "",
+      label: c.cash_item_label ?? null,
+    }))
+
+  return {
+    hair:    beautyR?.character_hair?.hair_name ?? "",
+    face:    beautyR?.character_face?.face_name ?? "",
+    skin:    beautyR?.character_skin?.skin_name ?? "",
+    preset1: mapItems(codiR.character_cashitem_equipment_preset_1),
+    preset2: mapItems(codiR.character_cashitem_equipment_preset_2),
+    preset3: mapItems(codiR.character_cashitem_equipment_preset_3),
+  }
+}
+
 export async function fetchHexa(name: string): Promise<{ cores: HexaCore[]; stats: HexaStat[] } | null> {
   const idData = await nexonFetch(`/maplestory/v1/id?character_name=${encodeURIComponent(name)}`)
   if (!idData?.ocid) return null

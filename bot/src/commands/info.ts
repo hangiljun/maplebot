@@ -7,7 +7,7 @@ import {
   ActionRowBuilder,
   ButtonInteraction,
 } from "discord.js"
-import { fetchCharacterSummary, fetchEquipment, fetchLevelHistory, fetchHexa } from "../maple"
+import { fetchCharacterSummary, fetchEquipment, fetchLevelHistory, fetchHexa, fetchCodi } from "../maple"
 
 export const data = new SlashCommandBuilder()
   .setName("정보")
@@ -80,7 +80,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       .setLabel("💎 헥사")
       .setStyle(ButtonStyle.Secondary)
 
-    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(equipBtn, levelBtn, hexaBtn)
+    const codiBtn = new ButtonBuilder()
+      .setCustomId(`codi:${char.name}`)
+      .setLabel("👗 코디")
+      .setStyle(ButtonStyle.Secondary)
+
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(equipBtn, levelBtn, hexaBtn, codiBtn)
 
     await interaction.editReply({ embeds: [embed], components: [row] })
   } catch (err) {
@@ -192,6 +197,39 @@ export async function handleLevelButton(interaction: ButtonInteraction, charName
   } catch (err) {
     console.error(err)
     await interaction.editReply("❌ 히스토리 조회 중 오류가 발생했어요.")
+  }
+}
+
+export async function handleCodiButton(interaction: ButtonInteraction, charName: string) {
+  await interaction.deferReply({ ephemeral: true })
+  try {
+    const codi = await fetchCodi(charName)
+    if (!codi) {
+      await interaction.editReply("❌ 코디 정보를 불러올 수 없어요.")
+      return
+    }
+
+    const formatPreset = (items: { part: string; name: string; label: string | null }[]) => {
+      if (!items.length) return "비어있음"
+      return items.map(i => `\`${i.part}\` ${i.name}${i.label ? ` (${i.label})` : ""}`).join("\n")
+    }
+
+    const embed = new EmbedBuilder()
+      .setColor(0xec4899)
+      .setTitle(`👗 ${charName} 코디`)
+      .addFields(
+        { name: "헤어", value: codi.hair || "기본", inline: true },
+        { name: "성형", value: codi.face || "기본", inline: true },
+        { name: "피부", value: codi.skin || "기본", inline: true },
+        { name: "프리셋 1", value: formatPreset(codi.preset1), inline: false },
+        { name: "프리셋 2", value: formatPreset(codi.preset2), inline: false },
+        { name: "프리셋 3", value: formatPreset(codi.preset3), inline: false },
+      )
+
+    await interaction.editReply({ embeds: [embed] })
+  } catch (err) {
+    console.error(err)
+    await interaction.editReply("❌ 코디 정보 조회 중 오류가 발생했어요.")
   }
 }
 
