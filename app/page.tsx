@@ -104,6 +104,7 @@ export default function HomePage() {
                 className="w-full h-auto object-contain drop-shadow-xl"
                 style={{ borderRadius: "24px" }}
                 priority
+                unoptimized
               />
             </div>
           </div>
