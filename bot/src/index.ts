@@ -23,6 +23,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
     const charName = rest.join(":")
     if (action === "equip") {
       await infoCommand.handleEquipButton(interaction, charName)
+    } else if (action === "level") {
+      await infoCommand.handleLevelButton(interaction, charName)
+    } else if (action === "hexa") {
+      await infoCommand.handleHexaButton(interaction, charName)
     }
   }
 })

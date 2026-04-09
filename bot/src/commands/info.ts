@@ -7,7 +7,7 @@ import {
   ActionRowBuilder,
   ButtonInteraction,
 } from "discord.js"
-import { fetchCharacterSummary, fetchEquipment } from "../maple"
+import { fetchCharacterSummary, fetchEquipment, fetchLevelHistory, fetchHexa } from "../maple"
 
 export const data = new SlashCommandBuilder()
   .setName("정보")
@@ -65,12 +65,22 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         ].join("\n")
       )
 
-    const button = new ButtonBuilder()
+    const equipBtn = new ButtonBuilder()
       .setCustomId(`equip:${char.name}`)
-      .setLabel("🛡️ 장비 보기")
+      .setLabel("🛡️ 장비")
       .setStyle(ButtonStyle.Secondary)
 
-    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(button)
+    const levelBtn = new ButtonBuilder()
+      .setCustomId(`level:${char.name}`)
+      .setLabel("📈 레벨 변동")
+      .setStyle(ButtonStyle.Secondary)
+
+    const hexaBtn = new ButtonBuilder()
+      .setCustomId(`hexa:${char.name}`)
+      .setLabel("💎 헥사")
+      .setStyle(ButtonStyle.Secondary)
+
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(equipBtn, levelBtn, hexaBtn)
 
     await interaction.editReply({ embeds: [embed], components: [row] })
   } catch (err) {
@@ -155,6 +165,76 @@ export async function handleEquipButton(interaction: ButtonInteraction, charName
   } catch (err) {
     console.error(err)
     await interaction.editReply("❌ 장비 정보 조회 중 오류가 발생했어요.")
+  }
+}
+
+export async function handleLevelButton(interaction: ButtonInteraction, charName: string) {
+  await interaction.deferReply({ ephemeral: true })
+  try {
+    const data = await fetchLevelHistory(charName)
+    if (!data) {
+      await interaction.editReply("❌ 히스토리 정보를 불러올 수 없어요.")
+      return
+    }
+
+    const expLines = data.expHistory.map(e => `\`${e.date}\` ${e.value.toFixed(3)}%`).join("\n")
+    const levelLines = data.levelHistory.map(l => `\`${l.date}\` Lv.${l.value}`).join("\n")
+
+    const embed = new EmbedBuilder()
+      .setColor(0x22c55e)
+      .setTitle(`📈 ${charName} 레벨 변동`)
+      .addFields(
+        { name: "경험치 히스토리 (최근 7일)", value: expLines || "데이터 없음", inline: false },
+        { name: "레벨 히스토리 (최근 12개월)", value: levelLines || "데이터 없음", inline: false },
+      )
+
+    await interaction.editReply({ embeds: [embed] })
+  } catch (err) {
+    console.error(err)
+    await interaction.editReply("❌ 히스토리 조회 중 오류가 발생했어요.")
+  }
+}
+
+export async function handleHexaButton(interaction: ButtonInteraction, charName: string) {
+  await interaction.deferReply({ ephemeral: true })
+  try {
+    const data = await fetchHexa(charName)
+    if (!data) {
+      await interaction.editReply("❌ 헥사 정보를 불러올 수 없어요.")
+      return
+    }
+
+    const coreLines = data.cores.length
+      ? data.cores.map(c => `\`${c.hexa_core_type}\` **${c.hexa_core_name}** Lv.${c.hexa_core_level}/30`).join("\n")
+      : "데이터 없음"
+
+    const statLines = data.stats.length
+      ? data.stats.map(s =>
+          `**[${s.slot_id}] ${s.main_stat_name}** Lv.${s.main_stat_level}\n` +
+          (s.sub_stat_name_1 ? `  ∟ ${s.sub_stat_name_1} Lv.${s.sub_stat_level_1}\n` : "") +
+          (s.sub_stat_name_2 ? `  ∟ ${s.sub_stat_name_2} Lv.${s.sub_stat_level_2}` : "")
+        ).join("\n")
+      : "데이터 없음"
+
+    const embeds: EmbedBuilder[] = []
+
+    if (coreLines.length <= 4096) {
+      embeds.push(new EmbedBuilder()
+        .setColor(0xf97316)
+        .setTitle(`💎 ${charName} 헥사 코어`)
+        .setDescription(coreLines))
+    }
+    if (statLines.length <= 4096) {
+      embeds.push(new EmbedBuilder()
+        .setColor(0xa855f7)
+        .setTitle("헥사 스탯")
+        .setDescription(statLines))
+    }
+
+    await interaction.editReply({ embeds })
+  } catch (err) {
+    console.error(err)
+    await interaction.editReply("❌ 헥사 정보 조회 중 오류가 발생했어요.")
   }
 }
 
