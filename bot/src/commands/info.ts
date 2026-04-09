@@ -96,48 +96,42 @@ export async function handleEquipButton(interaction: ButtonInteraction, charName
       ...items.filter((i) => !SLOT_ORDER.includes(i.slot)),
     ] as typeof items
 
-    // Discord 최대 10개 embed 제한 (헤더 1개 포함하므로 아이템은 9개)
-    const visible = ordered.slice(0, 9)
+    const buildEmbeds = (chunk: typeof ordered) =>
+      chunk.map((item) => {
+        const sf    = item.starforce > 0 ? `★${item.starforce}` : ""
+        const color = POTENTIAL_COLORS[item.potential] ?? 0x4b5563
 
-    const embeds = visible.map((item) => {
-      const sf    = item.starforce > 0 ? `★${item.starforce}` : ""
-      const color = POTENTIAL_COLORS[item.potential] ?? 0x4b5563
+        const lines: string[] = []
+        lines.push(`\`${item.slot || "기타"}\``)
+        if (sf) lines.push(`**${sf}**`)
 
-      const lines: string[] = []
-      lines.push(`\`${item.slot || "기타"}\``)
-      if (sf) lines.push(`**${sf}**`)
+        if (item.potentials?.length > 0) {
+          lines.push(`\n잠재  ${item.potentials.join(" · ")}`)
+        }
+        if (item.additionalPotentials?.length > 0) {
+          lines.push(`에디  ${item.additionalPotentials.join(" · ")}`)
+        }
 
-      if (item.potentials?.length > 0) {
-        lines.push(`\n잠재  ${item.potentials.join(" · ")}`)
-      }
-      if (item.additionalPotentials?.length > 0) {
-        lines.push(`에디  ${item.additionalPotentials.join(" · ")}`)
-      }
+        const title       = (item.name || item.slot || "장비").slice(0, 256)
+        const description = lines.join("\n") || "\u200b"
 
-      const title       = (item.name || item.slot || "장비").slice(0, 256)
-      const description = lines.join("\n") || "\u200b"
+        const embed = new EmbedBuilder()
+          .setColor(color)
+          .setTitle(title)
+          .setDescription(description)
 
-      const embed = new EmbedBuilder()
-        .setColor(color)
-        .setTitle(title)
-        .setDescription(description)
+        if (item.icon) embed.setThumbnail(item.icon)
+        return embed
+      })
 
-      if (item.icon) embed.setThumbnail(item.icon)
+    // 10개씩 나눠서 첫 번째는 editReply, 나머지는 followUp
+    const first  = ordered.slice(0, 10)
+    const second = ordered.slice(10, 20)
 
-      return embed
-    })
-
-    // 첫 embed에만 제목 추가 (10개 초과 시 안내)
-    const headerEmbed = new EmbedBuilder()
-      .setColor(0x3182f6)
-      .setTitle(`🛡️ ${charName}의 장비`)
-      .setDescription(
-        ordered.length > 9
-          ? `총 ${ordered.length}개 장비 중 상위 9개 표시\n나머지는 [maplebot.co.kr](https://maplebot.co.kr/character/${encodeURIComponent(charName)}) 에서 확인하세요.`
-          : `총 ${ordered.length}개 장비`
-      )
-
-    await interaction.editReply({ embeds: [headerEmbed, ...embeds] })
+    await interaction.editReply({ embeds: buildEmbeds(first) })
+    if (second.length > 0) {
+      await interaction.followUp({ embeds: buildEmbeds(second) })
+    }
   } catch (err) {
     console.error(err)
     await interaction.editReply("❌ 장비 정보 조회 중 오류가 발생했어요.")
