@@ -143,7 +143,22 @@ export const POTENTIAL_COLORS: Record<string, string> = {
 // ─────────────────────────────────────────────────────────────
 const BASE_URL = "https://open.api.nexon.com"
 
-async function nexonFetch(path: string, retry = 1): Promise<any> {
+// ocid 캐시 (1시간) — Vercel 인스턴스 단위지만 반복 호출 대폭 감소
+const ocidCache = new Map<string, { ocid: string; ts: number }>()
+const OCID_TTL  = 60 * 60 * 1000
+
+async function getOcid(name: string): Promise<string | null> {
+  const cached = ocidCache.get(name)
+  if (cached && Date.now() - cached.ts < OCID_TTL) return cached.ocid
+
+  const data = await nexonFetch(`/maplestory/v1/id?character_name=${encodeURIComponent(name)}`)
+  if (!data?.ocid) return null
+
+  ocidCache.set(name, { ocid: data.ocid, ts: Date.now() })
+  return data.ocid
+}
+
+async function nexonFetch(path: string, retry = 2): Promise<any> {
   const apiKey = process.env.NEXON_API_KEY
   if (!apiKey) throw new Error("NEXON_API_KEY 환경변수가 설정되지 않았습니다")
 
@@ -154,7 +169,7 @@ async function nexonFetch(path: string, retry = 1): Promise<any> {
 
   if (!res.ok) {
     if (res.status === 429 && retry > 0) {
-      await new Promise((r) => setTimeout(r, 1000))
+      await new Promise((r) => setTimeout(r, 2000))
       return nexonFetch(path, retry - 1)
     }
     console.error(`Nexon API 오류 [${res.status}]:`, path)
@@ -188,11 +203,8 @@ function formatKoDate(dateStr: string): string {
 }
 
 export async function fetchHistory(name: string): Promise<CharacterHistory | null> {
-  const idData = await nexonFetch(
-    `/maplestory/v1/id?character_name=${encodeURIComponent(name)}`
-  )
-  if (!idData?.ocid) return null
-  const { ocid } = idData
+  const ocid = await getOcid(name)
+  if (!ocid) return null
 
   // 경험치: 어제~7일 전 (1~7)
   const expDates = Array.from({ length: 7 }, (_, i) => kstDateString(i + 1))
@@ -262,14 +274,9 @@ export async function fetchHistory(name: string): Promise<CharacterHistory | nul
 export async function fetchCharacter(name: string): Promise<CharacterData | null> {
   if (!name?.trim()) return null
 
-  // 1. ocid 조회
-  const idData = await nexonFetch(
-    `/maplestory/v1/id?character_name=${encodeURIComponent(name)}`
-  )
-  if (!idData?.ocid) return null
-  const { ocid } = idData
+  const ocid = await getOcid(name)
+  if (!ocid) return null
 
-  // 2. 요청을 두 묶음으로 나눠서 Rate Limit 방지
   const q = `ocid=${ocid}`
 
   // 1묶음: 핵심 정보
