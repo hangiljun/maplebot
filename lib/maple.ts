@@ -140,9 +140,9 @@ export async function fetchHistory(name: string): Promise<CharacterHistory | nul
   // 경험치: 어제~7일 전 (1~7)
   const expDates = Array.from({ length: 7 }, (_, i) => kstDateString(i + 1))
 
-  // 레벨: 최근 6개월 (매월 1일)
+  // 레벨: 최근 24개월 (매월 1일)
   const levelDates: string[] = []
-  for (let i = 5; i >= 0; i--) {
+  for (let i = 23; i >= 0; i--) {
     const d = new Date(Date.now() + 9 * 60 * 60 * 1000)
     d.setUTCMonth(d.getUTCMonth() - i, 1)
     levelDates.push(d.toISOString().split("T")[0])
@@ -167,12 +167,15 @@ export async function fetchHistory(name: string): Promise<CharacterHistory | nul
     .filter(e => e.value > 0)
     .reverse()
 
-  const levelHistory: HistoryPoint[] = levelDates
-    .map((date, i) => ({
-      date: formatKoDate(date),
-      value: levelResults[i]?.character_level ?? 0,
-    }))
-    .filter(e => e.value > 0)
+  // 레벨이 변하는 시점만 추출
+  const allLevels = levelDates.map((date, i) => ({
+    date: formatKoDate(date),
+    value: levelResults[i]?.character_level ?? 0,
+  })).filter(e => e.value > 0)
+
+  const levelHistory: HistoryPoint[] = allLevels.filter((p, i) =>
+    i === 0 || p.value !== allLevels[i - 1].value
+  )
 
   return { expHistory, levelHistory }
 }
