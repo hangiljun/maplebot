@@ -24,11 +24,11 @@ function SymbolCard({ symbol }: { symbol: SymbolItem }) {
           </span>
         </div>
         <div className="flex justify-between text-[10px] mb-1" style={{ color: "var(--text-sub)" }}>
-          <span>{Number(symbol.symbol_force).toLocaleString()} 포스</span>
+          <span>{Number(symbol.symbol_force ?? 0).toLocaleString()} 포스</span>
           {isMaxLevel ? (
             <span className="text-green-500 font-bold">MAX</span>
           ) : (
-            <span>{symbol.symbol_exp.toLocaleString()} / {symbol.symbol_exp_required.toLocaleString()}</span>
+            <span>{(symbol.symbol_exp ?? 0).toLocaleString()} / {(symbol.symbol_exp_required ?? 0).toLocaleString()}</span>
           )}
         </div>
         <div className="w-full rounded-full h-1.5" style={{ background: "var(--bg-card)" }}>

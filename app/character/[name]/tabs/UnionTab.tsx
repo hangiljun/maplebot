@@ -88,7 +88,7 @@ export default function UnionTab({ union, basic }: { union: UnionInfo | null; ba
       {/* 유니온 수치 */}
       <div className="grid grid-cols-2 gap-3">
         {[
-          { label: "유니온 레벨", value: union.union_level.toLocaleString() },
+          { label: "유니온 레벨", value: (union.union_level ?? 0).toLocaleString() },
           { label: "아티팩트 레벨", value: String(union.union_artifact_level) },
         ].map(({ label, value }) => (
           <div key={label} className="rounded-2xl px-4 py-4 text-center"
@@ -105,8 +105,8 @@ export default function UnionTab({ union, basic }: { union: UnionInfo | null; ba
           <h3 className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: "var(--text-muted)" }}>유니온 아티팩트</h3>
           <div className="grid grid-cols-2 gap-2">
             {[
-              { label: "경험치", value: union.union_artifact_exp.toLocaleString() },
-              { label: "포인트", value: union.union_artifact_point.toLocaleString() },
+              { label: "경험치", value: (union.union_artifact_exp ?? 0).toLocaleString() },
+              { label: "포인트", value: (union.union_artifact_point ?? 0).toLocaleString() },
             ].map(({ label, value }) => (
               <div key={label} className="rounded-xl py-3 text-center" style={{ background: "var(--bg-card)" }}>
                 <p className="text-xs mb-1" style={{ color: "var(--text-sub)" }}>{label}</p>

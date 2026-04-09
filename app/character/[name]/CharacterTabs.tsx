@@ -70,7 +70,7 @@ export default function CharacterTabs({ data }: { data: CharacterData }) {
                 style={{ border: "1px solid rgba(59,130,246,0.25)" }}>
                 <span className="text-sm font-bold text-white">전투력</span>
                 <span className="text-xl font-extrabold" style={{ color: "var(--blue-light)" }}>
-                  {Number(combatPower.stat_value).toLocaleString()}
+                  {Number(combatPower.stat_value ?? 0).toLocaleString()}
                 </span>
               </div>
             )}

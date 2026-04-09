@@ -90,8 +90,8 @@ export default async function CharacterDetailPage({ params }: Props) {
     { label: "서버",   value: basic.world_name },
     { label: "직업",   value: basic.character_class },
     { label: "길드",   value: basic.character_guild_name || "없음" },
-    { label: "유니온", value: data.union ? `${data.union.union_grade} Lv.${data.union.union_level.toLocaleString()}` : "없음" },
-    { label: "인기도", value: data.popularity.toLocaleString() },
+    { label: "유니온", value: data.union ? `${data.union.union_grade} Lv.${(data.union.union_level ?? 0).toLocaleString()}` : "없음" },
+    { label: "인기도", value: (data.popularity ?? 0).toLocaleString() },
     { label: "전투력", value: formatPower(combatPower), gold: true },
   ]
 
