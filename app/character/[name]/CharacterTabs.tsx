@@ -54,7 +54,7 @@ export default function CharacterTabs({ data }: { data: CharacterData }) {
             style={{
               color: tab === t.key ? "var(--blue-light)" : "var(--text-muted)",
               borderBottom: tab === t.key ? "2px solid var(--blue-light)" : "2px solid transparent",
-              background: tab === t.key ? "rgba(245,141,163,0.05)" : "transparent",
+              background: tab === t.key ? "rgba(59,130,246,0.05)" : "transparent",
             }}>
             {t.label}
           </button>

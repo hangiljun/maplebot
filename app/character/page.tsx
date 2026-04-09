@@ -4,27 +4,24 @@ import { useRouter } from "next/navigation"
 import { Search, AlertCircle, Info } from "lucide-react"
 
 export default function CharacterSearchPage() {
-  const [query, setQuery] = useState("")
-  const [warn, setWarn] = useState(false)
-  const composingRef = useRef(false)
-  const router = useRouter()
+  const [charCount, setCharCount] = useState(0)
+  const [warn, setWarn]           = useState(false)
+  const inputRef                  = useRef<HTMLInputElement>(null)
+  const composingRef              = useRef(false)
+  const router                    = useRouter()
 
-  const applyFilter = (v: string) => {
-    const filtered = v.replace(/[^a-zA-Z0-9가-힣]/g, "").slice(0, 12)
-    setWarn(v.length > 0 && filtered !== v)
-    setQuery(filtered)
-  }
-
-  const handleChange = (v: string) => {
-    if (composingRef.current) {
-      setQuery(v.slice(0, 12))
-    } else {
-      applyFilter(v)
-    }
+  const applyFilter = () => {
+    const el = inputRef.current
+    if (!el) return
+    const raw      = el.value
+    const filtered = raw.replace(/[^a-zA-Z0-9가-힣]/g, "").slice(0, 12)
+    el.value = filtered
+    setCharCount(filtered.length)
+    setWarn(raw.length > 0 && filtered !== raw)
   }
 
   const go = () => {
-    const t = query.trim()
+    const t = (inputRef.current?.value ?? "").trim()
     if (!t) return
     router.push(`/character/${encodeURIComponent(t)}`)
   }
@@ -46,26 +43,22 @@ export default function CharacterSearchPage() {
           style={{ border: warn ? "1px solid rgba(239,68,68,0.5)" : "1px solid rgba(59,130,246,0.2)" }}>
           <Search size={17} className="ml-4 shrink-0" style={{ color: "var(--text-muted)" }} />
           <input
+            ref={inputRef}
             type="text"
-            value={query}
-            onChange={(e) => handleChange(e.target.value)}
+            onInput={() => { if (!composingRef.current) applyFilter() }}
             onCompositionStart={() => { composingRef.current = true }}
-            onCompositionEnd={(e) => { composingRef.current = false; applyFilter(e.currentTarget.value) }}
-            onKeyDown={(e) => e.key === "Enter" && !composingRef.current && go()}
+            onCompositionEnd={() => { composingRef.current = false; applyFilter() }}
             placeholder="닉네임 입력 후 Enter 또는 조회하기"
             autoFocus
             className="flex-1 px-3 py-4 bg-transparent focus:outline-none text-[15px] placeholder:text-white/20"
             style={{ color: "var(--text)" }}
           />
-          {query && (
+          {charCount > 0 && (
             <span className="text-xs mr-2 tabular-nums" style={{ color: "var(--text-muted)" }}>
-              {query.length}/12
+              {charCount}/12
             </span>
           )}
-          <button
-            type="submit"
-            className="btn-primary m-2 px-6 py-2.5 text-sm shrink-0"
-          >
+          <button type="submit" className="btn-primary m-2 px-6 py-2.5 text-sm shrink-0">
             조회하기
           </button>
         </form>
