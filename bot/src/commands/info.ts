@@ -45,13 +45,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     })
     const cardUrl = `https://maplebot.co.kr/api/card/${encodeURIComponent(char.name)}?${cardParams}`
 
+    console.log(`[card] fetching: ${cardUrl}`)
     const imageRes = await fetch(cardUrl)
-    const imageBuffer = Buffer.from(await imageRes.arrayBuffer())
-    const attachment = new AttachmentBuilder(imageBuffer, { name: "card.png" })
-
-    const embed = new EmbedBuilder()
-      .setColor(0xf59e0b)
-      .setImage("attachment://card.png")
+    console.log(`[card] status: ${imageRes.status}, content-type: ${imageRes.headers.get("content-type")}`)
 
     const button = new ButtonBuilder()
       .setCustomId(`equip:${char.name}`)
@@ -59,6 +55,24 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       .setStyle(ButtonStyle.Secondary)
 
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(button)
+
+    if (!imageRes.ok) {
+      console.error(`[card] fetch failed: ${imageRes.status}`)
+      const embed = new EmbedBuilder()
+        .setColor(0xf59e0b)
+        .setTitle(char.name)
+        .setDescription(`Lv.${char.level} ${char.characterClass}\n서버: ${char.world}`)
+      await interaction.editReply({ embeds: [embed], components: [row] })
+      return
+    }
+
+    const imageBuffer = Buffer.from(await imageRes.arrayBuffer())
+    console.log(`[card] buffer size: ${imageBuffer.length}`)
+    const attachment = new AttachmentBuilder(imageBuffer, { name: "card.png" })
+
+    const embed = new EmbedBuilder()
+      .setColor(0xf59e0b)
+      .setImage("attachment://card.png")
 
     await interaction.editReply({ embeds: [embed], files: [attachment], components: [row] })
   } catch (err) {
