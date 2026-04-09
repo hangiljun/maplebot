@@ -143,16 +143,20 @@ export const POTENTIAL_COLORS: Record<string, string> = {
 // ─────────────────────────────────────────────────────────────
 const BASE_URL = "https://open.api.nexon.com"
 
-async function nexonFetch(path: string) {
+async function nexonFetch(path: string, retry = 1): Promise<any> {
   const apiKey = process.env.NEXON_API_KEY
   if (!apiKey) throw new Error("NEXON_API_KEY 환경변수가 설정되지 않았습니다")
 
   const res = await fetch(`${BASE_URL}${path}`, {
     headers: { "x-nxopen-api-key": apiKey },
-    cache: "no-store", // 항상 최신 데이터 (빈 결과 캐시 방지)
+    cache: "no-store",
   })
 
   if (!res.ok) {
+    if (res.status === 429 && retry > 0) {
+      await new Promise((r) => setTimeout(r, 1000))
+      return nexonFetch(path, retry - 1)
+    }
     console.error(`Nexon API 오류 [${res.status}]:`, path)
     return null
   }

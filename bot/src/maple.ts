@@ -5,7 +5,7 @@ const BASE_URL = "https://open.api.nexon.com"
 const API_KEY  = process.env.NEXON_API_KEY!
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function nexonFetch(path: string): Promise<any> {
+async function nexonFetch(path: string, retry = 1): Promise<any> {
   if (!API_KEY) {
     console.error("❌ NEXON_API_KEY 환경변수가 설정되지 않았습니다")
     return null
@@ -14,6 +14,10 @@ async function nexonFetch(path: string): Promise<any> {
     headers: { "x-nxopen-api-key": API_KEY },
   })
   if (!res.ok) {
+    if (res.status === 429 && retry > 0) {
+      await new Promise((r) => setTimeout(r, 1000))
+      return nexonFetch(path, retry - 1)
+    }
     console.error(`❌ Nexon API 오류 [${res.status}] ${path}`)
     return null
   }
@@ -133,8 +137,6 @@ export async function fetchCodi(name: string): Promise<CodiSummary | null> {
   ])
 
   if (!codiR) return null
-
-  console.log("[fetchCodi] keys:", Object.keys(codiR))
 
   const mapItems = (arr: any[]): CodiPresetItem[] =>
     (arr ?? []).map((c: any) => ({
