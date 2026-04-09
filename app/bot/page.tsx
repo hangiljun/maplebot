@@ -5,7 +5,7 @@ export default function BotPage() {
     <div className="max-w-2xl mx-auto px-4 py-16 text-center">
       <div className="text-6xl mb-5">🤖</div>
       <h1 className="text-2xl font-black text-white mb-3">메이플봇 디스코드</h1>
-      <p className="text-sm mb-8" style={{ color: "var(--text-2)" }}>
+      <p className="text-sm mb-8" style={{ color: "var(--text-sub)" }}>
         디스코드 서버에 봇을 추가하고 <strong className="text-white">/정보</strong> 명령어로<br />
         메이플스토리 캐릭터를 바로 조회하세요.
       </p>
@@ -21,7 +21,7 @@ export default function BotPage() {
               style={{ background: "var(--bg-surface)", color: "#5cb85c" }}>
               {cmd}
             </code>
-            <span className="text-sm" style={{ color: "var(--text-2)" }}>{desc}</span>
+            <span className="text-sm" style={{ color: "var(--text-sub)" }}>{desc}</span>
           </div>
         ))}
       </div>

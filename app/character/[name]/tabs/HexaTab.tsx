@@ -8,7 +8,7 @@ const TYPE_COLOR: Record<string, { bg: string; text: string }> = {
 }
 
 function HexaCoreCard({ core }: { core: HexaCore }) {
-  const color = TYPE_COLOR[core.hexa_core_type] ?? { bg: "rgba(255,255,255,0.06)", text: "var(--text-2)" }
+  const color = TYPE_COLOR[core.hexa_core_type] ?? { bg: "rgba(255,255,255,0.06)", text: "var(--text-muted)" }
   const pct = Math.min((core.hexa_core_level / 30) * 100, 100)
 
   return (
@@ -46,13 +46,13 @@ function HexaStatCard({ stat }: { stat: HexaStat }) {
           <span className="text-sm font-black" style={{ color: "#f97316" }}>Lv.{stat.main_stat_level}</span>
         </div>
         {stat.sub_stat_name_1 && (
-          <div className="flex justify-between text-xs" style={{ color: "var(--text-2)" }}>
+          <div className="flex justify-between text-xs" style={{ color: "var(--text-sub)" }}>
             <span>{stat.sub_stat_name_1}</span>
             <span className="font-semibold">Lv.{stat.sub_stat_level_1}</span>
           </div>
         )}
         {stat.sub_stat_name_2 && (
-          <div className="flex justify-between text-xs" style={{ color: "var(--text-2)" }}>
+          <div className="flex justify-between text-xs" style={{ color: "var(--text-sub)" }}>
             <span>{stat.sub_stat_name_2}</span>
             <span className="font-semibold">Lv.{stat.sub_stat_level_2}</span>
           </div>
@@ -65,8 +65,7 @@ function HexaStatCard({ stat }: { stat: HexaStat }) {
 export default function HexaTab({ hexaCores, hexaStats }: { hexaCores: HexaCore[]; hexaStats: HexaStat[] }) {
   if (!hexaCores.length && !hexaStats.length) {
     return (
-      <div className="text-center py-12" style={{ color: "var(--text-2)" }}>
-        <div className="text-4xl mb-3">💎</div>
+      <div className="text-center py-12" style={{ color: "var(--text-muted)" }}>
         <p className="text-sm">헥사 정보가 없어요</p>
       </div>
     )

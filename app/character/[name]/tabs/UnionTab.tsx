@@ -32,8 +32,7 @@ function getBadgeStyle(badge: string): string {
 export default function UnionTab({ union, basic }: { union: UnionInfo | null; basic: CharacterBasic }) {
   if (!union) {
     return (
-      <div className="text-center py-12 text-gray-400">
-        <div className="text-4xl mb-3">🏰</div>
+      <div className="text-center py-12" style={{ color: "var(--text-muted)" }}>
         <p className="text-sm">유니온 정보를 불러올 수 없어요</p>
       </div>
     )
@@ -47,12 +46,12 @@ export default function UnionTab({ union, basic }: { union: UnionInfo | null; ba
 
       {/* 유니온 챔피언 카드 */}
       <div className="relative overflow-hidden rounded-2xl"
-        style={{ background: "linear-gradient(160deg, #1a0a2e 0%, #2d1060 40%, #1a0a2e 100%)" }}>
+        style={{ background: "linear-gradient(160deg, rgba(37,99,235,0.2) 0%, rgba(59,130,246,0.1) 40%, rgba(37,99,235,0.05) 100%)" }}>
 
         {/* 불꽃 배경 효과 */}
         <div className="absolute inset-0 flex items-end justify-center pointer-events-none">
           <div className="w-64 h-40 rounded-full opacity-40"
-            style={{ background: "radial-gradient(ellipse, #f97316 0%, #dc2626 40%, transparent 70%)", filter: "blur(20px)" }} />
+            style={{ background: "radial-gradient(ellipse, #3b82f6 0%, #1d4ed8 40%, transparent 70%)", filter: "blur(20px)" }} />
         </div>
 
         {/* 상단 배지 */}
@@ -94,7 +93,7 @@ export default function UnionTab({ union, basic }: { union: UnionInfo | null; ba
         ].map(({ label, value }) => (
           <div key={label} className="rounded-2xl px-4 py-4 text-center"
             style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}>
-            <p className="text-xs mb-1" style={{ color: "var(--text-2)" }}>{label}</p>
+            <p className="text-xs mb-1" style={{ color: "var(--text-sub)" }}>{label}</p>
             <p className="text-2xl font-extrabold text-white">{value}</p>
           </div>
         ))}
@@ -110,7 +109,7 @@ export default function UnionTab({ union, basic }: { union: UnionInfo | null; ba
               { label: "포인트", value: union.union_artifact_point.toLocaleString() },
             ].map(({ label, value }) => (
               <div key={label} className="rounded-xl py-3 text-center" style={{ background: "var(--bg-card)" }}>
-                <p className="text-xs mb-1" style={{ color: "var(--text-2)" }}>{label}</p>
+                <p className="text-xs mb-1" style={{ color: "var(--text-sub)" }}>{label}</p>
                 <p className="text-base font-extrabold text-white">{value}</p>
               </div>
             ))}

@@ -39,9 +39,7 @@ export default async function CharacterDetailPage({ params }: Props) {
         <p className="text-sm mb-8" style={{ color: "var(--text-sub)" }}>
           &apos;{decoded}&apos; 캐릭터가 존재하지 않거나 API 조회에 실패했습니다.
         </p>
-        <Link href="/"
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl font-semibold text-sm text-white transition-all hover:opacity-90"
-          style={{ background: "linear-gradient(135deg, #d4607e, #f58da3)" }}>
+        <Link href="/" className="btn-primary inline-flex items-center gap-2 px-6 py-3 text-sm">
           <Search size={14} /> 다시 검색
         </Link>
       </div>
@@ -69,7 +67,7 @@ export default async function CharacterDetailPage({ params }: Props) {
 
           {/* 이미지 */}
           <div className="flex items-end justify-center sm:justify-start pt-8 pb-4 px-6 sm:w-44 shrink-0"
-            style={{ background: "linear-gradient(160deg, rgba(212,96,126,0.15) 0%, transparent 100%)" }}>
+            style={{ background: "linear-gradient(160deg, rgba(37,99,235,0.15) 0%, transparent 100%)" }}>
             <CharacterImage src={basic.character_image} name={basic.character_name} size="xl" />
           </div>
 
@@ -84,8 +82,8 @@ export default async function CharacterDetailPage({ params }: Props) {
                 <p className="text-sm mt-0.5" style={{ color: "var(--text-sub)" }}>{basic.character_class}</p>
               </div>
               <div className="text-right">
-                <p className="text-3xl font-black leading-none gradient-text"
-                  style={{ fontFamily: "GmarketSans, sans-serif" }}>
+                <p className="text-3xl font-black leading-none"
+                  style={{ fontFamily: "GmarketSans, sans-serif", color: "var(--blue-light)" }}>
                   {basic.character_level}
                 </p>
                 <p className="text-[10px] font-bold uppercase tracking-widest mt-0.5" style={{ color: "var(--text-muted)" }}>
@@ -101,7 +99,7 @@ export default async function CharacterDetailPage({ params }: Props) {
                     {label}
                   </p>
                   <p className="text-sm font-bold truncate"
-                    style={{ color: gold ? "var(--gold)" : "var(--text)" }}>
+                    style={{ color: gold ? "var(--blue-light)" : "var(--text)" }}>
                     {value}
                   </p>
                 </div>

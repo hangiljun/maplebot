@@ -3,8 +3,7 @@ import { AbilityInfo, POTENTIAL_COLORS } from "@/lib/maple"
 export default function AbilityTab({ ability }: { ability: AbilityInfo | null }) {
   if (!ability) {
     return (
-      <div className="text-center py-12 text-gray-400">
-        <div className="text-4xl mb-3">🎯</div>
+      <div className="text-center py-12" style={{ color: "var(--text-muted)" }}>
         <p className="text-sm">어빌리티 정보를 불러올 수 없어요</p>
       </div>
     )

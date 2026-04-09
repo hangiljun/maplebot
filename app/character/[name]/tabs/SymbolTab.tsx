@@ -23,8 +23,8 @@ function SymbolCard({ symbol }: { symbol: SymbolItem }) {
             Lv.{symbol.symbol_level}
           </span>
         </div>
-        <div className="flex justify-between text-[10px] mb-1" style={{ color: "var(--text-2)" }}>
-          <span>✨ {Number(symbol.symbol_force).toLocaleString()} 포스</span>
+        <div className="flex justify-between text-[10px] mb-1" style={{ color: "var(--text-sub)" }}>
+          <span>{Number(symbol.symbol_force).toLocaleString()} 포스</span>
           {isMaxLevel ? (
             <span className="text-green-500 font-bold">MAX</span>
           ) : (
@@ -42,8 +42,7 @@ function SymbolCard({ symbol }: { symbol: SymbolItem }) {
 export default function SymbolTab({ symbols }: { symbols: SymbolItem[] }) {
   if (!symbols.length) {
     return (
-      <div className="text-center py-12 text-gray-400">
-        <div className="text-4xl mb-3">🔮</div>
+      <div className="text-center py-12" style={{ color: "var(--text-muted)" }}>
         <p className="text-sm">심볼 정보가 없어요</p>
       </div>
     )

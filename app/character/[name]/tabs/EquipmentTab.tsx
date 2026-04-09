@@ -80,7 +80,7 @@ function Tooltip({ item }: { item: EquipmentItem }) {
         {sf > 0 && <span className="text-yellow-400 mr-1">{"★".repeat(Math.min(sf, 5))}{sf > 5 ? ` ${sf}성` : ""}</span>}
         {item.item_name}
       </p>
-      <p className="text-gray-400 text-[11px] mb-2">{item.item_equipment_slot}</p>
+      <p className="text-[var(--text-muted)] text-[11px] mb-2">{item.item_equipment_slot}</p>
 
       {/* 총 옵션 */}
       {totalStats.length > 0 && (
@@ -175,7 +175,7 @@ function SlotCell({ item, col }: { item: EquipmentItem | undefined; col: number 
               )}
               {item.item_name}
             </p>
-            <p className="text-gray-400 text-[11px] mb-2">{item.item_equipment_slot}</p>
+            <p className="text-[var(--text-muted)] text-[11px] mb-2">{item.item_equipment_slot}</p>
 
             {/* 총 옵션 */}
             {(() => {
@@ -234,8 +234,7 @@ function SlotCell({ item, col }: { item: EquipmentItem | undefined; col: number 
 export default function EquipmentTab({ items }: { items: EquipmentItem[] }) {
   if (!items.length) {
     return (
-      <div className="text-center py-12 text-gray-400">
-        <div className="text-4xl mb-3">🗡️</div>
+      <div className="text-center py-12" style={{ color: "var(--text-muted)" }}>
         <p className="text-sm">장비 정보를 불러올 수 없어요</p>
       </div>
     )

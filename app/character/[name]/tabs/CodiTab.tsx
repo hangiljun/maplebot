@@ -20,7 +20,7 @@ function CashItemCard({ item }: { item: CashItem }) {
         <p className="text-sm font-bold text-white truncate">{item.cash_item_name}</p>
         {item.cash_item_label && (
           <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-            style={{ background: "rgba(255,215,0,0.15)", color: "var(--accent)" }}>
+            style={{ background: "rgba(96,165,250,0.15)", color: "var(--blue-light)" }}>
             {item.cash_item_label}
           </span>
         )}
@@ -34,8 +34,7 @@ export default function CodiTab({ codi }: { codi: CodiInfo | null }) {
 
   if (!codi) {
     return (
-      <div className="text-center py-12" style={{ color: "var(--text-2)" }}>
-        <div className="text-4xl mb-3">👗</div>
+      <div className="text-center py-12" style={{ color: "var(--text-muted)" }}>
         <p className="text-sm">코디 정보가 없어요</p>
       </div>
     )
@@ -67,8 +66,8 @@ export default function CodiTab({ codi }: { codi: CodiInfo | null }) {
           <button key={i} onClick={() => setPreset(i)}
             className="flex-1 py-2 text-sm font-semibold rounded-xl transition-all"
             style={{
-              background: preset === i ? "#ec4899" : "var(--bg-surface)",
-              color: preset === i ? "#fff" : "var(--text-2)",
+              background: preset === i ? "var(--blue)" : "var(--bg-surface)",
+              color: preset === i ? "#fff" : "var(--text-sub)",
               border: "1px solid var(--border)",
             }}>
             {label}
@@ -82,7 +81,7 @@ export default function CodiTab({ codi }: { codi: CodiInfo | null }) {
           {current.map((item, i) => <CashItemCard key={i} item={item} />)}
         </div>
       ) : (
-        <div className="text-center py-8 text-sm" style={{ color: "var(--text-2)" }}>
+        <div className="text-center py-8 text-sm" style={{ color: "var(--text-muted)" }}>
           이 프리셋은 비어있어요
         </div>
       )}

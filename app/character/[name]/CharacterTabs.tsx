@@ -52,8 +52,8 @@ export default function CharacterTabs({ data }: { data: CharacterData }) {
           <button key={t.key} onClick={() => setTab(t.key)}
             className="flex-1 py-3.5 text-[13px] font-semibold whitespace-nowrap transition-all"
             style={{
-              color: tab === t.key ? "var(--pink)" : "var(--text-muted)",
-              borderBottom: tab === t.key ? "2px solid var(--pink)" : "2px solid transparent",
+              color: tab === t.key ? "var(--blue-light)" : "var(--text-muted)",
+              borderBottom: tab === t.key ? "2px solid var(--blue-light)" : "2px solid transparent",
               background: tab === t.key ? "rgba(245,141,163,0.05)" : "transparent",
             }}>
             {t.label}
@@ -67,9 +67,9 @@ export default function CharacterTabs({ data }: { data: CharacterData }) {
           <div className="space-y-5">
             {combatPower?.stat_value && (
               <div className="glass rounded-xl px-5 py-4 flex items-center justify-between"
-                style={{ border: "1px solid rgba(255,215,0,0.2)" }}>
-                <span className="text-sm font-bold text-white">⚔️ 전투력</span>
-                <span className="text-xl font-extrabold" style={{ color: "var(--gold)" }}>
+                style={{ border: "1px solid rgba(59,130,246,0.25)" }}>
+                <span className="text-sm font-bold text-white">전투력</span>
+                <span className="text-xl font-extrabold" style={{ color: "var(--blue-light)" }}>
                   {Number(combatPower.stat_value).toLocaleString()}
                 </span>
               </div>

@@ -5,7 +5,7 @@ interface HistoryPoint { date: string; value: number }
 interface CharacterHistory { expHistory: HistoryPoint[]; levelHistory: HistoryPoint[] }
 
 function BarChart({ data }: { data: HistoryPoint[] }) {
-  if (!data.length) return <p className="text-xs text-gray-400 text-center py-8">데이터 없음</p>
+  if (!data.length) return <p className="text-xs text-center py-8" style={{ color: "var(--text-muted)" }}>데이터 없음</p>
   const max = Math.max(...data.map(d => d.value))
   const min = Math.min(...data.map(d => d.value))
 
@@ -15,9 +15,9 @@ function BarChart({ data }: { data: HistoryPoint[] }) {
         const pct = max === min ? 60 : ((point.value - min) / (max - min)) * 70 + 20
         return (
           <div key={i} className="flex-1 flex flex-col items-center gap-1">
-            <span className="text-[9px] text-gray-500 leading-none">{point.value.toFixed(3)}%</span>
-            <div className="w-full rounded-t-sm bg-green-300" style={{ height: `${pct}px` }} />
-            <span className="text-[8px] text-gray-400 whitespace-nowrap">{point.date}</span>
+            <span className="text-[9px] leading-none" style={{ color: "var(--text-muted)" }}>{point.value.toFixed(3)}%</span>
+            <div className="w-full rounded-t-sm" style={{ height: `${pct}px`, background: "var(--blue)" }} />
+            <span className="text-[8px] whitespace-nowrap" style={{ color: "var(--text-muted)" }}>{point.date}</span>
           </div>
         )
       })}
@@ -26,7 +26,7 @@ function BarChart({ data }: { data: HistoryPoint[] }) {
 }
 
 function LineChart({ data }: { data: HistoryPoint[] }) {
-  if (data.length < 2) return <p className="text-xs text-gray-400 text-center py-8">데이터 없음</p>
+  if (data.length < 2) return <p className="text-xs text-center py-8" style={{ color: "var(--text-muted)" }}>데이터 없음</p>
 
   const W = 400; const H = 100; const pX = 24; const pY = 18
   const iW = W - pX * 2; const iH = H - pY * 2
@@ -45,13 +45,13 @@ function LineChart({ data }: { data: HistoryPoint[] }) {
 
   return (
     <svg viewBox={`0 0 ${W} ${H + 28}`} className="w-full mt-1">
-      <path d={fill} fill="#86efac" fillOpacity="0.25" />
-      <path d={line} fill="none" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d={fill} fill="#3b82f6" fillOpacity="0.15" />
+      <path d={line} fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       {pts.map((p, i) => (
         <g key={i}>
-          <circle cx={p.x} cy={p.y} r="3.5" fill="white" stroke="#22c55e" strokeWidth="1.5" />
-          <text x={p.x} y={p.y - 7} textAnchor="middle" fontSize="9" fill="#374151" fontWeight="600">{p.value}</text>
-          <text x={p.x} y={H + 24} textAnchor="middle" fontSize="8" fill="#9ca3af">{p.date}</text>
+          <circle cx={p.x} cy={p.y} r="3.5" fill="#060c1a" stroke="#60a5fa" strokeWidth="1.5" />
+          <text x={p.x} y={p.y - 7} textAnchor="middle" fontSize="9" fill="rgba(255,255,255,0.6)" fontWeight="600">{p.value}</text>
+          <text x={p.x} y={H + 24} textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.3)">{p.date}</text>
         </g>
       ))}
     </svg>
@@ -60,10 +60,10 @@ function LineChart({ data }: { data: HistoryPoint[] }) {
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-2xl border border-[#E5E8EB] px-5 py-4">
+    <div className="glass rounded-2xl px-5 py-4">
       <div className="flex justify-between items-center mb-2">
-        <h3 className="text-sm font-bold text-[#191F28]">{title}</h3>
-        <span className="text-[10px] text-gray-300 font-medium">maplebot.co.kr</span>
+        <h3 className="text-sm font-bold text-white">{title}</h3>
+        <span className="text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>maplebot.co.kr</span>
       </div>
       {children}
     </div>
@@ -85,7 +85,7 @@ export default function HistoryCharts({ name }: { name: string }) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {[1, 2].map(i => (
-          <div key={i} className="bg-white rounded-2xl border border-[#E5E8EB] p-5 h-44 animate-pulse" />
+          <div key={i} className="glass rounded-2xl p-5 h-44 animate-pulse" />
         ))}
       </div>
     )
