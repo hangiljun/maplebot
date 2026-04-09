@@ -1,6 +1,7 @@
 "use client"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Search, ChevronRight, TrendingUp, Shield, Gem, Star } from "lucide-react"
 
 const QUICK_SEARCHES = ["아크메이지", "팔라딘", "나이트로드", "바이퍼", "윈드브레이커", "메르세데스", "비숍", "듀얼블레이드"]
@@ -212,8 +213,6 @@ export default function HomePage() {
 }
 
 // ── 랭킹 테이블 컴포넌트 ──────────────────────────────────────
-import Link from "next/link"
-
 const MOCK_RANKS = [
   { rank: 1,  name: "조회 준비 중", class: "-",      level: "-",   world: "-" },
   { rank: 2,  name: "조회 준비 중", class: "-",      level: "-",   world: "-" },
