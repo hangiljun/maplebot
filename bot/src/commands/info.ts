@@ -66,6 +66,23 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 }
 
+const POTENTIAL_COLORS: Record<string, number> = {
+  "레전드리": 0xFF8C00,
+  "유니크":   0xEAB308,
+  "에픽":     0xA855F7,
+  "레어":     0x3B82F6,
+}
+
+const SLOT_ORDER = [
+  "무기", "보조무기", "엠블렘",
+  "모자", "얼굴장식", "눈장식", "귀고리",
+  "상의", "하의", "전체갑옷", "장갑", "신발", "망토",
+  "어깨장식", "벨트",
+  "반지1", "반지2", "반지3", "반지4",
+  "펜던트", "펜던트2",
+  "포켓 아이템", "훈장", "뱃지", "안드로이드",
+]
+
 export async function handleEquipButton(interaction: ButtonInteraction, charName: string) {
   await interaction.deferReply({ ephemeral: false })
 
@@ -77,51 +94,54 @@ export async function handleEquipButton(interaction: ButtonInteraction, charName
       return
     }
 
-    // 슬롯 순서
-    const SLOT_ORDER = [
-      "모자", "얼굴장식", "눈장식", "귀고리",
-      "상의", "하의", "전체갑옷", "신발", "장갑", "망토",
-      "무기", "보조무기", "엠블렘",
-      "벨트", "어깨장식",
-      "반지1", "반지2", "반지3", "반지4",
-      "펜던트", "펜던트2",
-      "포켓 아이템", "훈장", "뱃지", "안드로이드",
-    ]
-
     const itemMap = new Map(items.map((i) => [i.slot, i]))
 
-    const lines: string[] = []
-    for (const slot of SLOT_ORDER) {
-      const item = itemMap.get(slot)
-      if (!item) continue
-      const star = item.starforce > 0 ? `✦${item.starforce} ` : ""
-      const pot  = POTENTIAL_EMOJI[item.potential] ?? ""
-      lines.push(`**${slot}** ${star}${pot}\n└ ${item.name}`)
-    }
+    // 슬롯 순서대로 정렬, 없는 슬롯은 뒤에 추가
+    const ordered = [
+      ...SLOT_ORDER.map((s) => itemMap.get(s)).filter(Boolean),
+      ...items.filter((i) => !SLOT_ORDER.includes(i.slot)),
+    ] as typeof items
 
-    // 슬롯 순서에 없는 기타 아이템 추가
-    for (const item of items) {
-      if (!SLOT_ORDER.includes(item.slot)) {
-        const star = item.starforce > 0 ? `✦${item.starforce} ` : ""
-        const pot  = POTENTIAL_EMOJI[item.potential] ?? ""
-        lines.push(`**${item.slot}** ${star}${pot}\n└ ${item.name}`)
+    // Discord 최대 10개 embed 제한
+    const visible = ordered.slice(0, 10)
+
+    const embeds = visible.map((item) => {
+      const sf    = item.starforce > 0 ? `✦${item.starforce} ` : ""
+      const color = POTENTIAL_COLORS[item.potential] ?? 0x4b5563
+
+      let desc = `**${item.slot}**`
+      if (item.potential) {
+        desc += `\n${POTENTIAL_EMOJI[item.potential] ?? ""} **${item.potential}**`
+        if (item.potentials.length > 0) {
+          desc += "\n" + item.potentials.join("\n")
+        }
       }
-    }
+      if (item.additionalPotential && item.additionalPotentials.length > 0) {
+        desc += `\n\n${POTENTIAL_EMOJI[item.additionalPotential] ?? ""} **추가 잠재**`
+        desc += "\n" + item.additionalPotentials.join("\n")
+      }
 
-    // 25줄씩 나눠서 embed 구성
-    const chunks: string[][] = []
-    for (let i = 0; i < lines.length; i += 10) {
-      chunks.push(lines.slice(i, i + 10))
-    }
+      const embed = new EmbedBuilder()
+        .setColor(color)
+        .setTitle(`${sf}${item.name}`)
+        .setDescription(desc)
 
-    const embeds = chunks.map((chunk, idx) =>
-      new EmbedBuilder()
-        .setColor(0x3182f6)
-        .setTitle(idx === 0 ? `🛡️ ${charName}의 장비` : "\u200b")
-        .setDescription(chunk.join("\n\n"))
-    )
+      if (item.icon) embed.setThumbnail(item.icon)
 
-    await interaction.editReply({ embeds })
+      return embed
+    })
+
+    // 첫 embed에만 제목 추가 (10개 초과 시 안내)
+    const headerEmbed = new EmbedBuilder()
+      .setColor(0x3182f6)
+      .setTitle(`🛡️ ${charName}의 장비`)
+      .setDescription(
+        ordered.length > 10
+          ? `총 ${ordered.length}개 장비 중 상위 10개 표시\n나머지는 [maplebot.co.kr](https://maplebot.co.kr/character/${encodeURIComponent(charName)}) 에서 확인하세요.`
+          : `총 ${ordered.length}개 장비`
+      )
+
+    await interaction.editReply({ embeds: [headerEmbed, ...embeds] })
   } catch (err) {
     console.error(err)
     await interaction.editReply("❌ 장비 정보 조회 중 오류가 발생했어요.")

@@ -31,6 +31,9 @@ export interface EquipItem {
   name: string
   starforce: number
   potential: string
+  additionalPotential: string
+  potentials: string[]
+  additionalPotentials: string[]
   icon: string
 }
 
@@ -43,11 +46,22 @@ export async function fetchEquipment(name: string): Promise<EquipItem[] | null> 
   if (!data?.item_equipment) return null
 
   return data.item_equipment.map((item: any) => ({
-    slot:      item.item_equipment_slot ?? "",
-    name:      item.item_name ?? "",
-    starforce: Number(item.starforce ?? 0),
-    potential: item.potential_option_grade ?? "",
-    icon:      item.item_icon ?? "",
+    slot:                item.item_equipment_slot ?? "",
+    name:                item.item_name ?? "",
+    starforce:           Number(item.starforce ?? 0),
+    potential:           item.potential_option_grade ?? "",
+    additionalPotential: item.additional_potential_option_grade ?? "",
+    potentials: [
+      item.potential_option_1,
+      item.potential_option_2,
+      item.potential_option_3,
+    ].filter(Boolean) as string[],
+    additionalPotentials: [
+      item.additional_potential_option_1,
+      item.additional_potential_option_2,
+      item.additional_potential_option_3,
+    ].filter(Boolean) as string[],
+    icon: item.item_icon ?? "",
   }))
 }
 
