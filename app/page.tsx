@@ -2,109 +2,121 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Search, ChevronRight, BarChart2, Trophy, Bot } from "lucide-react"
+import { Search, ChevronRight } from "lucide-react"
 
-const QUICK_SEARCHES = ["아크메이지", "팔라딘", "나이트로드", "바이퍼", "윈드브레이커", "메르세데스", "비숍", "듀얼블레이드"]
-
-const WORLDS = ["전체", "스카니아", "베라", "리부트", "루나", "엘리시움", "크로아", "아케인"]
+const QUICK = ["아크메이지", "팔라딘", "나이트로드", "바이퍼", "윈드브레이커", "비숍"]
 
 const FEATURES = [
-  { icon: <BarChart2 size={20} />, label: "캐릭터 조회", desc: "스탯·장비·유니온·심볼·헥사", href: "/character", color: "#5cb85c" },
-  { icon: <Trophy size={20} />,    label: "랭킹",       desc: "서버별 레벨 순위 확인",      href: "/ranking",   color: "#f59e0b" },
-  { icon: <Bot size={20} />,       label: "디스코드 봇", desc: "/정보 명령어로 바로 조회",  href: "/bot",       color: "#7289da" },
+  { emoji: "🛡️", label: "장비 조회",   desc: "잠재능력·스타포스·세트효과",  href: "/character" },
+  { emoji: "📊", label: "스탯 분석",   desc: "전투력·능력치·어빌리티",      href: "/character" },
+  { emoji: "🏰", label: "유니온",      desc: "유니온 등급·아티팩트 현황",   href: "/character" },
+  { emoji: "💎", label: "헥사 매트릭스", desc: "헥사 코어·스탯 현황",       href: "/character" },
+  { emoji: "🔮", label: "심볼",        desc: "아케인·사크레드 심볼",        href: "/character" },
+  { emoji: "🤖", label: "디스코드 봇", desc: "/정보 명령어로 바로 조회",    href: "/bot"       },
 ]
 
 export default function HomePage() {
   const [query, setQuery] = useState("")
-  const [world, setWorld] = useState("전체")
   const router = useRouter()
 
-  const handleSearch = (value?: string) => {
-    const trimmed = (value ?? query).trim()
-    if (!trimmed) return
-    router.push(`/character/${encodeURIComponent(trimmed)}`)
+  const go = (v?: string) => {
+    const t = (v ?? query).trim()
+    if (!t) return
+    router.push(`/character/${encodeURIComponent(t)}`)
   }
 
   return (
-    <div className="min-h-screen" style={{ background: "#0d0f18" }}>
+    <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
 
-      {/* 히어로 */}
-      <div className="relative overflow-hidden"
-        style={{
-          background: "linear-gradient(180deg, #1a0e2e 0%, #0f1424 50%, #0d0f18 100%)",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
-        }}>
+      {/* ── 히어로 ── */}
+      <section className="relative flex flex-col items-center justify-center text-center px-4 pt-36 pb-24 overflow-hidden">
+
+        {/* 배경 글로우 */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full opacity-20"
-            style={{ background: "radial-gradient(ellipse, #7c3aed 0%, transparent 70%)", filter: "blur(40px)" }} />
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] rounded-full opacity-25"
+            style={{ background: "radial-gradient(ellipse, #6d1b3a 0%, transparent 70%)", filter: "blur(60px)" }} />
+          <div className="absolute top-1/3 left-1/3 w-64 h-64 rounded-full opacity-15"
+            style={{ background: "radial-gradient(ellipse, #f58da3 0%, transparent 70%)", filter: "blur(50px)" }} />
+          <div className="absolute top-1/3 right-1/3 w-64 h-64 rounded-full opacity-10"
+            style={{ background: "radial-gradient(ellipse, #9b59b6 0%, transparent 70%)", filter: "blur(50px)" }} />
         </div>
 
-        <div className="relative max-w-3xl mx-auto px-4 py-20 flex flex-col items-center text-center">
-          <div className="text-5xl mb-3 drop-shadow-lg">🍁</div>
-          <h1 className="text-3xl font-black text-white mb-1 tracking-tight">메이플봇</h1>
-          <p className="text-sm mb-8" style={{ color: "rgba(255,255,255,0.4)" }}>
-            메이플스토리 캐릭터 정보를 빠르게 조회하세요
+        {/* 타이틀 */}
+        <div className="relative mb-10">
+          <p className="text-sm font-medium mb-3 tracking-widest uppercase" style={{ color: "var(--pink)" }}>
+            MapleStory Character Lookup
           </p>
+          <h1 className="gradient-text text-5xl md:text-6xl font-bold mb-4 leading-tight"
+            style={{ fontFamily: "GmarketSans, sans-serif" }}>
+            메이플봇
+          </h1>
+          <p className="text-base" style={{ color: "var(--text-sub)" }}>
+            메이플스토리 캐릭터 정보를 한눈에 확인하세요
+          </p>
+        </div>
 
-          {/* 검색창 */}
-          <div className="w-full max-w-xl">
-            <div className="flex items-center rounded-xl overflow-hidden shadow-2xl"
-              style={{ background: "#fff", border: "2px solid rgba(255,255,255,0.1)" }}>
-              <select value={world} onChange={(e) => setWorld(e.target.value)}
-                className="shrink-0 h-12 pl-3 pr-2 text-[13px] font-medium focus:outline-none border-r"
-                style={{ background: "#f3f4f6", color: "#374151", borderColor: "#e5e7eb", minWidth: "80px" }}>
-                {WORLDS.map(w => <option key={w}>{w}</option>)}
-              </select>
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                placeholder="캐릭터 닉네임을 입력하세요"
-                className="flex-1 h-12 px-4 text-[14px] focus:outline-none"
-                style={{ color: "#111", background: "#fff" }}
-                autoFocus
-              />
-              <button onClick={() => handleSearch()}
-                className="h-12 px-5 font-bold text-sm text-white shrink-0 flex items-center gap-1.5 transition-all hover:brightness-110"
-                style={{ background: "#5cb85c" }}>
-                <Search size={15} /> 검색
+        {/* 검색창 */}
+        <div className="relative w-full max-w-lg">
+          <div className="glass flex items-center rounded-2xl overflow-hidden shadow-2xl"
+            style={{ borderRadius: "16px" }}>
+            <Search size={17} className="ml-4 shrink-0" style={{ color: "var(--text-muted)" }} />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && go()}
+              placeholder="캐릭터 닉네임을 입력하세요"
+              autoFocus
+              className="flex-1 px-3 py-4 bg-transparent focus:outline-none text-[15px]"
+              style={{ color: "#fff" }}
+            />
+            <button onClick={() => go()}
+              className="m-2 px-5 py-2.5 rounded-xl font-bold text-sm text-white transition-all hover:opacity-90 active:scale-95"
+              style={{ background: "linear-gradient(135deg, #d4607e, #f58da3)" }}>
+              검색
+            </button>
+          </div>
+
+          {/* 빠른 검색 */}
+          <div className="flex flex-wrap gap-2 mt-4 justify-center">
+            {QUICK.map((name) => (
+              <button key={name} onClick={() => go(name)}
+                className="text-xs px-3 py-1.5 rounded-full transition-all hover:scale-105"
+                style={{ background: "rgba(245,141,163,0.1)", border: "1px solid rgba(245,141,163,0.2)", color: "var(--pink-soft)" }}>
+                {name}
               </button>
-            </div>
-
-            {/* 빠른 검색 */}
-            <div className="flex flex-wrap gap-1.5 mt-3 justify-center">
-              {QUICK_SEARCHES.map((name) => (
-                <button key={name} onClick={() => handleSearch(name)}
-                  className="text-[12px] px-3 py-1 rounded-full transition-all hover:bg-white/10"
-                  style={{ color: "rgba(255,255,255,0.4)", border: "1px solid rgba(255,255,255,0.1)" }}>
-                  {name}
-                </button>
-              ))}
-            </div>
+            ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* 기능 카드 */}
-      <div className="max-w-3xl mx-auto px-4 py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* ── 기능 카드 ── */}
+      <section className="max-w-5xl mx-auto px-4 pb-20">
+        <h2 className="text-center text-sm font-semibold tracking-widest uppercase mb-8"
+          style={{ color: "var(--text-muted)" }}>
+          Features
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {FEATURES.map((f) => (
-            <Link key={f.href} href={f.href}
-              className="rounded-xl p-5 flex items-start gap-4 transition-all hover:brightness-110 hover:-translate-y-0.5"
-              style={{ background: "#1e2028", border: "1px solid rgba(255,255,255,0.07)" }}>
-              <div className="rounded-xl p-2.5 shrink-0" style={{ background: `${f.color}18`, color: f.color }}>
-                {f.icon}
-              </div>
+            <Link key={f.label} href={f.href}
+              className="glass group rounded-2xl p-5 flex flex-col gap-3 transition-all hover:scale-[1.02] hover:border-pink-400/30"
+              style={{ borderRadius: "24px" }}>
+              <span className="text-2xl">{f.emoji}</span>
               <div>
-                <p className="text-sm font-bold text-white mb-0.5">{f.label}</p>
-                <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.4)" }}>{f.desc}</p>
+                <p className="font-bold text-sm text-white mb-1">{f.label}</p>
+                <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>{f.desc}</p>
               </div>
-              <ChevronRight size={14} className="ml-auto shrink-0 mt-1" style={{ color: "rgba(255,255,255,0.2)" }} />
+              <ChevronRight size={14} className="mt-auto self-end opacity-30 group-hover:opacity-70 transition-opacity"
+                style={{ color: "var(--pink)" }} />
             </Link>
           ))}
         </div>
-      </div>
+      </section>
+
+      {/* ── 푸터 ── */}
+      <footer className="text-center py-8" style={{ borderTop: "1px solid rgba(255,255,255,0.05)", color: "var(--text-muted)" }}>
+        <p className="text-xs">© 2025 메이플봇 · Powered by Nexon OpenAPI</p>
+      </footer>
 
     </div>
   )
