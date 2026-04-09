@@ -193,9 +193,9 @@ export async function fetchHistory(name: string): Promise<CharacterHistory | nul
   // 경험치: 어제~7일 전 (1~7)
   const expDates = Array.from({ length: 7 }, (_, i) => kstDateString(i + 1))
 
-  // 레벨: 최근 24개월 (매월 1일) + 어제 날짜 추가
+  // 레벨: 최근 8개월 (매월 1일) + 어제 날짜 추가 (Vercel 10s 제한 고려)
   const levelDates: string[] = []
-  for (let i = 23; i >= 0; i--) {
+  for (let i = 7; i >= 0; i--) {
     const d = new Date(Date.now() + 9 * 60 * 60 * 1000)
     d.setUTCMonth(d.getUTCMonth() - i, 1)
     levelDates.push(d.toISOString().split("T")[0])
@@ -203,6 +203,7 @@ export async function fetchHistory(name: string): Promise<CharacterHistory | nul
   const yesterday = kstDateString(1)
   if (!levelDates.includes(yesterday)) levelDates.push(yesterday)
 
+  // 경험치/레벨/오늘 동시 조회
   const [expResults, levelResults, todayResult] = await Promise.all([
     Promise.all(expDates.map(date =>
       nexonFetch(`/maplestory/v1/character/basic?ocid=${ocid}&date=${date}`)
@@ -277,16 +278,23 @@ export async function fetchCharacter(name: string): Promise<CharacterData | null
 
   if (!basicR) return null
 
-  // 2묶음: 어빌리티 + 유니온 + 심볼 + 헥사
+  // 2묶음: 어빌리티 + 유니온 + 심볼
   await new Promise((r) => setTimeout(r, 200))
 
-  const [abilityR, unionR, symbolR, hexaCoreR, hexaStatR, codiR] = await Promise.all([
+  const [abilityR, unionR, symbolR] = await Promise.all([
     nexonFetch(`/maplestory/v1/character/ability?${q}`),
     nexonFetch(`/maplestory/v1/user/union?${q}`),
     nexonFetch(`/maplestory/v1/character/symbol-equipment?${q}`),
+  ])
+
+  // 3묶음: 헥사 + 코디 + 뷰티
+  await new Promise((r) => setTimeout(r, 200))
+
+  const [hexaCoreR, hexaStatR, codiR, beautyR] = await Promise.all([
     nexonFetch(`/maplestory/v1/character/hexamatrix?${q}`),
     nexonFetch(`/maplestory/v1/character/hexamatrix-stat?${q}`),
     nexonFetch(`/maplestory/v1/character/cashitem-equipment?${q}`),
+    nexonFetch(`/maplestory/v1/character/beauty-equipment?${q}`),
   ])
 
   return {
@@ -340,9 +348,9 @@ export async function fetchCharacter(name: string): Promise<CharacterData | null
     })),
     codi: codiR ? {
       gender: codiR.character_gender ?? "",
-      hair:   codiR.character_look?.character_hair?.hair_name ?? "",
-      face:   codiR.character_look?.character_face?.face_name ?? "",
-      skin:   codiR.character_look?.character_skin_name ?? "",
+      hair:   beautyR?.character_hair?.hair_name ?? "",
+      face:   beautyR?.character_face?.face_name ?? "",
+      skin:   beautyR?.character_skin?.skin_name ?? "",
       preset1: (codiR.character_cashitem_equipment_preset_1 ?? []).map((c: CashItem) => ({
         cash_item_equipment_part: c.cash_item_equipment_part,
         cash_item_equipment_slot: c.cash_item_equipment_slot,
