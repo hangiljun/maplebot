@@ -6,6 +6,7 @@ import {
   ButtonStyle,
   ActionRowBuilder,
   ButtonInteraction,
+  AttachmentBuilder,
 } from "discord.js"
 import { fetchCharacterSummary, fetchEquipment } from "../maple"
 
@@ -44,9 +45,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     })
     const cardUrl = `https://maplebot.co.kr/api/card/${encodeURIComponent(char.name)}?${cardParams}`
 
+    const imageRes = await fetch(cardUrl)
+    const imageBuffer = Buffer.from(await imageRes.arrayBuffer())
+    const attachment = new AttachmentBuilder(imageBuffer, { name: "card.png" })
+
     const embed = new EmbedBuilder()
       .setColor(0xf59e0b)
-      .setImage(cardUrl)
+      .setImage("attachment://card.png")
 
     const button = new ButtonBuilder()
       .setCustomId(`equip:${char.name}`)
@@ -55,7 +60,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(button)
 
-    await interaction.editReply({ embeds: [embed], components: [row] })
+    await interaction.editReply({ embeds: [embed], files: [attachment], components: [row] })
   } catch (err) {
     console.error(err)
     await interaction.editReply("❌ 캐릭터 정보 조회 중 오류가 발생했어요.")
