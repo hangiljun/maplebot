@@ -31,6 +31,8 @@ export interface CharacterSummary {
   popularity: number
   combatPower: string
   dateCreate: string
+  unionLevel: number | null
+  unionGrade: string | null
 }
 
 export interface EquipItem {
@@ -99,11 +101,12 @@ export async function fetchCharacterSummary(name: string): Promise<CharacterSumm
 
   const q = `ocid=${ocid}`
 
-  // 기본 정보 + 인기도 + 스탯 병렬 조회
-  const [basic, popularityData, statData] = await Promise.all([
+  // 기본 정보 + 인기도 + 스탯 + 유니온 병렬 조회
+  const [basic, popularityData, statData, unionData] = await Promise.all([
     nexonFetch(`/maplestory/v1/character/basic?${q}`),
     nexonFetch(`/maplestory/v1/character/popularity?${q}`),
     nexonFetch(`/maplestory/v1/character/stat?${q}`),
+    nexonFetch(`/maplestory/v1/user/union?ocid=${ocid}`),
   ])
 
   if (!basic) return null
@@ -123,5 +126,7 @@ export async function fetchCharacterSummary(name: string): Promise<CharacterSumm
     popularity:     popularityData?.popularity ?? 0,
     combatPower,
     dateCreate:     basic.character_date_create ?? "",
+    unionLevel:     unionData?.union_level ?? null,
+    unionGrade:     unionData?.union_grade ?? null,
   }
 }

@@ -47,6 +47,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
           `• 길드 : ${char.guild || "없음"}`,
           `• 인기도 : ${char.popularity.toLocaleString()}`,
           `• 전투력 : ${cp}`,
+          char.unionGrade && char.unionLevel
+            ? `• 유니온 : ${char.unionGrade} (Lv.${char.unionLevel.toLocaleString()})`
+            : `• 유니온 : 정보 없음`,
         ].join("\n")
       )
 
