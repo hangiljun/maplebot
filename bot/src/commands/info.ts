@@ -19,12 +19,6 @@ export const data = new SlashCommandBuilder()
       .setRequired(true)
   )
 
-const POTENTIAL_EMOJI: Record<string, string> = {
-  "레전드리": "🟡",
-  "유니크":   "🟣",
-  "에픽":     "🟣",
-  "레어":     "🔵",
-}
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   const name = interaction.options.getString("캐릭터명", true).trim()
@@ -106,25 +100,25 @@ export async function handleEquipButton(interaction: ButtonInteraction, charName
     const visible = ordered.slice(0, 10)
 
     const embeds = visible.map((item) => {
-      const sf    = item.starforce > 0 ? `✦${item.starforce} ` : ""
+      const sf    = item.starforce > 0 ? `★${item.starforce}` : ""
       const color = POTENTIAL_COLORS[item.potential] ?? 0x4b5563
 
-      let desc = `**${item.slot}**`
-      if (item.potential) {
-        desc += `\n${POTENTIAL_EMOJI[item.potential] ?? ""} **${item.potential}**`
-        if (item.potentials.length > 0) {
-          desc += "\n" + item.potentials.join("\n")
-        }
+      const lines: string[] = []
+      lines.push(`\`${item.slot}\``)
+      if (sf) lines.push(`**${sf}**`)
+      lines.push("")
+
+      if (item.potentials.length > 0) {
+        lines.push(`잠재  ${item.potentials.join(" · ")}`)
       }
-      if (item.additionalPotential && item.additionalPotentials.length > 0) {
-        desc += `\n\n${POTENTIAL_EMOJI[item.additionalPotential] ?? ""} **추가 잠재**`
-        desc += "\n" + item.additionalPotentials.join("\n")
+      if (item.additionalPotentials.length > 0) {
+        lines.push(`에디  ${item.additionalPotentials.join(" · ")}`)
       }
 
       const embed = new EmbedBuilder()
         .setColor(color)
-        .setTitle(`${sf}${item.name}`)
-        .setDescription(desc)
+        .setTitle(item.name)
+        .setDescription(lines.join("\n"))
 
       if (item.icon) embed.setThumbnail(item.icon)
 
