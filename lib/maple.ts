@@ -140,13 +140,15 @@ export async function fetchHistory(name: string): Promise<CharacterHistory | nul
   // 경험치: 어제~7일 전 (1~7)
   const expDates = Array.from({ length: 7 }, (_, i) => kstDateString(i + 1))
 
-  // 레벨: 최근 24개월 (매월 1일)
+  // 레벨: 최근 24개월 (매월 1일) + 어제 날짜 추가
   const levelDates: string[] = []
   for (let i = 23; i >= 0; i--) {
     const d = new Date(Date.now() + 9 * 60 * 60 * 1000)
     d.setUTCMonth(d.getUTCMonth() - i, 1)
     levelDates.push(d.toISOString().split("T")[0])
   }
+  const yesterday = kstDateString(1)
+  if (!levelDates.includes(yesterday)) levelDates.push(yesterday)
 
   const [expResults, levelResults] = await Promise.all([
     Promise.all(expDates.map(date =>
