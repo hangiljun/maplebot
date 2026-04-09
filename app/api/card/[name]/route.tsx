@@ -3,14 +3,42 @@ import { fetchCharacter, COMBAT_POWER_STAT } from "@/lib/maple"
 
 export const runtime = "nodejs"
 
+// 폰트 캐시
 let fontCache: ArrayBuffer | null = null
-async function loadFont() {
+async function loadFont(): Promise<ArrayBuffer | null> {
   if (fontCache) return fontCache
-  const res = await fetch(
-    "https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/public/static/Pretendard-Bold.woff2"
-  )
-  fontCache = await res.arrayBuffer()
-  return fontCache
+  try {
+    // Google Fonts CSS → woff2 URL 파싱
+    const css = await fetch(
+      "https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@700;900&display=swap",
+      {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        },
+      }
+    ).then((r) => r.text())
+
+    const woff2Url = css.match(/url\((https:\/\/fonts\.gstatic\.com[^)]+)\)/)?.[1]
+    if (!woff2Url) return null
+
+    fontCache = await fetch(woff2Url).then((r) => r.arrayBuffer())
+    return fontCache
+  } catch {
+    return null
+  }
+}
+
+// 외부 이미지 → base64 data URL
+async function toDataUrl(url: string): Promise<string> {
+  try {
+    const res = await fetch(url)
+    const buf = Buffer.from(await res.arrayBuffer())
+    const mime = res.headers.get("content-type") ?? "image/png"
+    return `data:${mime};base64,${buf.toString("base64")}`
+  } catch {
+    return ""
+  }
 }
 
 function formatPower(value: string | number) {
@@ -39,12 +67,17 @@ export async function GET(
   const cp = data.stats.find((s) => s.stat_name === COMBAT_POWER_STAT)?.stat_value ?? "0"
   const unionLevel = data.union?.union_level ?? null
 
+  // 캐릭터 이미지 base64 변환 (Satori 호환)
+  const charImg = basic.character_image ? await toDataUrl(basic.character_image) : ""
+
   const rows = [
     { label: "서버",   value: basic.world_name },
     { label: "전투력", value: formatPower(cp) },
     { label: "길드",   value: basic.character_guild_name || "없음" },
     { label: "유니온", value: unionLevel !== null ? String(unionLevel) : "–" },
   ]
+
+  const fonts = font ? [{ name: "NotoSansKR", data: font, style: "normal" as const, weight: 700 as const }] : []
 
   return new ImageResponse(
     (
@@ -57,7 +90,7 @@ export async function GET(
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          fontFamily: "Pretendard",
+          fontFamily: font ? "NotoSansKR" : "sans-serif",
           overflow: "hidden",
           position: "relative",
         }}
@@ -82,15 +115,21 @@ export async function GET(
         </div>
 
         {/* 캐릭터 이미지 */}
-        <div style={{ height: 220, display: "flex", alignItems: "flex-end", justifyContent: "center", paddingTop: 24 }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={basic.character_image}
-            width={180}
-            height={180}
-            style={{ objectFit: "contain" }}
-            alt={basic.character_name}
-          />
+        <div
+          style={{
+            height: 210,
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "center",
+            paddingTop: 24,
+          }}
+        >
+          {charImg ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={charImg} width={180} height={180} style={{ objectFit: "contain" }} alt="" />
+          ) : (
+            <div style={{ fontSize: 80 }}>🍁</div>
+          )}
         </div>
 
         {/* 이름 + 레벨 */}
@@ -113,7 +152,7 @@ export async function GET(
             </span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-            <span style={{ fontSize: 52, fontWeight: 900, color: "#ef4444", lineHeight: 1 }}>
+            <span style={{ fontSize: 52, fontWeight: 900, color: "#ef4444", lineHeight: "1" }}>
               {basic.character_level}
             </span>
             <span style={{ fontSize: 10, color: "#f87171", letterSpacing: 3, fontWeight: 700 }}>
@@ -126,23 +165,27 @@ export async function GET(
         <div
           style={{
             width: "calc(100% - 56px)",
-            height: 1,
+            height: 2,
             background: "#d6b89a",
-            margin: "12px 28px",
+            margin: "12px 0",
             opacity: 0.5,
           }}
         />
 
         {/* 정보 그리드 */}
-        <div style={{ width: "100%", padding: "0 28px", display: "flex", flexDirection: "column", gap: 10 }}>
+        <div
+          style={{
+            width: "100%",
+            padding: "0 28px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 12,
+          }}
+        >
           {rows.map(({ label, value }) => (
             <div
               key={label}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
+              style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
             >
               <span style={{ fontSize: 13, color: "#92400e", fontWeight: 700, opacity: 0.7 }}>
                 {label}
@@ -158,7 +201,7 @@ export async function GET(
     {
       width: 400,
       height: 520,
-      fonts: [{ name: "Pretendard", data: font, style: "normal", weight: 700 }],
+      fonts,
     }
   )
 }
