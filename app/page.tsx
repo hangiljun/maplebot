@@ -180,23 +180,23 @@ export default function HomePage() {
             </p>
 
             {/* 검색 */}
-            <div className="flex items-center rounded-2xl overflow-hidden mb-4 max-w-lg lg:mx-0 mx-auto"
+            <form onSubmit={(e) => { e.preventDefault(); go() }}
+              className="flex items-center rounded-2xl overflow-hidden mb-4 max-w-lg lg:mx-0 mx-auto"
               style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 4px 24px rgba(0,0,0,0.3)" }}>
               <Search size={16} className="ml-4 shrink-0" style={{ color: "var(--text-muted)" }} />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && go()}
                 placeholder="캐릭터 닉네임 검색"
                 autoFocus
-                className="flex-1 px-3 py-4 bg-transparent focus:outline-none text-[15px]"
+                className="flex-1 px-3 py-4 bg-transparent focus:outline-none text-[15px] placeholder:text-white/20"
                 style={{ color: "var(--text)" }}
               />
-              <button onClick={() => go()} className="btn-primary m-2 px-5 py-2.5 text-sm">
+              <button type="submit" className="btn-primary m-2 px-5 py-2.5 text-sm">
                 조회하기
               </button>
-            </div>
+            </form>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
               <Link href={DISCORD_URL} target="_blank" className="btn-primary px-7 py-3 text-sm">
