@@ -98,13 +98,21 @@ const SLOT_ORDER = [
 ]
 
 export async function handleEquipButton(interaction: ButtonInteraction, charName: string) {
-  await interaction.deferReply({ ephemeral: false })
+  // 버튼 비활성화
+  const disabledButton = new ButtonBuilder()
+    .setCustomId(`equip:${charName}`)
+    .setLabel(`🛡️ 장비 보기 (${interaction.user.displayName})`)
+    .setStyle(ButtonStyle.Secondary)
+    .setDisabled(true)
+
+  const disabledRow = new ActionRowBuilder<ButtonBuilder>().addComponents(disabledButton)
+  await interaction.update({ components: [disabledRow] })
 
   try {
     const items = await fetchEquipment(charName)
 
     if (!items || items.length === 0) {
-      await interaction.editReply(`❌ **${charName}**의 장비 정보를 불러올 수 없어요.`)
+      await interaction.followUp(`❌ **${charName}**의 장비 정보를 불러올 수 없어요.`)
       return
     }
 
@@ -148,13 +156,13 @@ export async function handleEquipButton(interaction: ButtonInteraction, charName
     const first  = ordered.slice(0, 10)
     const second = ordered.slice(10, 20)
 
-    await interaction.editReply({ embeds: buildEmbeds(first) })
+    await interaction.followUp({ embeds: buildEmbeds(first) })
     if (second.length > 0) {
       await interaction.followUp({ embeds: buildEmbeds(second) })
     }
   } catch (err) {
     console.error(err)
-    await interaction.editReply("❌ 장비 정보 조회 중 오류가 발생했어요.")
+    await interaction.followUp("❌ 장비 정보 조회 중 오류가 발생했어요.")
   }
 }
 
