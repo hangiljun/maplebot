@@ -6,6 +6,7 @@ import AbilityTab   from "./tabs/AbilityTab"
 import UnionTab     from "./tabs/UnionTab"
 import SymbolTab    from "./tabs/SymbolTab"
 import HexaTab      from "./tabs/HexaTab"
+import CodiTab      from "./tabs/CodiTab"
 
 const TABS = [
   { key: "stat",      label: "기본 정보" },
@@ -14,6 +15,7 @@ const TABS = [
   { key: "union",     label: "유니온" },
   { key: "symbol",    label: "심볼" },
   { key: "hexa",      label: "헥사" },
+  { key: "codi",      label: "코디" },
 ]
 
 function pickStats(stats: StatItem[], keys: string[]) {
@@ -85,6 +87,7 @@ export default function CharacterTabs({ data }: { data: CharacterData }) {
         {tab === "union"     && <UnionTab union={union} basic={data.basic} />}
         {tab === "symbol"    && <SymbolTab symbols={data.symbols} />}
         {tab === "hexa"      && <HexaTab hexaCores={data.hexaCores} hexaStats={data.hexaStats} />}
+        {tab === "codi"      && <CodiTab codi={data.codi} />}
       </div>
     </div>
   )

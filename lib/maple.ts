@@ -61,6 +61,25 @@ export interface UnionInfo {
   union_artifact_point: number
 }
 
+// ── 코디 ───────────────────────────────────────────────────
+export interface CashItem {
+  cash_item_equipment_part: string
+  cash_item_equipment_slot: string
+  cash_item_name: string
+  cash_item_icon: string
+  cash_item_label: string | null
+}
+
+export interface CodiInfo {
+  gender: string
+  hair: string
+  face: string
+  skin: string
+  preset1: CashItem[]
+  preset2: CashItem[]
+  preset3: CashItem[]
+}
+
 // ── 심볼 ───────────────────────────────────────────────────
 export interface SymbolItem {
   symbol_name: string
@@ -102,6 +121,7 @@ export interface CharacterData {
   symbols: SymbolItem[]
   hexaCores: HexaCore[]
   hexaStats: HexaStat[]
+  codi: CodiInfo | null
 }
 
 // 표시할 주요 스탯
@@ -260,12 +280,13 @@ export async function fetchCharacter(name: string): Promise<CharacterData | null
   // 2묶음: 어빌리티 + 유니온 + 심볼 + 헥사
   await new Promise((r) => setTimeout(r, 200))
 
-  const [abilityR, unionR, symbolR, hexaCoreR, hexaStatR] = await Promise.all([
+  const [abilityR, unionR, symbolR, hexaCoreR, hexaStatR, codiR] = await Promise.all([
     nexonFetch(`/maplestory/v1/character/ability?${q}`),
     nexonFetch(`/maplestory/v1/user/union?${q}`),
     nexonFetch(`/maplestory/v1/character/symbol-equipment?${q}`),
     nexonFetch(`/maplestory/v1/character/hexamatrix?${q}`),
     nexonFetch(`/maplestory/v1/character/hexamatrix-stat?${q}`),
+    nexonFetch(`/maplestory/v1/character/cashitem-equipment?${q}`),
   ])
 
   return {
@@ -309,13 +330,40 @@ export async function fetchCharacter(name: string): Promise<CharacterData | null
       hexa_core_type:  h.hexa_core_type,
     })),
     hexaStats: (hexaStatR?.character_hexa_stat_core ?? []).map((s: HexaStat) => ({
-      slot_id:         s.slot_id,
-      main_stat_name:  s.main_stat_name,
-      sub_stat_name_1: s.sub_stat_name_1,
-      sub_stat_name_2: s.sub_stat_name_2,
-      main_stat_level: s.main_stat_level,
+      slot_id:          s.slot_id,
+      main_stat_name:   s.main_stat_name,
+      sub_stat_name_1:  s.sub_stat_name_1,
+      sub_stat_name_2:  s.sub_stat_name_2,
+      main_stat_level:  s.main_stat_level,
       sub_stat_level_1: s.sub_stat_level_1,
       sub_stat_level_2: s.sub_stat_level_2,
     })),
+    codi: codiR ? {
+      gender: codiR.character_gender ?? "",
+      hair:   codiR.character_look?.character_hair?.hair_name ?? "",
+      face:   codiR.character_look?.character_face?.face_name ?? "",
+      skin:   codiR.character_look?.character_skin_name ?? "",
+      preset1: (codiR.character_cashitem_equipment_preset_1 ?? []).map((c: CashItem) => ({
+        cash_item_equipment_part: c.cash_item_equipment_part,
+        cash_item_equipment_slot: c.cash_item_equipment_slot,
+        cash_item_name:           c.cash_item_name,
+        cash_item_icon:           c.cash_item_icon,
+        cash_item_label:          c.cash_item_label ?? null,
+      })),
+      preset2: (codiR.character_cashitem_equipment_preset_2 ?? []).map((c: CashItem) => ({
+        cash_item_equipment_part: c.cash_item_equipment_part,
+        cash_item_equipment_slot: c.cash_item_equipment_slot,
+        cash_item_name:           c.cash_item_name,
+        cash_item_icon:           c.cash_item_icon,
+        cash_item_label:          c.cash_item_label ?? null,
+      })),
+      preset3: (codiR.character_cashitem_equipment_preset_3 ?? []).map((c: CashItem) => ({
+        cash_item_equipment_part: c.cash_item_equipment_part,
+        cash_item_equipment_slot: c.cash_item_equipment_slot,
+        cash_item_name:           c.cash_item_name,
+        cash_item_icon:           c.cash_item_icon,
+        cash_item_label:          c.cash_item_label ?? null,
+      })),
+    } : null,
   }
 }
