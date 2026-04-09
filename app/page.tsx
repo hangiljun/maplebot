@@ -1,39 +1,10 @@
 "use client"
 import Link from "next/link"
-import { useState, useEffect, useRef } from "react"
+import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Search } from "lucide-react"
 
 const DISCORD_URL = "https://discord.com/oauth2/authorize?client_id=1491444296623325194&permissions=51200&integration_type=0&scope=bot"
-
-/* ── 카운터 ─────────────────────────────────────────────────── */
-function Counter({ target, duration = 1800 }: { target: number; duration?: number }) {
-  const [count, setCount] = useState(0)
-  const ref = useRef<HTMLSpanElement>(null)
-  const started = useRef(false)
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting && !started.current) {
-        started.current = true
-        const t0 = Date.now()
-        const tick = () => {
-          const p = Math.min((Date.now() - t0) / duration, 1)
-          const eased = 1 - Math.pow(1 - p, 3)
-          setCount(Math.floor(eased * target))
-          if (p < 1) requestAnimationFrame(tick)
-          else setCount(target)
-        }
-        requestAnimationFrame(tick)
-        obs.disconnect()
-      }
-    }, { threshold: 0.4 })
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [target, duration])
-  return <span ref={ref}>{count.toLocaleString()}</span>
-}
 
 /* ── 디스코드 목업 ─────────────────────────────────────────── */
 const CMD_DATA: Record<string, { title: string; color: string; fields: { k: string; v: string }[] }> = {
@@ -223,28 +194,6 @@ export default function HomePage() {
                 <DiscordMockup cmd="/정보" />
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── 통계 위젯 ──────────────────────────────────── */}
-      <section className="py-12">
-        <div className="section-container">
-          <div className="grid grid-cols-3 gap-px rounded-2xl overflow-hidden"
-            style={{ background: "var(--border)" }}>
-            {[
-              { label: "운영 서버 수",    value: 4281,   suffix: "+" },
-              { label: "오늘 조회 건수",  value: 12502,  suffix: "" },
-              { label: "누적 캐릭터 조회", value: 893421, suffix: "" },
-            ].map(({ label, value, suffix }) => (
-              <div key={label} className="py-8 text-center"
-                style={{ background: "var(--bg)" }}>
-                <p className="text-3xl font-black mb-1" style={{ color: "var(--blue-light)" }}>
-                  <Counter target={value} />{suffix}
-                </p>
-                <p className="text-xs" style={{ color: "var(--text-muted)" }}>{label}</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>

@@ -343,57 +343,20 @@ export async function fetchCharacter(name: string): Promise<CharacterData | null
       union_artifact_exp:   unionR.union_artifact_exp ?? 0,
       union_artifact_point: unionR.union_artifact_point ?? 0,
     } : null,
-    symbols: (symbolR?.symbol ?? []).map((s: SymbolItem) => ({
-      symbol_name:                 s.symbol_name,
-      symbol_icon:                 s.symbol_icon,
-      symbol_force:                s.symbol_force,
-      symbol_level:                s.symbol_level,
-      symbol_exp:                  s.symbol_exp,
-      symbol_exp_required:         s.symbol_exp_required,
-      symbol_item_count:           s.symbol_item_count,
-      symbol_growth_count:         s.symbol_growth_count,
-      symbol_require_growth_count: s.symbol_require_growth_count,
-    })),
-    hexaCores: (hexaCoreR?.character_hexa_core_equipment ?? []).map((h: HexaCore) => ({
-      hexa_core_name:  h.hexa_core_name,
-      hexa_core_level: h.hexa_core_level,
-      hexa_core_type:  h.hexa_core_type,
-    })),
-    hexaStats: (hexaStatR?.character_hexa_stat_core ?? []).map((s: HexaStat) => ({
-      slot_id:          s.slot_id,
-      main_stat_name:   s.main_stat_name,
-      sub_stat_name_1:  s.sub_stat_name_1,
-      sub_stat_name_2:  s.sub_stat_name_2,
-      main_stat_level:  s.main_stat_level,
-      sub_stat_level_1: s.sub_stat_level_1,
-      sub_stat_level_2: s.sub_stat_level_2,
-    })),
-    codi: codiR ? {
-      gender: codiR.character_gender ?? "",
-      hair:   beautyR?.character_hair?.hair_name ?? "",
-      face:   beautyR?.character_face?.face_name ?? "",
-      skin:   beautyR?.character_skin?.skin_name ?? "",
-      preset1: (codiR.character_cashitem_equipment_preset_1 ?? []).map((c: CashItem) => ({
-        cash_item_equipment_part: c.cash_item_equipment_part,
-        cash_item_equipment_slot: c.cash_item_equipment_slot,
-        cash_item_name:           c.cash_item_name,
-        cash_item_icon:           c.cash_item_icon,
-        cash_item_label:          c.cash_item_label ?? null,
-      })),
-      preset2: (codiR.character_cashitem_equipment_preset_2 ?? []).map((c: CashItem) => ({
-        cash_item_equipment_part: c.cash_item_equipment_part,
-        cash_item_equipment_slot: c.cash_item_equipment_slot,
-        cash_item_name:           c.cash_item_name,
-        cash_item_icon:           c.cash_item_icon,
-        cash_item_label:          c.cash_item_label ?? null,
-      })),
-      preset3: (codiR.character_cashitem_equipment_preset_3 ?? []).map((c: CashItem) => ({
-        cash_item_equipment_part: c.cash_item_equipment_part,
-        cash_item_equipment_slot: c.cash_item_equipment_slot,
-        cash_item_name:           c.cash_item_name,
-        cash_item_icon:           c.cash_item_icon,
-        cash_item_label:          c.cash_item_label ?? null,
-      })),
-    } : null,
+    symbols:   symbolR?.symbol ?? [],
+    hexaCores: (hexaCoreR?.character_hexa_core_equipment ?? []).map(({ hexa_core_name, hexa_core_level, hexa_core_type }: HexaCore) => ({ hexa_core_name, hexa_core_level, hexa_core_type })),
+    hexaStats: (hexaStatR?.character_hexa_stat_core ?? []).map(({ slot_id, main_stat_name, sub_stat_name_1, sub_stat_name_2, main_stat_level, sub_stat_level_1, sub_stat_level_2 }: HexaStat) => ({ slot_id, main_stat_name, sub_stat_name_1, sub_stat_name_2, main_stat_level, sub_stat_level_1, sub_stat_level_2 })),
+    codi: codiR ? (() => {
+      const mapPreset = (items: CashItem[]) => (items ?? []).map(({ cash_item_equipment_part, cash_item_equipment_slot, cash_item_name, cash_item_icon, cash_item_label }: CashItem) => ({ cash_item_equipment_part, cash_item_equipment_slot, cash_item_name, cash_item_icon, cash_item_label: cash_item_label ?? null }))
+      return {
+        gender: codiR.character_gender ?? "",
+        hair:   beautyR?.character_hair?.hair_name ?? "",
+        face:   beautyR?.character_face?.face_name ?? "",
+        skin:   beautyR?.character_skin?.skin_name ?? "",
+        preset1: mapPreset(codiR.character_cashitem_equipment_preset_1),
+        preset2: mapPreset(codiR.character_cashitem_equipment_preset_2),
+        preset3: mapPreset(codiR.character_cashitem_equipment_preset_3),
+      }
+    })() : null,
   }
 }
