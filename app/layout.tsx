@@ -40,8 +40,8 @@ export default function RootLayout({
         />
         <script type="text/javascript" src="https://openapi.nexon.com/js/analytics.js?app_id=262525" async />
       </head>
-      <body style={{ fontFamily: "'Pretendard', sans-serif" }}
-        className="bg-[#F5F6FA] text-[#191F28] antialiased min-h-screen">
+      <body style={{ fontFamily: "'Pretendard', sans-serif", background: "var(--bg-base)", color: "var(--text-1)" }}
+        className="antialiased min-h-screen">
         <Navbar />
         <main>{children}</main>
       </body>

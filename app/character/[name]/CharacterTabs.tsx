@@ -26,12 +26,14 @@ function StatGrid({ title, items }: { title: string; items: StatItem[] }) {
   if (!items.length) return null
   return (
     <section>
-      <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{title}</h3>
+      <h3 className="text-[10px] font-bold uppercase tracking-widest mb-3"
+        style={{ color: "var(--text-muted)" }}>{title}</h3>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {items.map((item) => (
-          <div key={item.stat_name} className="bg-white rounded-xl px-4 py-3 border border-gray-100">
-            <p className="text-[11px] text-gray-400 mb-0.5 font-medium">{item.stat_name}</p>
-            <p className="text-[15px] font-bold text-[#191F28]">{item.stat_value ?? "-"}</p>
+          <div key={item.stat_name} className="rounded-xl px-4 py-3"
+            style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}>
+            <p className="text-[11px] mb-0.5 font-medium" style={{ color: "var(--text-2)" }}>{item.stat_name}</p>
+            <p className="text-[15px] font-bold text-white">{item.stat_value ?? "-"}</p>
           </div>
         ))}
       </div>
@@ -46,33 +48,33 @@ export default function CharacterTabs({ data }: { data: CharacterData }) {
   const combatPower = stats.find((s) => s.stat_name === COMBAT_POWER_STAT)
 
   return (
-    <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
+    <div className="rounded-2xl overflow-hidden" style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}>
       {/* 탭 바 */}
-      <div className="flex border-b border-gray-100 overflow-x-auto">
+      <div className="flex border-b overflow-x-auto" style={{ borderColor: "var(--border)" }}>
         {TABS.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`flex-1 py-3 text-sm font-semibold transition-colors whitespace-nowrap ${
-              tab === t.key
-                ? "text-[#3182F6] border-b-2 border-[#3182F6] bg-blue-50/50"
-                : "text-gray-400 hover:text-gray-600"
-            }`}
-          >
+            className="flex-1 py-3 text-sm font-semibold transition-colors whitespace-nowrap relative"
+            style={{
+              color: tab === t.key ? "var(--primary)" : "var(--text-2)",
+              borderBottom: tab === t.key ? "2px solid var(--primary)" : "2px solid transparent",
+              background: tab === t.key ? "rgba(92,184,92,0.05)" : "transparent",
+            }}>
             {t.label}
           </button>
         ))}
       </div>
 
       {/* 콘텐츠 */}
-      <div className="p-4">
+      <div className="p-5">
         {tab === "stat" && (
           <div className="space-y-5">
-            {/* 전투력 */}
             {combatPower?.stat_value && (
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl px-5 py-4 flex items-center justify-between">
-                <span className="text-sm font-bold text-[#191F28]">⚔️ 전투력</span>
-                <span className="text-xl font-extrabold text-[#3182F6]">
+              <div className="rounded-xl px-5 py-4 flex items-center justify-between"
+                style={{ background: "rgba(255,215,0,0.06)", border: "1px solid rgba(255,215,0,0.15)" }}>
+                <span className="text-sm font-bold text-white">⚔️ 전투력</span>
+                <span className="text-xl font-extrabold" style={{ color: "var(--accent)" }}>
                   {Number(combatPower.stat_value).toLocaleString()}
                 </span>
               </div>

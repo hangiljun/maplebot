@@ -12,18 +12,18 @@ function SymbolCard({ symbol }: { symbol: SymbolItem }) {
   const shortName = symbol.symbol_name.replace("아케인심볼 : ", "").replace("사크레드심볼 : ", "")
 
   return (
-    <div className="bg-white border border-gray-100 rounded-xl p-3 flex items-center gap-3">
+    <div className="rounded-xl p-3 flex items-center gap-3" style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}>
       {symbol.symbol_icon && (
         <Image src={symbol.symbol_icon} alt={shortName} width={40} height={40} unoptimized className="object-contain flex-shrink-0" />
       )}
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-center mb-1">
-          <span className="text-xs font-bold text-[#191F28] truncate">{shortName}</span>
+          <span className="text-xs font-bold text-white truncate">{shortName}</span>
           <span className="text-xs font-black ml-2 flex-shrink-0" style={{ color }}>
             Lv.{symbol.symbol_level}
           </span>
         </div>
-        <div className="flex justify-between text-[10px] text-gray-400 mb-1">
+        <div className="flex justify-between text-[10px] mb-1" style={{ color: "var(--text-2)" }}>
           <span>✨ {Number(symbol.symbol_force).toLocaleString()} 포스</span>
           {isMaxLevel ? (
             <span className="text-green-500 font-bold">MAX</span>
@@ -31,7 +31,7 @@ function SymbolCard({ symbol }: { symbol: SymbolItem }) {
             <span>{symbol.symbol_exp.toLocaleString()} / {symbol.symbol_exp_required.toLocaleString()}</span>
           )}
         </div>
-        <div className="w-full bg-gray-100 rounded-full h-1.5">
+        <div className="w-full rounded-full h-1.5" style={{ background: "var(--bg-card)" }}>
           <div className="h-1.5 rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: color }} />
         </div>
       </div>

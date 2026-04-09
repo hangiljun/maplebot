@@ -27,13 +27,14 @@ export default function AbilityTab({ ability }: { ability: AbilityInfo | null })
         const lineColor = POTENTIAL_COLORS[line.ability_grade] ?? "#6B7280"
         return (
           <div key={i}
-            className="bg-white border border-gray-100 rounded-xl px-4 py-3 flex items-center gap-3">
-            <span className="text-xs font-bold w-4 text-gray-400">{i + 1}</span>
+            className="rounded-xl px-4 py-3 flex items-center gap-3"
+            style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}>
+            <span className="text-xs font-bold w-4" style={{ color: "var(--text-muted)" }}>{i + 1}</span>
             <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full shrink-0"
               style={{ backgroundColor: lineColor + "22", color: lineColor }}>
               {line.ability_grade}
             </span>
-            <p className="text-sm font-medium text-[#191F28]">{line.ability_value}</p>
+            <p className="text-sm font-medium text-white">{line.ability_value}</p>
           </div>
         )
       })}

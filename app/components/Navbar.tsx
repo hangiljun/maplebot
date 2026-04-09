@@ -1,6 +1,6 @@
 "use client"
 import Link from "next/link"
-import { useState, useRef, useEffect } from "react"
+import { useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { Search, Menu, X } from "lucide-react"
 
@@ -15,9 +15,7 @@ export default function Navbar() {
   const [query, setQuery]       = useState("")
   const pathname = usePathname()
   const router   = useRouter()
-  const inputRef = useRef<HTMLInputElement>(null)
 
-  // 상세 페이지가 아닌 곳에선 검색창 숨기기
   const showSearch = pathname !== "/" && !pathname.startsWith("/bot")
 
   const handleSearch = (e: React.FormEvent) => {
@@ -26,50 +24,53 @@ export default function Navbar() {
     if (!trimmed) return
     router.push(`/character/${encodeURIComponent(trimmed)}`)
     setQuery("")
+    setMenuOpen(false)
   }
-
-  useEffect(() => { setMenuOpen(false) }, [pathname])
 
   return (
     <>
-      <nav className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3">
+      <nav className="sticky top-0 z-50 border-b"
+        style={{ background: "rgba(19,20,26,0.92)", backdropFilter: "blur(12px)", borderColor: "var(--border)" }}>
+        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-4">
 
           {/* 로고 */}
-          <Link href="/" className="flex items-center gap-1.5 shrink-0">
-            <span className="text-lg">🍁</span>
-            <span className="font-extrabold text-[#191F28] text-[15px] tracking-tight">메이플봇</span>
+          <Link href="/" className="flex items-center gap-2 shrink-0">
+            <span className="text-xl">🍁</span>
+            <span className="font-extrabold text-white text-[15px] tracking-tight">메이플봇</span>
           </Link>
 
-          {/* 인라인 검색창 (홈 제외) */}
+          {/* 인라인 검색창 */}
           {showSearch && (
-            <form onSubmit={handleSearch}
-              className="hidden md:flex items-center gap-2 flex-1 max-w-xs ml-2">
-              <div className="relative flex-1">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <form onSubmit={handleSearch} className="hidden md:flex items-center flex-1 max-w-xs ml-2">
+              <div className="relative w-full">
+                <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
                 <input
-                  ref={inputRef}
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="캐릭터 검색"
-                  className="w-full pl-8 pr-3 py-1.5 text-sm bg-[#F5F6FA] border border-gray-200 rounded-lg focus:outline-none focus:border-[#3182F6] transition-colors"
+                  className="w-full pl-8 pr-3 py-1.5 text-sm rounded-lg focus:outline-none transition-colors"
+                  style={{
+                    background: "var(--bg-surface)",
+                    border: "1px solid var(--border)",
+                    color: "var(--text-1)",
+                  }}
                 />
               </div>
             </form>
           )}
 
           {/* 데스크탑 메뉴 */}
-          <div className="hidden md:flex items-center gap-0.5 ml-auto">
+          <div className="hidden md:flex items-center gap-1 ml-auto">
             {menuItems.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
               return (
                 <Link key={item.href} href={item.href}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? "text-[#3182F6] bg-blue-50 font-semibold"
-                      : "text-gray-500 hover:text-[#191F28] hover:bg-gray-50"
-                  }`}>
+                  className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+                  style={{
+                    color: isActive ? "var(--primary)" : "var(--text-2)",
+                    background: isActive ? "rgba(92,184,92,0.1)" : "transparent",
+                  }}>
                   {item.label}
                 </Link>
               )
@@ -79,34 +80,32 @@ export default function Navbar() {
           {/* 모바일 햄버거 */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden ml-auto flex items-center justify-center w-8 h-8 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors">
+            className="md:hidden ml-auto flex items-center justify-center w-8 h-8 rounded-lg transition-colors"
+            style={{ color: "var(--text-2)" }}>
             {menuOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
         </div>
 
         {/* 모바일 메뉴 */}
         {menuOpen && (
-          <div className="md:hidden bg-white border-t border-gray-100 py-2">
-            {/* 모바일 검색 */}
+          <div className="md:hidden border-t py-2" style={{ background: "var(--bg-card)", borderColor: "var(--border)" }}>
             <form onSubmit={handleSearch} className="px-4 pb-2">
               <div className="relative">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
                 <input
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="캐릭터 검색"
-                  className="w-full pl-8 pr-3 py-2 text-sm bg-[#F5F6FA] border border-gray-200 rounded-lg focus:outline-none focus:border-[#3182F6]"
+                  className="w-full pl-8 pr-3 py-2 text-sm rounded-lg focus:outline-none"
+                  style={{ background: "var(--bg-surface)", border: "1px solid var(--border)", color: "var(--text-1)" }}
                 />
               </div>
             </form>
             {menuItems.map((item) => (
               <Link key={item.href} href={item.href}
-                className={`block px-4 py-2.5 text-sm font-medium ${
-                  pathname === item.href
-                    ? "text-[#3182F6] bg-blue-50"
-                    : "text-[#191F28] hover:bg-gray-50"
-                }`}>
+                className="block px-4 py-2.5 text-sm font-medium transition-colors"
+                style={{ color: pathname === item.href ? "var(--primary)" : "var(--text-1)" }}>
                 {item.label}
               </Link>
             ))}

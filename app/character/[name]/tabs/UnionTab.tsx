@@ -88,29 +88,32 @@ export default function UnionTab({ union, basic }: { union: UnionInfo | null; ba
 
       {/* 유니온 수치 */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-white border border-gray-100 rounded-2xl px-4 py-4 text-center">
-          <p className="text-xs text-gray-400 mb-1">유니온 레벨</p>
-          <p className="text-2xl font-extrabold text-[#191F28]">{union.union_level.toLocaleString()}</p>
-        </div>
-        <div className="bg-white border border-gray-100 rounded-2xl px-4 py-4 text-center">
-          <p className="text-xs text-gray-400 mb-1">아티팩트 레벨</p>
-          <p className="text-2xl font-extrabold text-[#191F28]">{union.union_artifact_level}</p>
-        </div>
+        {[
+          { label: "유니온 레벨", value: union.union_level.toLocaleString() },
+          { label: "아티팩트 레벨", value: String(union.union_artifact_level) },
+        ].map(({ label, value }) => (
+          <div key={label} className="rounded-2xl px-4 py-4 text-center"
+            style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}>
+            <p className="text-xs mb-1" style={{ color: "var(--text-2)" }}>{label}</p>
+            <p className="text-2xl font-extrabold text-white">{value}</p>
+          </div>
+        ))}
       </div>
 
       {/* 아티팩트 상세 */}
       {union.union_artifact_level > 0 && (
-        <div className="bg-white border border-gray-100 rounded-2xl p-4">
-          <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">유니온 아티팩트</h3>
+        <div className="rounded-2xl p-4" style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}>
+          <h3 className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: "var(--text-muted)" }}>유니온 아티팩트</h3>
           <div className="grid grid-cols-2 gap-2">
-            <div className="bg-[#F5F6FA] rounded-xl py-3 text-center">
-              <p className="text-xs text-gray-400 mb-1">경험치</p>
-              <p className="text-base font-extrabold text-[#191F28]">{union.union_artifact_exp.toLocaleString()}</p>
-            </div>
-            <div className="bg-[#F5F6FA] rounded-xl py-3 text-center">
-              <p className="text-xs text-gray-400 mb-1">포인트</p>
-              <p className="text-base font-extrabold text-[#191F28]">{union.union_artifact_point.toLocaleString()}</p>
-            </div>
+            {[
+              { label: "경험치", value: union.union_artifact_exp.toLocaleString() },
+              { label: "포인트", value: union.union_artifact_point.toLocaleString() },
+            ].map(({ label, value }) => (
+              <div key={label} className="rounded-xl py-3 text-center" style={{ background: "var(--bg-card)" }}>
+                <p className="text-xs mb-1" style={{ color: "var(--text-2)" }}>{label}</p>
+                <p className="text-base font-extrabold text-white">{value}</p>
+              </div>
+            ))}
           </div>
         </div>
       )}
