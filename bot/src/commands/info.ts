@@ -20,6 +20,19 @@ export const data = new SlashCommandBuilder()
   )
 
 
+function formatPower(value: string | number): string {
+  const num = Number(value)
+  if (!num) return "0"
+  const eok = Math.floor(num / 100_000_000)
+  const man = Math.floor((num % 100_000_000) / 10_000)
+  const rest = num % 10_000
+  const parts: string[] = []
+  if (eok > 0) parts.push(`${eok}억`)
+  if (man > 0) parts.push(`${man}만`)
+  if (rest > 0) parts.push(`${rest}`)
+  return parts.join(" ") || "0"
+}
+
 export async function execute(interaction: ChatInputCommandInteraction) {
   const name = interaction.options.getString("캐릭터명", true).trim()
 
@@ -33,11 +46,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       return
     }
 
-    const cp = Number(char.combatPower).toLocaleString()
+    const cp = formatPower(char.combatPower)
 
     const embed = new EmbedBuilder()
       .setColor(0xf59e0b)
-      .setTitle(`${char.name}  lv${char.level}`)
+      .setTitle(`${char.name}  LV${char.level}`)
       .setThumbnail(char.image || null)
       .setDescription(
         [
