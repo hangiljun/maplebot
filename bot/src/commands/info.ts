@@ -43,7 +43,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         { name: "서버",   value: char.world,                 inline: true },
         { name: "길드",   value: char.guild || "없음",       inline: true },
         { name: "인기도", value: `${char.popularity}`,       inline: true },
-        { name: "전투력", value: `**${Number(char.combatPower).toLocaleString()}**`, inline: true },
+        { name: "전투력", value: `**${formatPower(char.combatPower)}**`, inline: true },
       )
 
     const button = new ButtonBuilder()
@@ -58,6 +58,17 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     console.error(err)
     await interaction.editReply("❌ 캐릭터 정보 조회 중 오류가 발생했어요.")
   }
+}
+
+function formatPower(value: string | number): string {
+  const num = Number(value)
+  if (!num) return "0"
+  const eok = Math.floor(num / 100_000_000)
+  const man = Math.floor((num % 100_000_000) / 10_000)
+  if (eok > 0 && man > 0) return `${eok}억 ${man}만`
+  if (eok > 0) return `${eok}억`
+  if (man > 0) return `${man}만`
+  return num.toLocaleString()
 }
 
 const POTENTIAL_COLORS: Record<string, number> = {

@@ -27,6 +27,17 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   )
 }
 
+function formatPower(value: string | number): string {
+  const num = Number(value)
+  if (!num) return "0"
+  const eok = Math.floor(num / 100_000_000)
+  const man = Math.floor((num % 100_000_000) / 10_000)
+  if (eok > 0 && man > 0) return `${eok}억 ${man}만`
+  if (eok > 0) return `${eok}억`
+  if (man > 0) return `${man}만`
+  return num.toLocaleString()
+}
+
 export default async function CharacterDetailPage({ params }: Props) {
   const { name } = await params
   const decoded = decodeURIComponent(name)
@@ -67,7 +78,7 @@ export default async function CharacterDetailPage({ params }: Props) {
               <span className="text-sm">🍁</span>
             </div>
 
-            <CharacterImage src={basic.character_image} name={basic.character_name} size="lg" />
+            <CharacterImage src={basic.character_image} name={basic.character_name} size="xl" />
           </div>
 
           {/* 이름 + 레벨 */}
@@ -88,9 +99,9 @@ export default async function CharacterDetailPage({ params }: Props) {
           {/* 정보 그리드 */}
           <div className="px-6 pb-6">
             <InfoRow label="서버"   value={basic.world_name} />
-            <InfoRow label="전투력" value={Number(combatPower).toLocaleString()} />
+            <InfoRow label="전투력" value={formatPower(combatPower)} />
             <InfoRow label="길드"   value={basic.character_guild_name || "없음"} />
-            <InfoRow label="유니온" value={data.union?.union_grade ?? "정보 없음"} />
+            <InfoRow label="유니온" value={data.union ? String(data.union.union_level) : "정보 없음"} />
           </div>
         </div>
       </div>
