@@ -156,13 +156,13 @@ export async function handleEquipButton(interaction: ButtonInteraction, charName
     const first  = ordered.slice(0, 10)
     const second = ordered.slice(10, 20)
 
-    await interaction.followUp({ embeds: buildEmbeds(first) })
+    await interaction.followUp({ embeds: buildEmbeds(first), ephemeral: true })
     if (second.length > 0) {
-      await interaction.followUp({ embeds: buildEmbeds(second) })
+      await interaction.followUp({ embeds: buildEmbeds(second), ephemeral: true })
     }
   } catch (err) {
     console.error(err)
-    await interaction.followUp("❌ 장비 정보 조회 중 오류가 발생했어요.")
+    await interaction.followUp({ content: "❌ 장비 정보 조회 중 오류가 발생했어요.", ephemeral: true })
   }
 }
 
