@@ -33,18 +33,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       return
     }
 
+    const cardUrl = `https://maplebot.co.kr/api/card/${encodeURIComponent(char.name)}`
+
     const embed = new EmbedBuilder()
-      .setColor(0x3182f6)
-      .setTitle(`🍁 ${char.name}`)
-      .setThumbnail(char.image || null)
-      .addFields(
-        { name: "레벨",   value: `Lv.**${char.level}**`,    inline: true },
-        { name: "직업",   value: char.characterClass,        inline: true },
-        { name: "서버",   value: char.world,                 inline: true },
-        { name: "길드",   value: char.guild || "없음",       inline: true },
-        { name: "인기도", value: `${char.popularity}`,       inline: true },
-        { name: "전투력", value: `**${formatPower(char.combatPower)}**`, inline: true },
-      )
+      .setColor(0xf59e0b)
+      .setImage(cardUrl)
 
     const button = new ButtonBuilder()
       .setCustomId(`equip:${char.name}`)
@@ -60,16 +53,6 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 }
 
-function formatPower(value: string | number): string {
-  const num = Number(value)
-  if (!num) return "0"
-  const eok = Math.floor(num / 100_000_000)
-  const man = Math.floor((num % 100_000_000) / 10_000)
-  if (eok > 0 && man > 0) return `${eok}억 ${man}만`
-  if (eok > 0) return `${eok}억`
-  if (man > 0) return `${man}만`
-  return num.toLocaleString()
-}
 
 const POTENTIAL_COLORS: Record<string, number> = {
   "레전드리": 0xFF8C00,
