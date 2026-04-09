@@ -3,16 +3,16 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:           #060c1a;
-  --bg-card:      rgba(255,255,255,0.04);
-  --bg-surface:   rgba(255,255,255,0.07);
-  --border:       rgba(255,255,255,0.08);
-  --blue:         #3b82f6;
-  --blue-light:   #60a5fa;
+  --bg:           #eef3ff;
+  --bg-card:      #ffffff;
+  --bg-surface:   rgba(59,130,246,0.05);
+  --border:       rgba(59,130,246,0.13);
+  --blue:         #2563eb;
+  --blue-light:   #3b82f6;
   --blue-dark:    #1d4ed8;
-  --text:         #ffffff;
-  --text-sub:     rgba(255,255,255,0.55);
-  --text-muted:   rgba(255,255,255,0.3);
+  --text:         #0f172a;
+  --text-sub:     rgba(15,23,42,0.58);
+  --text-muted:   rgba(15,23,42,0.36);
 }
 
 body {
@@ -23,31 +23,32 @@ body {
 }
 
 .glass {
-  background: var(--bg-card);
+  background: rgba(255,255,255,0.88);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border);
+  box-shadow: 0 2px 20px rgba(59,130,246,0.07);
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  background: linear-gradient(135deg, #1d4ed8, #2563eb);
   color: #fff;
   font-weight: 700;
   border-radius: 12px;
   transition: all 0.2s;
 }
-.btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.btn-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
 
 .btn-outline {
-  background: transparent;
-  color: var(--blue-light);
-  border: 1px solid rgba(96,165,250,0.4);
+  background: #ffffff;
+  color: var(--blue);
+  border: 1px solid rgba(37,99,235,0.35);
   font-weight: 600;
   border-radius: 12px;
   transition: all 0.2s;
 }
-.btn-outline:hover { background: rgba(59,130,246,0.1); transform: translateY(-1px); }
+.btn-outline:hover { background: rgba(37,99,235,0.06); transform: translateY(-1px); }
 
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.3); border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: rgba(37,99,235,0.2); border-radius: 4px; }

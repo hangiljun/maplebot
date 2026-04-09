@@ -49,9 +49,9 @@ function LineChart({ data }: { data: HistoryPoint[] }) {
       <path d={line} fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       {pts.map((p, i) => (
         <g key={i}>
-          <circle cx={p.x} cy={p.y} r="3.5" fill="#060c1a" stroke="#60a5fa" strokeWidth="1.5" />
-          <text x={p.x} y={p.y - 7} textAnchor="middle" fontSize="9" fill="rgba(255,255,255,0.6)" fontWeight="600">{p.value}</text>
-          <text x={p.x} y={H + 24} textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.3)">{p.date}</text>
+          <circle cx={p.x} cy={p.y} r="3.5" fill="#fff" stroke="#2563eb" strokeWidth="1.5" />
+          <text x={p.x} y={p.y - 7} textAnchor="middle" fontSize="9" fill="rgba(15,23,42,0.6)" fontWeight="600">{p.value}</text>
+          <text x={p.x} y={H + 24} textAnchor="middle" fontSize="8" fill="rgba(15,23,42,0.35)">{p.date}</text>
         </g>
       ))}
     </svg>

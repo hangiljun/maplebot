@@ -21,11 +21,12 @@ export default function Navbar() {
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 h-14"
-        style={{ background: "rgba(6,12,26,0.85)", backdropFilter: "blur(20px)", borderBottom: "1px solid var(--border)" }}>
+        style={{ background: "rgba(255,255,255,0.95)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(59,130,246,0.1)", boxShadow: "0 1px 12px rgba(59,130,246,0.06)" }}>
         <div className="max-w-6xl mx-auto px-5 h-full flex items-center gap-8">
 
           {/* 로고 */}
-          <Link href="/" className="shrink-0 font-black text-white text-[16px] tracking-tight">
+          <Link href="/" className="shrink-0 font-black text-[16px] tracking-tight"
+            style={{ color: "var(--blue-dark)" }}>
             메이플봇
           </Link>
 
@@ -35,8 +36,9 @@ export default function Navbar() {
               <Link key={item.href} href={item.href}
                 className="px-4 py-1.5 rounded-lg text-[13px] font-medium transition-all"
                 style={{
-                  color: isActive(item.href) ? "#fff" : "var(--text-sub)",
-                  background: isActive(item.href) ? "rgba(59,130,246,0.15)" : "transparent",
+                  color: isActive(item.href) ? "var(--blue)" : "var(--text-sub)",
+                  background: isActive(item.href) ? "rgba(37,99,235,0.08)" : "transparent",
+                  fontWeight: isActive(item.href) ? 700 : 500,
                 }}>
                 {item.label}
               </Link>
@@ -59,11 +61,11 @@ export default function Navbar() {
         {/* 모바일 드롭다운 */}
         {open && (
           <div className="md:hidden px-4 pb-4 space-y-1"
-            style={{ background: "rgba(6,12,26,0.98)", borderTop: "1px solid var(--border)" }}>
+            style={{ background: "rgba(255,255,255,0.98)", borderTop: "1px solid var(--border)" }}>
             {NAV_ITEMS.map(item => (
               <Link key={item.href} href={item.href} onClick={() => setOpen(false)}
                 className="block px-4 py-2.5 rounded-lg text-sm font-medium"
-                style={{ color: isActive(item.href) ? "#fff" : "var(--text-sub)" }}>
+                style={{ color: isActive(item.href) ? "var(--blue)" : "var(--text-sub)" }}>
                 {item.label}
               </Link>
             ))}
