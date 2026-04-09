@@ -78,7 +78,7 @@ export default function CharacterTabs({ data }: { data: CharacterData }) {
         )}
         {tab === "equipment" && <EquipmentTab items={equipment} />}
         {tab === "ability"   && <AbilityTab ability={ability} />}
-        {tab === "union"     && <UnionTab union={union} />}
+        {tab === "union"     && <UnionTab union={union} basic={data.basic} />}
       </div>
     </div>
   )
