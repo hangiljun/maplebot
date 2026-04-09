@@ -119,9 +119,7 @@ export interface CodiSummary {
   hair: string
   face: string
   skin: string
-  preset1: CodiPresetItem[]
-  preset2: CodiPresetItem[]
-  preset3: CodiPresetItem[]
+  equipped: CodiPresetItem[]
 }
 
 export async function fetchCodi(name: string): Promise<CodiSummary | null> {
@@ -144,12 +142,10 @@ export async function fetchCodi(name: string): Promise<CodiSummary | null> {
     }))
 
   return {
-    hair:    beautyR?.character_hair?.hair_name ?? "",
-    face:    beautyR?.character_face?.face_name ?? "",
-    skin:    beautyR?.character_skin?.skin_name ?? "",
-    preset1: mapItems(codiR.character_cashitem_equipment_preset_1),
-    preset2: mapItems(codiR.character_cashitem_equipment_preset_2),
-    preset3: mapItems(codiR.character_cashitem_equipment_preset_3),
+    hair:     beautyR?.character_hair?.hair_name ?? "",
+    face:     beautyR?.character_face?.face_name ?? "",
+    skin:     beautyR?.character_skin?.skin_name ?? "",
+    equipped: mapItems(codiR.character_cashitem_equipment_base),
   }
 }
 

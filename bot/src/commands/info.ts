@@ -209,10 +209,9 @@ export async function handleCodiButton(interaction: ButtonInteraction, charName:
       return
     }
 
-    const formatPreset = (items: { part: string; name: string; label: string | null }[]) => {
-      if (!items.length) return "비어있음"
-      return items.map(i => `\`${i.part}\` ${i.name}${i.label ? ` (${i.label})` : ""}`).join("\n")
-    }
+    const equippedLines = codi.equipped.length
+      ? codi.equipped.map(i => `\`${i.part}\` ${i.name}${i.label ? ` (${i.label})` : ""}`).join("\n")
+      : "착용 중인 캐시 아이템 없음"
 
     const embed = new EmbedBuilder()
       .setColor(0xec4899)
@@ -221,9 +220,7 @@ export async function handleCodiButton(interaction: ButtonInteraction, charName:
         { name: "헤어", value: codi.hair || "기본", inline: true },
         { name: "성형", value: codi.face || "기본", inline: true },
         { name: "피부", value: codi.skin || "기본", inline: true },
-        { name: "프리셋 1", value: formatPreset(codi.preset1), inline: false },
-        { name: "프리셋 2", value: formatPreset(codi.preset2), inline: false },
-        { name: "프리셋 3", value: formatPreset(codi.preset3), inline: false },
+        { name: "착용 중인 캐시 아이템", value: equippedLines, inline: false },
       )
 
     await interaction.editReply({ embeds: [embed] })
