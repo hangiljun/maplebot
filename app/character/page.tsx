@@ -6,12 +6,21 @@ import { Search, AlertCircle, Info } from "lucide-react"
 export default function CharacterSearchPage() {
   const [query, setQuery] = useState("")
   const [warn, setWarn] = useState(false)
+  const [composing, setComposing] = useState(false)
   const router = useRouter()
 
-  const handleInput = (v: string) => {
+  const applyFilter = (v: string) => {
     const filtered = v.replace(/[^a-zA-Z0-9가-힣]/g, "").slice(0, 12)
-    setWarn(v.length > 0 && filtered !== v.replace(/.$/, "").slice(0, 12) && filtered !== v)
+    setWarn(v.length > 0 && filtered !== v)
     setQuery(filtered)
+  }
+
+  const handleChange = (v: string) => {
+    if (composing) {
+      setQuery(v.slice(0, 12))
+    } else {
+      applyFilter(v)
+    }
   }
 
   const go = (v?: string) => {
@@ -38,8 +47,10 @@ export default function CharacterSearchPage() {
           <input
             type="text"
             value={query}
-            onChange={(e) => handleInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && go()}
+            onChange={(e) => handleChange(e.target.value)}
+            onCompositionStart={() => setComposing(true)}
+            onCompositionEnd={(e) => { setComposing(false); applyFilter(e.currentTarget.value) }}
+            onKeyDown={(e) => e.key === "Enter" && !composing && go()}
             placeholder="닉네임 입력 후 Enter 또는 조회하기"
             autoFocus
             className="flex-1 px-3 py-4 bg-transparent focus:outline-none text-[15px] placeholder:text-white/20"
