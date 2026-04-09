@@ -1,47 +1,16 @@
 "use client"
 import Link from "next/link"
-import { useState, useEffect, useRef } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Search } from "lucide-react"
 
 const DISCORD_URL = "https://discord.com/oauth2/authorize?client_id=1491444296623325194&permissions=51200&integration_type=0&scope=bot"
 
-/* ── 카운터 애니메이션 ─────────────────────────────────────── */
-function Counter({ target, duration = 1800 }: { target: number; duration?: number }) {
-  const [count, setCount] = useState(0)
-  const ref = useRef<HTMLSpanElement>(null)
-  const started = useRef(false)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && !started.current) {
-        started.current = true
-        const startTime = Date.now()
-        const tick = () => {
-          const elapsed = Date.now() - startTime
-          const progress = Math.min(elapsed / duration, 1)
-          const eased = 1 - Math.pow(1 - progress, 3)
-          setCount(Math.floor(eased * target))
-          if (progress < 1) requestAnimationFrame(tick)
-          else setCount(target)
-        }
-        requestAnimationFrame(tick)
-        observer.disconnect()
-      }
-    }, { threshold: 0.3 })
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [target, duration])
-
-  return <span ref={ref}>{count.toLocaleString()}</span>
-}
 
 /* ── 디스코드 목업 ─────────────────────────────────────────── */
 const COMMAND_DATA: Record<string, { title: string; fields: { k: string; v: string }[]; color: string }> = {
   "/정보": {
-    title: "아크메이지불독 (Lv.285)",
+    title: "메이플봇 (Lv.285)",
     fields: [
       { k: "직업", v: "아크메이지(불,독)" },
       { k: "서버", v: "크로아" },
@@ -84,7 +53,7 @@ function DiscordMockup({ command }: { command: string }) {
       </div>
       <div style={{ marginBottom: "10px" }}>
         <span style={{ color: "#949BA4", fontSize: "11px" }}>유저</span>
-        <p style={{ color: "#00AFF4", fontSize: "13px", margin: 0 }}>{command} 아크메이지불독</p>
+        <p style={{ color: "#00AFF4", fontSize: "13px", margin: 0 }}>{command} 메이플봇</p>
       </div>
       <div style={{ display: "flex", gap: "10px" }}>
         <div style={{ width: "34px", height: "34px", borderRadius: "50%", background: "linear-gradient(135deg, #5865f2, #7289da)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: "11px" }}>M</div>
@@ -225,26 +194,6 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* ── 실시간 통계 ── */}
-      <section className="max-w-4xl mx-auto px-4 pb-16">
-        <div className="glass rounded-3xl py-8 px-6 grid grid-cols-3 text-center"
-          style={{ borderRadius: "24px" }}>
-          {[
-            { label: "운영 서버 수", value: 4281, suffix: "+", border: false },
-            { label: "오늘 조회 건수", value: 12502, suffix: "", border: true },
-            { label: "누적 캐릭터 조회", value: 893421, suffix: "", border: true },
-          ].map(({ label, value, suffix, border }) => (
-            <div key={label} className="px-4"
-              style={border ? { borderLeft: "1px solid var(--border)" } : {}}>
-              <p className="text-3xl font-black mb-1" style={{ color: "var(--blue)" }}>
-                <Counter target={value} />{suffix}
-              </p>
-              <p className="text-xs" style={{ color: "var(--text-muted)" }}>{label}</p>
-            </div>
-          ))}
         </div>
       </section>
 
