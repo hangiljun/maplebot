@@ -6,9 +6,8 @@ import {
   ButtonStyle,
   ActionRowBuilder,
   ButtonInteraction,
-  AttachmentBuilder,
 } from "discord.js"
-import { fetchCharacterSummary, fetchEquipment, fetchImageAsBase64 } from "../maple"
+import { fetchCharacterSummary, fetchEquipment } from "../maple"
 
 export const data = new SlashCommandBuilder()
   .setName("정보")
@@ -34,22 +33,22 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       return
     }
 
-    const imageData = await fetchImageAsBase64(char.image ?? "")
+    const cp = Number(char.combatPower).toLocaleString()
 
-    const cardUrl = `https://maplebot.co.kr/api/card/${encodeURIComponent(char.name)}`
-    const cardRes = await fetch(cardUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        level: char.level,
-        cls:   char.characterClass,
-        world: char.world,
-        guild: char.guild ?? "",
-        cp:    char.combatPower,
-        union: "",
-        imageData,
-      }),
-    })
+    const embed = new EmbedBuilder()
+      .setColor(0xf59e0b)
+      .setTitle(char.name)
+      .setThumbnail(char.image || null)
+      .setDescription(
+        [
+          `• 월드 : ${char.world}`,
+          `• 레벨 : ${char.level}`,
+          `• 직업 : ${char.characterClass}`,
+          `• 길드 : ${char.guild || "없음"}`,
+          `• 인기도 : ${char.popularity.toLocaleString()}`,
+          `• 전투력 : ${cp}`,
+        ].join("\n")
+      )
 
     const button = new ButtonBuilder()
       .setCustomId(`equip:${char.name}`)
@@ -58,24 +57,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(button)
 
-    if (!cardRes.ok) {
-      console.error(`[card] POST failed: ${cardRes.status}`)
-      const embed = new EmbedBuilder()
-        .setColor(0xf59e0b)
-        .setTitle(char.name)
-        .setDescription(`Lv.${char.level} ${char.characterClass}\n서버: ${char.world}`)
-      await interaction.editReply({ embeds: [embed], components: [row] })
-      return
-    }
-
-    const imageBuffer = Buffer.from(await cardRes.arrayBuffer())
-    const attachment = new AttachmentBuilder(imageBuffer, { name: "card.png" })
-
-    const embed = new EmbedBuilder()
-      .setColor(0xf59e0b)
-      .setImage("attachment://card.png")
-
-    await interaction.editReply({ embeds: [embed], files: [attachment], components: [row] })
+    await interaction.editReply({ embeds: [embed], components: [row] })
   } catch (err) {
     console.error("[info] 오류:", err)
     await interaction.editReply("❌ 캐릭터 정보 조회 중 오류가 발생했어요.")
