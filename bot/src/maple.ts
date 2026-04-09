@@ -148,13 +148,12 @@ export async function fetchLevelHistory(name: string): Promise<{ expHistory: { d
   if (!idData?.ocid) return null
   const { ocid } = idData
 
+  // 경험치: 최근 7일 (1~7일 전)
   const expDates = Array.from({ length: 7 }, (_, i) => kstDateString(i + 1))
-  const levelDates: string[] = []
-  for (let i = 11; i >= 0; i--) {
-    const d = new Date(Date.now() + 9 * 60 * 60 * 1000)
-    d.setUTCMonth(d.getUTCMonth() - i, 1)
-    levelDates.push(d.toISOString().split("T")[0])
-  }
+
+  // 레벨: 최근 30일 내 주요 시점
+  const levelDaysAgo = [30, 21, 14, 7, 3, 1]
+  const levelDates = levelDaysAgo.map(d => kstDateString(d))
 
   const [expResults, levelResults, todayR] = await Promise.all([
     Promise.all(expDates.map(date =>
@@ -180,21 +179,19 @@ export async function fetchLevelHistory(name: string): Promise<{ expHistory: { d
     expHistory.push({ date: "오늘", value: parseFloat(todayR.character_exp_rate) })
   }
 
-  const allLevels = levelDates.map((date, i) => ({
-    date: fmt(date),
-    value: levelResults[i]?.character_level ?? 0,
-  })).filter(e => e.value > 0)
+  const allLevels = levelDates
+    .map((date, i) => ({ date: fmt(date), value: levelResults[i]?.character_level ?? 0 }))
+    .filter(e => e.value > 0)
 
+  // 오늘 실시간 레벨 항상 마지막에 추가
   if (todayR?.character_level) {
-    const last = allLevels[allLevels.length - 1]
-    if (!last || last.value !== todayR.character_level) {
-      allLevels.push({ date: "오늘", value: todayR.character_level })
-    } else if (last) {
-      last.date = "오늘"
-    }
+    allLevels.push({ date: "오늘", value: todayR.character_level })
   }
 
-  const levelHistory = allLevels.filter((p, i) => i === 0 || p.value !== allLevels[i - 1].value)
+  // 연속된 같은 레벨 제거 (오늘은 항상 유지)
+  const levelHistory = allLevels.filter((p, i, arr) =>
+    p.date === "오늘" || i === 0 || p.value !== arr[i - 1].value
+  )
 
   return { expHistory, levelHistory }
 }
