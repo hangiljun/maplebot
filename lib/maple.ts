@@ -150,7 +150,7 @@ export async function fetchHistory(name: string): Promise<CharacterHistory | nul
   const yesterday = kstDateString(1)
   if (!levelDates.includes(yesterday)) levelDates.push(yesterday)
 
-  const [expResults, levelResults] = await Promise.all([
+  const [expResults, levelResults, todayResult] = await Promise.all([
     Promise.all(expDates.map(date =>
       nexonFetch(`/maplestory/v1/character/basic?ocid=${ocid}&date=${date}`)
         .catch(() => null)
@@ -159,6 +159,7 @@ export async function fetchHistory(name: string): Promise<CharacterHistory | nul
       nexonFetch(`/maplestory/v1/character/basic?ocid=${ocid}&date=${date}`)
         .catch(() => null)
     )),
+    nexonFetch(`/maplestory/v1/character/basic?ocid=${ocid}`).catch(() => null),
   ])
 
   const expHistory: HistoryPoint[] = expDates
@@ -169,11 +170,26 @@ export async function fetchHistory(name: string): Promise<CharacterHistory | nul
     .filter(e => e.value > 0)
     .reverse()
 
+  if (todayResult?.character_exp_rate) {
+    expHistory.push({ date: "오늘", value: parseFloat(todayResult.character_exp_rate) })
+  }
+
   // 레벨이 변하는 시점만 추출
   const allLevels = levelDates.map((date, i) => ({
     date: formatKoDate(date),
     value: levelResults[i]?.character_level ?? 0,
   })).filter(e => e.value > 0)
+
+  // 오늘 실시간 데이터 추가
+  if (todayResult?.character_level) {
+    const todayStr = "오늘"
+    const last = allLevels[allLevels.length - 1]
+    if (!last || last.value !== todayResult.character_level) {
+      allLevels.push({ date: todayStr, value: todayResult.character_level })
+    } else if (last) {
+      last.date = todayStr
+    }
+  }
 
   const levelHistory: HistoryPoint[] = allLevels.filter((p, i) =>
     i === 0 || p.value !== allLevels[i - 1].value
