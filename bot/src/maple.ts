@@ -6,10 +6,17 @@ const API_KEY  = process.env.NEXON_API_KEY!
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function nexonFetch(path: string): Promise<any> {
+  if (!API_KEY) {
+    console.error("❌ NEXON_API_KEY 환경변수가 설정되지 않았습니다")
+    return null
+  }
   const res = await fetch(`${BASE_URL}${path}`, {
     headers: { "x-nxopen-api-key": API_KEY },
   })
-  if (!res.ok) return null
+  if (!res.ok) {
+    console.error(`❌ Nexon API 오류 [${res.status}] ${path}`)
+    return null
+  }
   return res.json()
 }
 
