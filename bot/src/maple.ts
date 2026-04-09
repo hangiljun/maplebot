@@ -75,10 +75,13 @@ export async function fetchEquipment(name: string): Promise<EquipItem[] | null> 
 export async function fetchImageAsBase64(url: string): Promise<string> {
   if (!url) return ""
   try {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 5000)
     const res = await fetch(url, {
       headers: { "x-nxopen-api-key": API_KEY },
-      signal: AbortSignal.timeout(5000),
+      signal: controller.signal,
     })
+    clearTimeout(timer)
     if (!res.ok) return ""
     const mime = res.headers.get("content-type") ?? "image/png"
     const buf = Buffer.from(await res.arrayBuffer())

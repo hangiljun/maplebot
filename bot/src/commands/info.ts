@@ -77,7 +77,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     await interaction.editReply({ embeds: [embed], files: [attachment], components: [row] })
   } catch (err) {
-    console.error(err)
+    console.error("[info] 오류:", err)
     await interaction.editReply("❌ 캐릭터 정보 조회 중 오류가 발생했어요.")
   }
 }

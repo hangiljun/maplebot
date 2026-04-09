@@ -27,7 +27,7 @@ async function loadFont(): Promise<ArrayBuffer | null> {
 
 async function toDataUrl(url: string): Promise<string> {
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(5000) })
+    const res = await fetch(url)
     if (!res.ok) return ""
     const mime = res.headers.get("content-type") ?? ""
     if (!mime.startsWith("image/")) return ""
