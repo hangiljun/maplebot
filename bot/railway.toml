@@ -2,5 +2,5 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "npx ts-node src/index.ts"
+startCommand = "npx ts-node src/deploy.ts && npx ts-node src/index.ts"
 restartPolicyType = "always"
