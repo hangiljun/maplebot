@@ -151,9 +151,8 @@ export async function fetchLevelHistory(name: string): Promise<{ expHistory: { d
   // 경험치: 최근 7일 (1~7일 전)
   const expDates = Array.from({ length: 7 }, (_, i) => kstDateString(i + 1))
 
-  // 레벨: 최근 30일 내 주요 시점
-  const levelDaysAgo = [30, 21, 14, 7, 3, 1]
-  const levelDates = levelDaysAgo.map(d => kstDateString(d))
+  // 레벨: 최근 30일 매일 조회 (레벨업 날짜 정확히 포착)
+  const levelDates = Array.from({ length: 30 }, (_, i) => kstDateString(i + 1)).reverse()
 
   const [expResults, levelResults, todayR] = await Promise.all([
     Promise.all(expDates.map(date =>
