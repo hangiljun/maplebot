@@ -181,7 +181,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA */}
-      <section style={{ paddingTop: "160px", paddingBottom: "160px" }}>
+      <section style={{ paddingTop: "80px", paddingBottom: "80px" }}>
         <div className="section-container flex justify-center">
           <div className="rounded-3xl p-12 text-center w-full max-w-3xl"
             style={{ background: "linear-gradient(135deg, rgba(29,78,216,0.5), rgba(59,130,246,0.3))", border: "1px solid rgba(96,165,250,0.25)", boxShadow: "0 0 60px rgba(59,130,246,0.12)" }}>
