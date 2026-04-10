@@ -73,7 +73,8 @@ const SECTIONS = [
 
 export default function PrivacyPage() {
   return (
-    <div className="max-w-3xl mx-auto px-4 pb-20" style={{ paddingTop: "80px" }}>
+    <div className="section-container pb-20" style={{ paddingTop: "80px" }}>
+      <div className="max-w-3xl mx-auto">
 
       <div className="text-center mb-12">
         <h1 className="text-3xl font-black mb-3" style={{ color: "var(--text)" }}>개인정보처리방침</h1>
@@ -113,6 +114,7 @@ export default function PrivacyPage() {
           </div>
         ))}
       </div>
+    </div>
     </div>
   )
 }

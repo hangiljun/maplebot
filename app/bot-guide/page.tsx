@@ -323,7 +323,7 @@ export default function BotGuidePage() {
 
   return (
     <div style={{ paddingTop: "56px", minHeight: "100vh" }}>
-      <div className="max-w-5xl mx-auto px-4 sm:px-6">
+      <div className="section-container">
         <div className="flex">
 
           {/* ── 사이드바 ── */}

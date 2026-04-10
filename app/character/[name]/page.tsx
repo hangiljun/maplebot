@@ -96,7 +96,8 @@ export default async function CharacterDetailPage({ params }: Props) {
   ]
 
   return (
-    <div className="max-w-3xl mx-auto px-4 pb-16 space-y-4" style={{ paddingTop: "80px" }}>
+    <div className="section-container pb-16" style={{ paddingTop: "80px" }}>
+      <div className="max-w-3xl mx-auto space-y-4">
 
       {/* 캐릭터 카드 */}
       <div className="glass rounded-3xl overflow-hidden">
@@ -159,6 +160,7 @@ export default async function CharacterDetailPage({ params }: Props) {
           <Search size={13} /> 다른 캐릭터 검색
         </Link>
       </div>
+    </div>
     </div>
   )
 }

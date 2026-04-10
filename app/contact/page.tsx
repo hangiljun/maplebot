@@ -280,7 +280,7 @@ export default function ContactPage() {
         />
       )}
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12">
+      <div className="section-container py-12">
 
         {/* ── Hero ── */}
         <div className="mb-10 flex items-start justify-between gap-4">
