@@ -71,6 +71,37 @@ export async function POST(req: NextRequest) {
   }
 }
 
+// ── PATCH: 우선순위/상태 변경 (관리자 전용) ──────────────────────────────────
+export async function PATCH(req: NextRequest) {
+  try {
+    const { id, adminPassword, priority, status } = await req.json()
+
+    if (!id) return NextResponse.json({ error: "ID가 없습니다." }, { status: 400 })
+
+    const correctPassword = process.env.ADMIN_PASSWORD
+    if (!correctPassword || adminPassword !== correctPassword) {
+      return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 })
+    }
+
+    const update: Record<string, string> = {}
+    if (priority) update.priority = priority
+    if (status)   update.status   = status
+
+    if (Object.keys(update).length === 0) {
+      return NextResponse.json({ error: "변경할 항목이 없습니다." }, { status: 400 })
+    }
+
+    const { getDb } = await import("@/lib/firebase-admin")
+    const db = getDb()
+
+    await db.collection(COLLECTION).doc(id).update(update)
+    return NextResponse.json({ success: true })
+  } catch (e) {
+    console.error("PATCH /api/feature-request", e)
+    return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 })
+  }
+}
+
 // ── DELETE: 기능 요청 삭제 (관리자 전용) ─────────────────────────────────────
 export async function DELETE(req: NextRequest) {
   try {
