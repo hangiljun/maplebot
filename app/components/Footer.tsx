@@ -5,8 +5,8 @@ export default function Footer() {
     <footer className="mt-auto">
       {/* 넥슨 법적 고지 */}
       <div className="section-container pb-4">
-        <div className="rounded-xl px-5 py-4 text-xs text-center leading-relaxed"
-          style={{ background: "rgba(37,99,235,0.04)", border: "1px solid rgba(37,99,235,0.1)", color: "var(--text-muted)" }}>
+        <div className="px-5 py-4 text-xs text-center leading-relaxed"
+          style={{ color: "var(--text-muted)" }}>
           본 서비스는 Nexon OpenAPI를 활용하며, Nexon(넥슨)의 공식 서비스가 아닙니다.<br />
           메이플스토리 및 관련 모든 자산에 대한 저작권은 넥슨 코리아(Nexon Korea Corporation)에 있습니다.<br />
           본 서비스의 모든 캐릭터 데이터는 Nexon OpenAPI를 통해 실시간으로 제공되며, Nexon의 서비스 이용약관에 따라 활용됩니다.

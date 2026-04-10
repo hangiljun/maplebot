@@ -183,8 +183,7 @@ export default function HomePage() {
       {/* CTA */}
       <section style={{ paddingTop: "80px", paddingBottom: "80px" }}>
         <div className="section-container flex justify-center">
-          <div className="rounded-3xl p-12 text-center w-full max-w-3xl"
-            style={{ background: "linear-gradient(135deg, rgba(29,78,216,0.5), rgba(59,130,246,0.3))", border: "1px solid rgba(96,165,250,0.25)", boxShadow: "0 0 60px rgba(59,130,246,0.12)" }}>
+          <div className="p-12 text-center w-full max-w-3xl">
             <h2 className="text-3xl font-black mb-3 text-white">지금 바로 시작하세요</h2>
             <p className="text-sm mb-8" style={{ color: "rgba(255,255,255,0.65)" }}>
               디스코드 서버에 메이플봇을 추가하고<br />
