@@ -38,21 +38,22 @@ export default function Navbar() {
             메이플봇
           </Link>
 
-          {/* 데스크탑: 메뉴 + 버튼 */}
-          <div className="hidden md:flex items-center gap-1 ml-6 flex-1">
+          {/* 데스크탑: 메뉴 + 버튼 — ml-auto로 오른쪽 정렬 */}
+          <div className="hidden md:flex items-center gap-6 ml-auto">
             {NAV_ITEMS.map(item => (
               <Link key={item.href} href={item.href}
-                className="px-4 py-2 rounded-lg text-[13px] transition-all"
+                className="py-2 text-[13px] transition-all"
                 style={{
                   color: isActive(item.href) ? "var(--blue-light)" : "var(--text-muted)",
-                  background: isActive(item.href) ? "rgba(59,130,246,0.1)" : "transparent",
                   fontWeight: isActive(item.href) ? 600 : 400,
+                  borderBottom: isActive(item.href) ? "2px solid var(--blue-light)" : "2px solid transparent",
+                  paddingBottom: "4px",
                 }}>
                 {item.label}
               </Link>
             ))}
             <Link href={DISCORD_URL} target="_blank"
-              className="btn-primary text-sm px-4 py-1.5 ml-auto">
+              className="btn-primary text-sm px-4 py-1.5 shrink-0">
               서버에 추가하기
             </Link>
           </div>
