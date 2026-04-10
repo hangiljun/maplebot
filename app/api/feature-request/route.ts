@@ -1,35 +1,43 @@
 import { NextRequest, NextResponse } from "next/server"
+import { FieldValue } from "firebase-admin/firestore"
 
-const OWNER = "hangiljun"
-const REPO  = "maplebot"
+export const dynamic = "force-dynamic"
 
-// ── GET: GitHub Issues에서 기능 요청 목록 조회 ────────────────────────────────
+const COLLECTION = "feature-requests"
+
+// ── GET: Firestore에서 기능 요청 목록 조회 ────────────────────────────────────
 export async function GET() {
   try {
-    const headers: HeadersInit = {
-      "Accept": "application/vnd.github.v3+json",
-      "X-GitHub-Api-Version": "2022-11-28",
-    }
-    if (process.env.GITHUB_TOKEN) {
-      headers["Authorization"] = `Bearer ${process.env.GITHUB_TOKEN}`
-    }
+    const { getDb } = await import("@/lib/firebase-admin")
+    const db = getDb()
 
-    // open + closed(done) 모두 가져옴
-    const [openRes, closedRes] = await Promise.all([
-      fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues?labels=feature-request&state=open&per_page=50&sort=created&direction=desc`, { headers, next: { revalidate: 30 } }),
-      fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues?labels=feature-request&state=closed&per_page=20&sort=created&direction=desc`, { headers, next: { revalidate: 30 } }),
-    ])
+    const snapshot = await db
+      .collection(COLLECTION)
+      .orderBy("createdAt", "desc")
+      .limit(100)
+      .get()
 
-    const open   = openRes.ok   ? await openRes.json()   : []
-    const closed = closedRes.ok ? await closedRes.json() : []
+    const requests = snapshot.docs.map(doc => {
+      const d = doc.data()
+      return {
+        id:          doc.id,
+        title:       d.title,
+        description: d.description,
+        nickname:    d.nickname || "익명",
+        priority:    d.priority ?? "medium",
+        status:      d.status   ?? "reviewing",
+        createdAt:   d.createdAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
+      }
+    })
 
-    return NextResponse.json([...open, ...closed])
-  } catch {
+    return NextResponse.json(requests)
+  } catch (e) {
+    console.error("GET /api/feature-request", e)
     return NextResponse.json([])
   }
 }
 
-// ── POST: 새 기능 요청 → GitHub Issue 생성 ────────────────────────────────────
+// ── POST: 새 기능 요청 → Firestore 저장 ──────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
     const { title, description, nickname } = await req.json()
@@ -40,43 +48,25 @@ export async function POST(req: NextRequest) {
     if (title.trim().length > 80) {
       return NextResponse.json({ error: "제목은 80자 이하로 입력해주세요." }, { status: 400 })
     }
-
-    const token = process.env.GITHUB_TOKEN
-    if (!token) {
-      return NextResponse.json({ error: "서버 설정 오류입니다. 관리자에게 문의해주세요." }, { status: 500 })
+    if (description.trim().length > 500) {
+      return NextResponse.json({ error: "내용은 500자 이하로 입력해주세요." }, { status: 400 })
     }
 
-    const body = [
-      `**요청자:** ${nickname?.trim() || "익명"}`,
-      "",
-      "**내용:**",
-      description.trim(),
-    ].join("\n")
+    const { getDb } = await import("@/lib/firebase-admin")
+    const db = getDb()
 
-    const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json",
-        "Accept": "application/vnd.github.v3+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
-      body: JSON.stringify({
-        title: title.trim(),
-        body,
-        labels: ["feature-request", "priority:medium", "status:reviewing"],
-      }),
+    await db.collection(COLLECTION).add({
+      title:       title.trim(),
+      description: description.trim(),
+      nickname:    nickname?.trim() || "익명",
+      priority:    "medium",
+      status:      "reviewing",
+      createdAt:   FieldValue.serverTimestamp(),
     })
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}))
-      console.error("GitHub API error:", err)
-      return NextResponse.json({ error: "요청 전송에 실패했습니다. 잠시 후 다시 시도해주세요." }, { status: 500 })
-    }
 
     return NextResponse.json({ success: true })
   } catch (e) {
-    console.error(e)
+    console.error("POST /api/feature-request", e)
     return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 })
   }
 }

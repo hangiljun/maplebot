@@ -10,14 +10,13 @@ type Priority = "high" | "medium" | "low"
 type Status   = "reviewing" | "planned" | "in-progress" | "done"
 
 type Request = {
-  id: number
-  number: number
+  id: string
   title: string
-  body: string | null
-  created_at: string
-  state: "open" | "closed"
+  description: string | null
+  nickname: string
   priority: Priority
   status: Status
+  createdAt: string
 }
 
 // ─── 라벨 매핑 ────────────────────────────────────────────────────────────────
@@ -32,37 +31,6 @@ const STATUS_META: Record<Status, { text: string; color: string; bg: string; bor
   planned:      { text: "예정",   color: "#818cf8", bg: "rgba(129,140,248,0.1)", border: "rgba(129,140,248,0.2)" },
   "in-progress":{ text: "진행중", color: "#f59e0b", bg: "rgba(245,158,11,0.1)",  border: "rgba(245,158,11,0.2)"  },
   done:         { text: "완료",   color: "#4ade80", bg: "rgba(74,222,128,0.1)",   border: "rgba(74,222,128,0.2)"  },
-}
-
-// ─── 데이터 파싱 ──────────────────────────────────────────────────────────────
-function parseIssue(issue: any): Request {
-  const names: string[] = issue.labels?.map((l: any) => l.name) ?? []
-
-  let priority: Priority = "medium"
-  if (names.includes("priority:high")) priority = "high"
-  else if (names.includes("priority:low")) priority = "low"
-
-  let status: Status = issue.state === "closed" ? "done" : "reviewing"
-  if (names.includes("status:done"))          status = "done"
-  else if (names.includes("status:in-progress")) status = "in-progress"
-  else if (names.includes("status:planned"))     status = "planned"
-
-  // body에서 실제 설명만 추출 (마크다운 헤더 제거)
-  const rawBody = (issue.body ?? "")
-    .replace(/\*\*요청자:\*\*.+/g, "")
-    .replace(/\*\*내용:\*\*/g, "")
-    .trim()
-
-  return {
-    id: issue.id,
-    number: issue.number,
-    title: issue.title,
-    body: rawBody || null,
-    created_at: issue.created_at,
-    state: issue.state,
-    priority,
-    status,
-  }
 }
 
 // ─── 날짜 포맷 ────────────────────────────────────────────────────────────────
@@ -84,7 +52,7 @@ export default function ContactPage() {
     try {
       const res = await fetch("/api/feature-request", { cache: "no-store" })
       const data = await res.json()
-      setRequests(data.map(parseIssue))
+      setRequests(data as Request[])
     } catch {
       setRequests([])
     } finally {
@@ -100,7 +68,7 @@ export default function ContactPage() {
       const order: Record<Priority, number> = { high: 0, medium: 1, low: 2 }
       return order[a.priority] - order[b.priority]
     }
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   })
 
   // 제출
@@ -264,20 +232,20 @@ export default function ContactPage() {
                       </div>
 
                       {/* 내용 미리보기 */}
-                      {r.body && (
+                      {r.description && (
                         <p style={{
                           fontSize: "0.9rem", color: "var(--text-muted)", lineHeight: 1.65,
                           marginBottom: "10px",
                           display: "-webkit-box", WebkitLineClamp: 2,
                           WebkitBoxOrient: "vertical", overflow: "hidden",
                         }}>
-                          {r.body}
+                          {r.description}
                         </p>
                       )}
 
-                      {/* 날짜 */}
+                      {/* 닉네임 · 날짜 */}
                       <p style={{ fontSize: "11px", color: "var(--text-muted)" }}>
-                        #{r.number} · {fmtDate(r.created_at)}
+                        {r.nickname} · {fmtDate(r.createdAt)}
                       </p>
                     </div>
                   )
