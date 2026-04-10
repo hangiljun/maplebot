@@ -315,22 +315,22 @@ export default function HomePage() {
       {/* ── 최근 업데이트 ──────────────────────────────── */}
       <section style={{ paddingTop: "160px", paddingBottom: "160px" }}>
         <div className="section-container flex justify-center">
-          <div className="glass rounded-2xl p-6 w-full max-w-2xl">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="text-sm font-bold" style={{ color: "var(--text)" }}>최근 업데이트</h3>
+          <div className="glass rounded-3xl p-10 w-full max-w-3xl">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-xl font-black" style={{ color: "var(--text)" }}>최근 업데이트</h3>
               <Link href="/updates" className="text-xs font-semibold hover:underline"
                 style={{ color: "var(--blue-light)" }}>
                 전체 보기
               </Link>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-5">
               {UPDATES.map((u, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <span className="text-xs font-mono shrink-0 tabular-nums"
+                <div key={i} className="flex items-center gap-4">
+                  <span className="text-sm font-mono shrink-0 tabular-nums"
                     style={{ color: "var(--text-muted)" }}>{u.date}</span>
-                  <div className="w-1 h-1 rounded-full shrink-0"
+                  <div className="w-1.5 h-1.5 rounded-full shrink-0"
                     style={{ background: "var(--blue-light)" }} />
-                  <span className="text-sm" style={{ color: "var(--text-sub)" }}>{u.text}</span>
+                  <span className="text-base" style={{ color: "var(--text-sub)" }}>{u.text}</span>
                 </div>
               ))}
             </div>
