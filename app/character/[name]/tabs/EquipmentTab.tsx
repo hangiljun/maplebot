@@ -1,4 +1,6 @@
 "use client"
+import { useState } from "react"
+import { X } from "lucide-react"
 import { EquipmentItem, POTENTIAL_COLORS } from "@/lib/maple"
 
 const STAT_KO: Record<string, string> = {
@@ -58,7 +60,49 @@ function PotentialBlock({ grade, opts }: { grade: string | null | undefined; opt
   )
 }
 
-function SlotCell({ item, col }: { item: EquipmentItem | undefined; col: number }) {
+function ItemDetail({ item }: { item: EquipmentItem }) {
+  const grade = item.potential_option_grade ?? null
+  const sfNum = parseInt(item.starforce ?? "0") || 0
+  const stats = Object.entries(item.item_total_option ?? {}).filter(([, v]) => v !== "0" && v !== "")
+
+  return (
+    <div className="text-[12px]">
+      <div className="flex items-start gap-3 mb-3">
+        {item.item_icon && (
+          <img src={item.item_icon} alt={item.item_name} className="w-12 h-12 object-contain shrink-0" />
+        )}
+        <div>
+          <p className="font-bold text-[14px] leading-tight mb-0.5"
+            style={{ color: grade ? (POTENTIAL_COLORS[grade] ?? "#fff") : "#fff" }}>
+            {sfNum > 0 && (
+              <span className="text-yellow-400 mr-1">
+                {"★".repeat(Math.min(sfNum, 5))}{sfNum > 5 ? ` ${sfNum}성` : ""}
+              </span>
+            )}
+            {item.item_name}
+          </p>
+          <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>{item.item_equipment_slot}</p>
+        </div>
+      </div>
+
+      {stats.length > 0 && (
+        <div className="border-t border-gray-700 pt-2 mb-2 space-y-0.5">
+          {stats.map(([k, v]) => (
+            <div key={k} className="flex justify-between">
+              <span className="text-gray-300">{STAT_KO[k] ?? k}</span>
+              <span className="text-white font-semibold">+{v}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <PotentialBlock grade={item.potential_option_grade} opts={[item.potential_option_1, item.potential_option_2, item.potential_option_3]} />
+      <PotentialBlock grade={item.additional_potential_option_grade} opts={[item.additional_potential_option_1, item.additional_potential_option_2, item.additional_potential_option_3]} />
+    </div>
+  )
+}
+
+function SlotCell({ item, col, onClick }: { item: EquipmentItem | undefined; col: number; onClick: (item: EquipmentItem) => void }) {
   const grade     = item?.potential_option_grade ?? null
   const sfNum     = parseInt(item?.starforce ?? "0") || 0
   const borderCls = grade ? (GRADE_BORDER[grade] ?? "border-gray-600") : "border-gray-600"
@@ -66,7 +110,9 @@ function SlotCell({ item, col }: { item: EquipmentItem | undefined; col: number 
 
   return (
     <div className="relative group flex items-center justify-center">
-      <div className={`w-[52px] h-[52px] rounded-lg border-2 flex items-center justify-center bg-[#12122a] cursor-default transition-all ${item ? borderCls + " hover:brightness-110" : "border-gray-700 opacity-40"}`}>
+      <div
+        onClick={() => item && onClick(item)}
+        className={`w-[52px] h-[52px] rounded-lg border-2 flex items-center justify-center bg-[#12122a] transition-all ${item ? borderCls + " hover:brightness-110 cursor-pointer" : "border-gray-700 opacity-40 cursor-default"}`}>
         {item ? (
           <>
             {item.item_icon
@@ -81,32 +127,11 @@ function SlotCell({ item, col }: { item: EquipmentItem | undefined; col: number 
         )}
       </div>
 
+      {/* 데스크탑 hover 툴팁 */}
       {item && (
-        <div className={`hidden group-hover:block absolute z-50 top-0 w-64 ${tipSide}`}>
-          <div className="bg-[#1a1a2e] text-white rounded-xl shadow-2xl border border-gray-700 p-3 text-[12px]">
-            <p className="font-bold text-[13px] leading-tight mb-1"
-              style={{ color: grade ? (POTENTIAL_COLORS[grade] ?? "#fff") : "#fff" }}>
-              {sfNum > 0 && <span className="text-yellow-400 mr-1">{"★".repeat(Math.min(sfNum, 5))}{sfNum > 5 ? ` ${sfNum}성` : ""}</span>}
-              {item.item_name}
-            </p>
-            <p className="text-[var(--text-muted)] text-[11px] mb-2">{item.item_equipment_slot}</p>
-
-            {(() => {
-              const stats = Object.entries(item.item_total_option ?? {}).filter(([, v]) => v !== "0" && v !== "")
-              return stats.length > 0 ? (
-                <div className="border-t border-gray-700 pt-2 mb-2 space-y-0.5">
-                  {stats.map(([k, v]) => (
-                    <div key={k} className="flex justify-between">
-                      <span className="text-gray-300">{STAT_KO[k] ?? k}</span>
-                      <span className="text-white font-semibold">+{v}</span>
-                    </div>
-                  ))}
-                </div>
-              ) : null
-            })()}
-
-            <PotentialBlock grade={item.potential_option_grade} opts={[item.potential_option_1, item.potential_option_2, item.potential_option_3]} />
-            <PotentialBlock grade={item.additional_potential_option_grade} opts={[item.additional_potential_option_1, item.additional_potential_option_2, item.additional_potential_option_3]} />
+        <div className={`hidden md:group-hover:block absolute z-50 top-0 w-64 ${tipSide}`}>
+          <div className="bg-[#1a1a2e] text-white rounded-xl shadow-2xl border border-gray-700 p-3">
+            <ItemDetail item={item} />
           </div>
         </div>
       )}
@@ -115,6 +140,8 @@ function SlotCell({ item, col }: { item: EquipmentItem | undefined; col: number 
 }
 
 export default function EquipmentTab({ items }: { items: EquipmentItem[] }) {
+  const [selected, setSelected] = useState<EquipmentItem | null>(null)
+
   if (!items.length) {
     return <div className="text-center py-12 text-sm" style={{ color: "var(--text-muted)" }}>장비 정보를 불러올 수 없어요</div>
   }
@@ -122,14 +149,37 @@ export default function EquipmentTab({ items }: { items: EquipmentItem[] }) {
   const itemMap = new Map(items.map(it => [it.item_equipment_slot, it]))
 
   return (
-    <div className="flex justify-center">
-      <div className="grid gap-1.5" style={{ gridTemplateColumns: "repeat(5, 52px)", gridTemplateRows: "repeat(6, 52px)" }}>
-        {SLOT_LAYOUT.map(({ slot, col, row }) => (
-          <div key={slot} style={{ gridColumn: col, gridRow: row }}>
-            <SlotCell item={itemMap.get(slot)} col={col} />
-          </div>
-        ))}
+    <>
+      <div className="flex justify-center">
+        <div className="grid gap-1.5" style={{ gridTemplateColumns: "repeat(5, 52px)", gridTemplateRows: "repeat(6, 52px)" }}>
+          {SLOT_LAYOUT.map(({ slot, col, row }) => (
+            <div key={slot} style={{ gridColumn: col, gridRow: row }}>
+              <SlotCell item={itemMap.get(slot)} col={col} onClick={setSelected} />
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+
+      {/* 모바일 + 데스크탑 클릭 모달 */}
+      {selected && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+          style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
+          onClick={() => setSelected(null)}>
+          <div
+            className="w-full sm:w-80 rounded-t-2xl sm:rounded-2xl p-5"
+            style={{ background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", maxHeight: "80vh", overflowY: "auto" }}
+            onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>장비 정보</p>
+              <button onClick={() => setSelected(null)} style={{ color: "var(--text-muted)" }}>
+                <X size={16} />
+              </button>
+            </div>
+            <ItemDetail item={selected} />
+          </div>
+        </div>
+      )}
+    </>
   )
 }
