@@ -14,8 +14,16 @@ export default function ContactPage() {
   const [result, setResult]         = useState<{ ok: boolean; msg: string } | null>(null)
   const [selected, setSelected]     = useState<Request | null>(null)
   const [showAdminLogin, setShowAdminLogin] = useState(false)
-  const [isAdmin, setIsAdmin]       = useState(() => typeof window !== "undefined" && sessionStorage.getItem("isAdmin") === "true")
-  const [adminPassword, setAdminPassword]   = useState(() => typeof window !== "undefined" ? sessionStorage.getItem("adminPassword") ?? "" : "")
+  const [isAdmin, setIsAdmin]       = useState(false)
+  const [adminPassword, setAdminPassword]   = useState("")
+
+  useEffect(() => {
+    const pw = sessionStorage.getItem("adminPassword")
+    if (pw && sessionStorage.getItem("isAdmin") === "true") {
+      setIsAdmin(true)
+      setAdminPassword(pw)
+    }
+  }, [])
 
   const fetchRequests = useCallback(async () => {
     setLoading(true)
@@ -98,15 +106,17 @@ export default function ContactPage() {
   }
 
   const handleUpdate = async (id: string, field: "priority" | "status", value: string) => {
+    const pw = sessionStorage.getItem("adminPassword") ?? adminPassword
     const prev = requests.find(r => r.id === id)
     setRequests(rs => rs.map(r => r.id === id ? { ...r, [field]: value as any } : r))
     const res = await fetch("/api/feature-request", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, adminPassword, [field]: value }),
+      body: JSON.stringify({ id, adminPassword: pw, [field]: value }),
     })
     if (!res.ok && prev) {
       setRequests(rs => rs.map(r => r.id === id ? { ...r, [field]: (prev as any)[field] } : r))
+      console.error("PATCH failed", await res.json())
     }
   }
 
