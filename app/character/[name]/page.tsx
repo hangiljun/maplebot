@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { Search } from "lucide-react"
@@ -25,58 +26,87 @@ function formatPower(value: string | number): string {
   return num.toLocaleString()
 }
 
-export default async function CharacterDetailPage({ params }: Props) {
-  const { name } = await params
-  const decoded = decodeURIComponent(name)
-  const data = await fetchCharacter(decoded)
+function CharacterSkeleton() {
+  return (
+    <div className="max-w-3xl mx-auto space-y-4 animate-pulse">
+      {/* 캐릭터 카드 스켈레톤 */}
+      <div className="glass rounded-3xl overflow-hidden">
+        <div className="flex flex-col sm:flex-row">
+          <div className="sm:w-44 shrink-0 pt-8 pb-4 px-6 flex items-end justify-center"
+            style={{ background: "linear-gradient(160deg, rgba(37,99,235,0.15) 0%, transparent 100%)" }}>
+            <div className="w-24 h-32 rounded-2xl" style={{ background: "rgba(255,255,255,0.06)" }} />
+          </div>
+          <div className="flex-1 p-6 space-y-4">
+            <div className="flex items-start justify-between">
+              <div className="space-y-2">
+                <div className="h-7 w-32 rounded-lg" style={{ background: "rgba(255,255,255,0.08)" }} />
+                <div className="h-4 w-20 rounded" style={{ background: "rgba(255,255,255,0.05)" }} />
+              </div>
+              <div className="h-9 w-14 rounded-lg" style={{ background: "rgba(255,255,255,0.08)" }} />
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="rounded-xl px-3 py-2.5 h-12" style={{ background: "rgba(255,255,255,0.04)" }} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* 히스토리 스켈레톤 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {[1, 2].map(i => (
+          <div key={i} className="glass rounded-2xl p-5 h-44" style={{ background: "rgba(255,255,255,0.03)" }} />
+        ))}
+      </div>
+      {/* 탭 스켈레톤 */}
+      <div className="glass rounded-2xl p-5 h-64" style={{ background: "rgba(255,255,255,0.03)" }} />
+    </div>
+  )
+}
+
+async function CharacterContent({ name }: { name: string }) {
+  const data = await fetchCharacter(name)
 
   if (!data) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-6" style={{ paddingTop: "56px" }}>
-        <div className="glass rounded-3xl p-10 max-w-md w-full text-center"
-          style={{ border: "1px solid rgba(239,68,68,0.15)" }}>
-          {/* 아이콘 */}
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
-            style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
-            <Search size={26} style={{ color: "#f87171" }} />
-          </div>
-
-          <h2 className="text-xl font-bold mb-2" style={{ color: "var(--text)" }}>
-            캐릭터를 찾을 수 없어요
-          </h2>
-          <p className="text-sm mb-2" style={{ color: "var(--text-sub)" }}>
-            <span style={{ color: "var(--blue-light)", fontWeight: 600 }}>&apos;{decoded}&apos;</span> 캐릭터가
-            존재하지 않거나 일시적으로 API 조회에 실패했습니다.
-          </p>
-          <p className="text-xs mb-7 leading-relaxed" style={{ color: "var(--text-muted)" }}>
-            Nexon 서버 점검 중이거나 API 호출 한도를 초과한 경우<br />
-            일시적으로 조회가 되지 않을 수 있습니다. 잠시 후 다시 시도해 주세요.
-          </p>
-
-          {/* 체크리스트 */}
-          <div className="rounded-xl p-4 text-left mb-7"
-            style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}>
-            <p className="text-xs font-semibold mb-2" style={{ color: "var(--text-muted)" }}>확인해 보세요</p>
-            {[
-              "닉네임 철자가 정확한지 확인",
-              "메이플스토리 공식 홈페이지에서 캐릭터 조회 후 복사",
-              "잠시 후(1~2분) 다시 시도",
-            ].map((tip, i) => (
-              <div key={i} className="flex items-center gap-2 text-xs mt-1.5"
-                style={{ color: "var(--text-sub)" }}>
-                <div className="w-1 h-1 rounded-full shrink-0" style={{ background: "var(--blue-light)" }} />
-                {tip}
-              </div>
-            ))}
-          </div>
-
-          <div className="flex gap-2 justify-center">
-            <Link href="/character" className="btn-primary px-5 py-2.5 text-sm">
-              다시 검색
-            </Link>
-            <Link href="/" className="btn-outline px-5 py-2.5 text-sm">
-              홈으로
-            </Link>
+      <div className="max-w-3xl mx-auto">
+        <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="glass rounded-3xl p-10 max-w-md w-full text-center"
+            style={{ border: "1px solid rgba(239,68,68,0.15)" }}>
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
+              style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
+              <Search size={26} style={{ color: "#f87171" }} />
+            </div>
+            <h2 className="text-xl font-bold mb-2" style={{ color: "var(--text)" }}>
+              캐릭터를 찾을 수 없어요
+            </h2>
+            <p className="text-sm mb-2" style={{ color: "var(--text-sub)" }}>
+              <span style={{ color: "var(--blue-light)", fontWeight: 600 }}>&apos;{name}&apos;</span> 캐릭터가
+              존재하지 않거나 일시적으로 API 조회에 실패했습니다.
+            </p>
+            <p className="text-xs mb-7 leading-relaxed" style={{ color: "var(--text-muted)" }}>
+              Nexon 서버 점검 중이거나 API 호출 한도를 초과한 경우<br />
+              일시적으로 조회가 되지 않을 수 있습니다. 잠시 후 다시 시도해 주세요.
+            </p>
+            <div className="rounded-xl p-4 text-left mb-7"
+              style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}>
+              <p className="text-xs font-semibold mb-2" style={{ color: "var(--text-muted)" }}>확인해 보세요</p>
+              {[
+                "닉네임 철자가 정확한지 확인",
+                "메이플스토리 공식 홈페이지에서 캐릭터 조회 후 복사",
+                "잠시 후(1~2분) 다시 시도",
+              ].map((tip, i) => (
+                <div key={i} className="flex items-center gap-2 text-xs mt-1.5"
+                  style={{ color: "var(--text-sub)" }}>
+                  <div className="w-1 h-1 rounded-full shrink-0" style={{ background: "var(--blue-light)" }} />
+                  {tip}
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2 justify-center">
+              <Link href="/character" className="btn-primary px-5 py-2.5 text-sm">다시 검색</Link>
+              <Link href="/" className="btn-outline px-5 py-2.5 text-sm">홈으로</Link>
+            </div>
           </div>
         </div>
       </div>
@@ -96,20 +126,14 @@ export default async function CharacterDetailPage({ params }: Props) {
   ]
 
   return (
-    <div className="section-container pb-16" style={{ paddingTop: "80px" }}>
-      <div className="max-w-3xl mx-auto space-y-4">
-
+    <div className="max-w-3xl mx-auto space-y-4">
       {/* 캐릭터 카드 */}
       <div className="glass rounded-3xl overflow-hidden">
         <div className="flex flex-col sm:flex-row">
-
-          {/* 이미지 */}
           <div className="flex items-end justify-center sm:justify-start pt-8 pb-4 px-6 sm:w-44 shrink-0"
             style={{ background: "linear-gradient(160deg, rgba(37,99,235,0.15) 0%, transparent 100%)" }}>
             <CharacterImage src={basic.character_image} name={basic.character_name} size="xl" />
           </div>
-
-          {/* 정보 */}
           <div className="flex-1 p-6">
             <div className="flex items-start justify-between mb-5">
               <div>
@@ -129,7 +153,6 @@ export default async function CharacterDetailPage({ params }: Props) {
                 </p>
               </div>
             </div>
-
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {infoItems.map(({ label, value, gold }) => (
                 <div key={label} className="glass rounded-xl px-3 py-2.5">
@@ -148,7 +171,7 @@ export default async function CharacterDetailPage({ params }: Props) {
       </div>
 
       {/* 히스토리 */}
-      <HistoryCharts name={decoded} />
+      <HistoryCharts name={basic.character_name} />
 
       {/* 탭 */}
       <CharacterTabs data={data} />
@@ -161,6 +184,18 @@ export default async function CharacterDetailPage({ params }: Props) {
         </Link>
       </div>
     </div>
+  )
+}
+
+export default async function CharacterDetailPage({ params }: Props) {
+  const { name } = await params
+  const decoded = decodeURIComponent(name)
+
+  return (
+    <div className="section-container pb-16" style={{ paddingTop: "80px" }}>
+      <Suspense fallback={<CharacterSkeleton />}>
+        <CharacterContent name={decoded} />
+      </Suspense>
     </div>
   )
 }
