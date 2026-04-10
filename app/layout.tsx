@@ -36,6 +36,7 @@ export default function RootLayout({
     <html lang="ko">
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
+        <meta name="naver-site-verification" content="2d5bce72e14a9d6df1ec4a44c0f8b7a64ebb6ac1" />
         <link
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
