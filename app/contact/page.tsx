@@ -14,8 +14,8 @@ export default function ContactPage() {
   const [result, setResult]         = useState<{ ok: boolean; msg: string } | null>(null)
   const [selected, setSelected]     = useState<Request | null>(null)
   const [showAdminLogin, setShowAdminLogin] = useState(false)
-  const [isAdmin, setIsAdmin]       = useState(false)
-  const [adminPassword, setAdminPassword]   = useState("")
+  const [isAdmin, setIsAdmin]       = useState(() => typeof window !== "undefined" && sessionStorage.getItem("isAdmin") === "true")
+  const [adminPassword, setAdminPassword]   = useState(() => typeof window !== "undefined" ? sessionStorage.getItem("adminPassword") ?? "" : "")
 
   const fetchRequests = useCallback(async () => {
     setLoading(true)
@@ -74,8 +74,17 @@ export default function ContactPage() {
     if (res.status === 400) {
       setIsAdmin(true)
       setAdminPassword(pw)
+      sessionStorage.setItem("isAdmin", "true")
+      sessionStorage.setItem("adminPassword", pw)
       setShowAdminLogin(false)
     }
+  }
+
+  const handleAdminLogout = () => {
+    setIsAdmin(false)
+    setAdminPassword("")
+    sessionStorage.removeItem("isAdmin")
+    sessionStorage.removeItem("adminPassword")
   }
 
   const handleDelete = async (id: string) => {
@@ -89,12 +98,16 @@ export default function ContactPage() {
   }
 
   const handleUpdate = async (id: string, field: "priority" | "status", value: string) => {
-    await fetch("/api/feature-request", {
+    const prev = requests.find(r => r.id === id)
+    setRequests(rs => rs.map(r => r.id === id ? { ...r, [field]: value as any } : r))
+    const res = await fetch("/api/feature-request", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, adminPassword, [field]: value }),
     })
-    setRequests(prev => prev.map(r => r.id === id ? { ...r, [field]: value as any } : r))
+    if (!res.ok && prev) {
+      setRequests(rs => rs.map(r => r.id === id ? { ...r, [field]: (prev as any)[field] } : r))
+    }
   }
 
   const canSubmit = !submitting && form.title.trim().length > 0 && form.description.trim().length > 0
@@ -127,7 +140,7 @@ export default function ContactPage() {
             </p>
           </div>
           <button
-            onClick={() => isAdmin ? setIsAdmin(false) : setShowAdminLogin(true)}
+            onClick={() => isAdmin ? handleAdminLogout() : setShowAdminLogin(true)}
             className="flex items-center gap-1.5 shrink-0 mt-1"
             style={{ fontSize: "12px", fontWeight: 600, padding: "6px 12px", borderRadius: "5px", border: `1px solid ${isAdmin ? "rgba(74,222,128,0.3)" : "var(--border)"}`, background: isAdmin ? "rgba(74,222,128,0.08)" : "rgba(255,255,255,0.02)", color: isAdmin ? "#4ade80" : "var(--text-muted)" }}>
             {isAdmin ? <><Shield size={12} />관리자 모드</> : <><Lock size={12} />관리자</>}
