@@ -88,9 +88,29 @@ export function DiscordMockup({ cmd }: { cmd: CmdKey }) {
                   </div>
                 )}
                 {c.buttons && c.buttons.length > 0 && (
-                  <div style={{ display: "flex", gap: "4px", flexWrap: "wrap", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "8px" }}>
+                  <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "8px" }}>
                     {c.buttons.map(btn => (
-                      <div key={btn} style={{ background: "#4e5058", color: "#dbdee1", fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "4px", cursor: "default" }}>{btn}</div>
+                      <div key={btn}
+                        style={{
+                          background: "rgba(88,101,242,0.18)",
+                          color: "#c9cdfb",
+                          fontSize: "11px",
+                          fontWeight: 700,
+                          padding: "5px 11px",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                          border: "1px solid rgba(88,101,242,0.4)",
+                          transition: "all 0.15s",
+                        }}
+                        onMouseEnter={e => {
+                          e.currentTarget.style.background = "rgba(88,101,242,0.38)"
+                          e.currentTarget.style.borderColor = "rgba(88,101,242,0.7)"
+                        }}
+                        onMouseLeave={e => {
+                          e.currentTarget.style.background = "rgba(88,101,242,0.18)"
+                          e.currentTarget.style.borderColor = "rgba(88,101,242,0.4)"
+                        }}
+                      >{btn}</div>
                     ))}
                   </div>
                 )}

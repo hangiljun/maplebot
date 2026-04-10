@@ -53,47 +53,60 @@ export default function HomePage() {
         </div>
 
         <div className="section-container w-full flex flex-col lg:flex-row items-center gap-12 lg:gap-20 pt-20 pb-16">
-          <div className="flex-1 text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-6"
-              style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.2)", color: "#4ade80" }}>
-              <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block"
-                style={{ boxShadow: "0 0 6px #4ade80", animation: "pulse 2s infinite" }} />
-              Nexon API 최신 버전 연동 완료 · 2026-04-09
-            </div>
+
+          {/* 왼쪽: 텍스트 + 검색창 */}
+          <div className="flex-1 text-center lg:text-left">
             <h1 className="font-black leading-tight tracking-tight mb-4"
               style={{ fontSize: "clamp(2.2rem, 5vw, 3.5rem)", color: "var(--text)" }}>
               정확한 데이터,<br />
               <span style={{ color: "var(--blue-light)" }}>압도적인 속도.</span>
             </h1>
-            <p className="text-base font-medium mb-2" style={{ color: "var(--text-sub)" }}>메이플봇이 당신의 스펙을 증명합니다.</p>
-            <p className="text-sm mb-8" style={{ color: "var(--text-muted)" }}>Nexon OpenAPI 기반 · 실시간 캐릭터 정보 · 디스코드 봇 연동</p>
 
+            {/* 3번: 서브 텍스트 변경 */}
+            <p className="text-base font-medium mb-8" style={{ color: "var(--text-sub)" }}>
+              당신의 진짜 스펙을 빠르고 정확하게 보여드립니다.
+            </p>
+
+            {/* 6번: 검색창 개선 */}
             <form onSubmit={(e) => { e.preventDefault(); go() }}
-              className="flex items-center rounded-2xl overflow-hidden mb-5 mx-auto"
-              style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)", boxShadow: "0 8px 40px rgba(0,0,0,0.4)", maxWidth: "520px", height: "72px" }}>
-              <Search size={20} className="ml-6 shrink-0" style={{ color: "var(--text-muted)" }} />
-              <input ref={inputRef} type="text" placeholder="캐릭터 닉네임 검색" autoFocus
-                className="flex-1 px-4 bg-transparent focus:outline-none placeholder:text-white/25"
-                style={{ color: "var(--text)", fontSize: "16px", height: "100%" }} />
+              className="flex items-center rounded-2xl overflow-hidden mx-auto lg:mx-0"
+              style={{
+                background: "rgba(255,255,255,0.07)",
+                border: "1px solid rgba(255,255,255,0.15)",
+                boxShadow: "0 8px 40px rgba(0,0,0,0.4)",
+                maxWidth: "560px",
+                height: "64px",
+              }}>
+              <Search size={20} className="ml-5 shrink-0" style={{ color: "var(--text-muted)" }} />
+              <input
+                ref={inputRef}
+                type="text"
+                placeholder="캐릭터 닉네임을 입력하세요 (예: 메이플봇)"
+                autoFocus
+                className="flex-1 px-4 bg-transparent focus:outline-none placeholder:text-white/30 text-sm"
+                style={{ color: "var(--text)", height: "100%" }}
+              />
               <button type="submit" className="btn-primary shrink-0 font-bold rounded-xl"
-                style={{ margin: "10px", padding: "0 28px", height: "52px", fontSize: "15px" }}>검색</button>
+                style={{ margin: "8px", padding: "0 24px", height: "48px", fontSize: "14px" }}>
+                검색
+              </button>
             </form>
-
-            <div className="flex justify-center">
-              <Link href={DISCORD_URL} target="_blank" className="btn-primary font-bold"
-                style={{ padding: "14px 32px", fontSize: "15px", borderRadius: "14px" }}>
-                메이플봇 서버에 추가하기
-              </Link>
-            </div>
           </div>
 
-          <div className="shrink-0 flex justify-center">
+          {/* 오른쪽: 예시 카드 + 4번: 버튼을 카드 하단으로 이동 */}
+          <div className="shrink-0 flex flex-col items-center gap-5">
             <div style={{ position: "relative" }}>
               <div style={{ position: "absolute", inset: "-30px", borderRadius: "32px", background: "radial-gradient(ellipse, rgba(88,101,242,0.3) 0%, transparent 70%)", filter: "blur(30px)" }} />
               <div style={{ position: "relative", transform: "perspective(1200px) rotateY(-10deg) rotateX(4deg)", filter: "drop-shadow(0 30px 60px rgba(0,0,0,0.5))" }}>
                 <DiscordMockup cmd="/정보" />
               </div>
             </div>
+
+            {/* 4번: 버튼 위치 — 카드 하단 */}
+            <Link href={DISCORD_URL} target="_blank" className="btn-primary font-bold"
+              style={{ padding: "13px 28px", fontSize: "14px", borderRadius: "14px" }}>
+              메이플봇 서버에 추가하기
+            </Link>
           </div>
         </div>
       </section>
