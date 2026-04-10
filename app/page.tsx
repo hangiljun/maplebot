@@ -201,28 +201,28 @@ export default function HomePage() {
 
             {/* 검색바 */}
             <form onSubmit={(e) => { e.preventDefault(); go() }}
-              className="flex items-center rounded-3xl overflow-hidden mb-5 max-w-lg mx-auto"
-              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.14)", boxShadow: "0 8px 40px rgba(0,0,0,0.4)" }}>
-              <Search size={18} className="ml-5 shrink-0" style={{ color: "var(--text-muted)" }} />
+              className="flex items-center rounded-2xl overflow-hidden mb-5 mx-auto"
+              style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.15)", boxShadow: "0 8px 40px rgba(0,0,0,0.4)", maxWidth: "520px", height: "72px" }}>
+              <Search size={20} className="ml-6 shrink-0" style={{ color: "var(--text-muted)" }} />
               <input
                 ref={inputRef}
                 type="text"
                 placeholder="캐릭터 닉네임 검색"
                 autoFocus
-                className="flex-1 px-4 bg-transparent focus:outline-none text-base placeholder:text-white/20"
-                style={{ color: "var(--text)", height: "64px" }}
+                className="flex-1 px-4 bg-transparent focus:outline-none placeholder:text-white/25"
+                style={{ color: "var(--text)", fontSize: "16px", height: "100%" }}
               />
-              <button type="submit" className="btn-primary m-3 px-7 py-3.5 text-sm font-bold rounded-2xl">
+              <button type="submit" className="btn-primary shrink-0 font-bold rounded-xl"
+                style={{ margin: "10px", padding: "0 28px", height: "52px", fontSize: "15px" }}>
                 검색
               </button>
             </form>
 
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link href={DISCORD_URL} target="_blank" className="btn-primary px-7 py-3 text-sm">
+            <div className="flex justify-center">
+              <Link href={DISCORD_URL} target="_blank"
+                className="btn-primary font-bold"
+                style={{ padding: "14px 32px", fontSize: "15px", borderRadius: "14px" }}>
                 메이플봇 서버에 추가하기
-              </Link>
-              <Link href="/character" className="btn-outline px-7 py-3 text-sm">
-                캐릭터 조회하기
               </Link>
             </div>
           </div>
