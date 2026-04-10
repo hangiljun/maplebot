@@ -85,6 +85,11 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 })
     }
 
+    // 비밀번호 확인용 더미 요청 — 삭제하지 않고 400 반환
+    if (id === "__check__") {
+      return NextResponse.json({ ok: true }, { status: 400 })
+    }
+
     const { getDb } = await import("@/lib/firebase-admin")
     const db = getDb()
 
