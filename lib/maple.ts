@@ -12,20 +12,20 @@ function getApiKeys(): string[] {
   return [process.env.NEXON_API_KEY, process.env.NEXON_API_KEY_2].filter(Boolean) as string[]
 }
 
-async function nexonFetch(path: string, keyIndex = 0, revalidate = 300): Promise<any> {
+async function nexonFetch(path: string, keyIndex = 0): Promise<any> {
   const keys = getApiKeys()
   if (keys.length === 0) throw new Error("NEXON_API_KEY 환경변수가 설정되지 않았습니다")
 
   const res = await fetch(`${BASE_URL}${path}`, {
     headers: { "x-nxopen-api-key": keys[keyIndex % keys.length] },
-    next: { revalidate },
+    cache: "no-store",
   })
 
   if (!res.ok) {
-    if (res.status === 429 && keyIndex + 1 < keys.length) return nexonFetch(path, keyIndex + 1, revalidate)
+    if (res.status === 429 && keyIndex + 1 < keys.length) return nexonFetch(path, keyIndex + 1)
     if (res.status === 429) {
       await new Promise(r => setTimeout(r, 1000))
-      return nexonFetch(path, 0, revalidate)
+      return nexonFetch(path, 0)
     }
     console.error(`Nexon API 오류 [${res.status}]:`, path)
     return null
@@ -107,25 +107,28 @@ export async function fetchCharacter(name: string): Promise<CharacterData | null
 
   const q = `ocid=${ocid}`
 
-  const [
-    basicR, popularityR, statR, equipR,
-    abilityR, unionR, symbolR,
-    hexaCoreR, hexaStatR, codiR, beautyR,
-  ] = await Promise.all([
+  // 배치 1: 핵심 정보 (6개 병렬)
+  const [basicR, popularityR, statR, equipR, abilityR, unionR] = await Promise.all([
     nexonFetch(`/maplestory/v1/character/basic?${q}`),
     nexonFetch(`/maplestory/v1/character/popularity?${q}`),
     nexonFetch(`/maplestory/v1/character/stat?${q}`),
     nexonFetch(`/maplestory/v1/character/item-equipment?${q}`),
     nexonFetch(`/maplestory/v1/character/ability?${q}`),
     nexonFetch(`/maplestory/v1/user/union?${q}`),
+  ])
+
+  if (!basicR) return null
+
+  await new Promise(r => setTimeout(r, 100))
+
+  // 배치 2: 탭 데이터 (5개 병렬)
+  const [symbolR, hexaCoreR, hexaStatR, codiR, beautyR] = await Promise.all([
     nexonFetch(`/maplestory/v1/character/symbol-equipment?${q}`),
     nexonFetch(`/maplestory/v1/character/hexamatrix?${q}`),
     nexonFetch(`/maplestory/v1/character/hexamatrix-stat?${q}`),
     nexonFetch(`/maplestory/v1/character/cashitem-equipment?${q}`),
     nexonFetch(`/maplestory/v1/character/beauty-equipment?${q}`),
   ])
-
-  if (!basicR) return null
 
   const mapPreset = (items: CashItem[]) =>
     (items ?? []).map(({ cash_item_equipment_part, cash_item_equipment_slot, cash_item_name, cash_item_icon, cash_item_label }: CashItem) =>
