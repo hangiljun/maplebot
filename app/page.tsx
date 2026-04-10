@@ -136,16 +136,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 기능 소개 + 최근 업데이트 */}
-      <section style={{ paddingTop: "160px", paddingBottom: "160px" }}>
+      {/* 기능 소개 */}
+      <section style={{ paddingTop: "160px", paddingBottom: "80px" }}>
         <div className="section-container">
-
-          {/* 제공 기능 */}
           <div className="text-center mb-12">
             <h2 className="text-3xl font-black mb-3" style={{ color: "var(--text)" }}>제공 기능</h2>
             <p className="text-sm" style={{ color: "var(--text-muted)" }}>Nexon OpenAPI를 기반으로 다양한 캐릭터 정보를 제공합니다</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map((f) => (
               <div key={f.label} className="glass rounded-2xl p-6 card-hover cursor-default" style={{ border: "1px solid var(--border)" }}>
                 <div className="w-2 h-2 rounded-full mb-4" style={{ background: "linear-gradient(135deg, #1d4ed8, #60a5fa)" }} />
@@ -154,24 +152,29 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
 
-          {/* 최근 업데이트 — 같은 너비 */}
-          <div className="glass rounded-3xl p-10" style={{ border: "1px solid var(--border)" }}>
-            <div className="flex items-center justify-between mb-8">
-              <h3 className="text-xl font-black" style={{ color: "var(--text)" }}>최근 업데이트</h3>
-              <Link href="/updates" className="text-xs font-semibold hover:underline" style={{ color: "var(--blue-light)" }}>전체 보기</Link>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-5">
-              {RECENT_UPDATES.map((u, i) => (
-                <div key={i} className="flex items-center gap-4">
-                  <span className="text-sm font-mono shrink-0 tabular-nums" style={{ color: "var(--text-muted)" }}>{u.date}</span>
-                  <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "var(--blue-light)" }} />
-                  <span className="text-sm" style={{ color: "var(--text-sub)" }}>{u.text}</span>
-                </div>
-              ))}
+      {/* 최근 업데이트 */}
+      <section style={{ paddingTop: "80px", paddingBottom: "160px" }}>
+        <div className="section-container">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-black mb-3" style={{ color: "var(--text)" }}>최근 업데이트</h2>
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>메이플봇의 최신 기능 추가 및 개선 내역을 확인하세요</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {RECENT_UPDATES.map((u, i) => (
+              <div key={i} className="glass rounded-2xl p-6 card-hover cursor-default" style={{ border: "1px solid var(--border)" }}>
+                <p className="text-xs font-mono mb-3 tabular-nums" style={{ color: "var(--blue-light)" }}>{u.date}</p>
+                <p className="text-sm leading-relaxed" style={{ color: "var(--text-sub)" }}>{u.text}</p>
+              </div>
+            ))}
+            <div className="glass rounded-2xl p-6 flex items-center justify-center card-hover" style={{ border: "1px solid var(--border)" }}>
+              <Link href="/updates" className="text-sm font-semibold" style={{ color: "var(--blue-light)" }}>
+                전체 업데이트 보기 →
+              </Link>
             </div>
           </div>
-
         </div>
       </section>
 
