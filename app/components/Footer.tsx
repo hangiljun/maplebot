@@ -4,7 +4,7 @@ export default function Footer() {
   return (
     <footer className="mt-auto">
       {/* 넥슨 법적 고지 */}
-      <div className="max-w-3xl mx-auto px-4 pb-4">
+      <div className="section-container pb-4">
         <div className="rounded-xl px-5 py-4 text-xs text-center leading-relaxed"
           style={{ background: "rgba(37,99,235,0.04)", border: "1px solid rgba(37,99,235,0.1)", color: "var(--text-muted)" }}>
           본 서비스는 Nexon OpenAPI를 활용하며, Nexon(넥슨)의 공식 서비스가 아닙니다.<br />
