@@ -30,7 +30,7 @@ export default function Navbar() {
           WebkitBackdropFilter: "blur(20px)",
           borderBottom: "1px solid rgba(255,255,255,0.07)",
         }}>
-        <div className="section-container h-full flex items-center gap-6">
+        <div className="section-container h-full flex items-center">
 
           {/* 로고 */}
           <Link href="/" className="shrink-0 font-black text-[16px] tracking-tight"
@@ -38,8 +38,8 @@ export default function Navbar() {
             메이플봇
           </Link>
 
-          {/* 데스크탑 메뉴 */}
-          <div className="hidden md:flex items-center gap-1 flex-1">
+          {/* 데스크탑: 메뉴 + 버튼 */}
+          <div className="hidden md:flex items-center gap-1 flex-1 ml-6">
             {NAV_ITEMS.map(item => (
               <Link key={item.href} href={item.href}
                 className="px-4 py-2 rounded-lg text-[13px] transition-all"
@@ -51,18 +51,16 @@ export default function Navbar() {
                 {item.label}
               </Link>
             ))}
+            <Link href={DISCORD_URL} target="_blank"
+              className="btn-primary text-sm px-4 py-1.5 ml-auto">
+              서버에 추가하기
+            </Link>
           </div>
 
-          {/* 서버 추가 버튼 */}
-          <Link href={DISCORD_URL} target="_blank"
-            className="hidden md:block btn-primary text-sm px-4 py-1.5 ml-auto">
-            서버에 추가하기
-          </Link>
-
-          {/* 모바일 햄버거 */}
-          <button onClick={() => setOpen(!open)} className="md:hidden ml-auto p-1"
+          {/* 모바일 햄버거 — ml-auto로 오른쪽 끝 고정 */}
+          <button onClick={() => setOpen(!open)} className="md:hidden ml-auto p-2"
             style={{ color: "var(--text-muted)" }}>
-            {open ? <X size={20} /> : <Menu size={20} />}
+            {open ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
 
