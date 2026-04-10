@@ -4,24 +4,34 @@ import { useRouter } from "next/navigation"
 import { Search, AlertCircle, Info } from "lucide-react"
 
 export default function CharacterSearchPage() {
-  const [charCount, setCharCount] = useState(0)
+  const [value, setValue]         = useState("")
   const [warn, setWarn]           = useState(false)
-  const inputRef                  = useRef<HTMLInputElement>(null)
   const composingRef              = useRef(false)
   const router                    = useRouter()
 
-  const applyFilter = () => {
-    const el = inputRef.current
-    if (!el) return
-    const raw      = el.value
-    const filtered = raw.replace(/[^a-zA-Z0-9가-힣]/g, "").slice(0, 12)
-    el.value = filtered
-    setCharCount(filtered.length)
+  const filter = (raw: string) => raw.replace(/[^a-zA-Z0-9가-힣]/g, "").slice(0, 12)
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value
+    if (composingRef.current) {
+      setValue(raw)
+      return
+    }
+    const filtered = filter(raw)
+    setValue(filtered)
+    setWarn(raw.length > 0 && filtered !== raw)
+  }
+
+  const handleCompositionEnd = (e: React.CompositionEvent<HTMLInputElement>) => {
+    composingRef.current = false
+    const raw = (e.target as HTMLInputElement).value
+    const filtered = filter(raw)
+    setValue(filtered)
     setWarn(raw.length > 0 && filtered !== raw)
   }
 
   const go = () => {
-    const t = (inputRef.current?.value ?? "").trim()
+    const t = value.trim()
     if (!t) return
     router.push(`/character/${encodeURIComponent(t)}`)
   }
@@ -49,19 +59,18 @@ export default function CharacterSearchPage() {
           }}>
           <Search size={20} className="ml-6 shrink-0" style={{ color: "var(--text-muted)" }} />
           <input
-            ref={inputRef}
             type="text"
-            onInput={() => { if (!composingRef.current) applyFilter() }}
+            value={value}
+            onChange={handleChange}
             onCompositionStart={() => { composingRef.current = true }}
-            onCompositionEnd={() => { composingRef.current = false; applyFilter() }}
+            onCompositionEnd={handleCompositionEnd}
             placeholder="닉네임 입력 후 Enter 또는 검색"
-            autoFocus
             className="flex-1 px-4 bg-transparent focus:outline-none placeholder:text-white/20"
             style={{ color: "var(--text)", fontSize: "16px", height: "100%" }}
           />
-          {charCount > 0 && (
+          {value.length > 0 && (
             <span className="text-sm mr-4 tabular-nums" style={{ color: "var(--text-muted)" }}>
-              {charCount}/12
+              {value.length}/12
             </span>
           )}
           <button type="submit" className="btn-primary shrink-0 font-bold rounded-xl"
