@@ -21,22 +21,6 @@ function CopyButton({ text }: { text: string }) {
   )
 }
 
-/* ── 섹션 헤더 ── */
-function SectionHeader({ num, title, sub }: { num: string; title: string; sub?: string }) {
-  return (
-    <div className="flex items-center gap-4 mb-8 pb-5" style={{ borderBottom: "1px solid var(--border)" }}>
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 font-black text-sm"
-        style={{ background: "rgba(59,130,246,0.12)", color: "var(--blue-light)", border: "1px solid rgba(59,130,246,0.2)" }}>
-        {num}
-      </div>
-      <div>
-        <h2 className="text-lg font-black" style={{ color: "var(--text)" }}>{title}</h2>
-        {sub && <p className="text-sm mt-0.5" style={{ color: "var(--text-muted)" }}>{sub}</p>}
-      </div>
-    </div>
-  )
-}
-
 const STEPS = [
   { step: "01", title: "봇 초대", desc: "아래 '서버에 추가하기' 버튼을 눌러 메이플봇을 디스코드 서버에 초대하세요." },
   { step: "02", title: "명령어 입력", desc: "채널에서 /정보 [캐릭터명] 을 입력합니다. 슬래시(/)를 입력하면 자동완성이 나타납니다." },
@@ -51,8 +35,8 @@ const BUTTONS = [
 ]
 
 const PERMISSIONS = [
-  { name: "메시지 보기 (View Channels)",          reason: "봇이 명령어가 입력된 채널을 인식하기 위해 필요합니다." },
-  { name: "메시지 보내기 (Send Messages)",         reason: "캐릭터 조회 결과를 채널에 전송하기 위해 필요합니다." },
+  { name: "메시지 보기 (View Channels)",           reason: "봇이 명령어가 입력된 채널을 인식하기 위해 필요합니다." },
+  { name: "메시지 보내기 (Send Messages)",          reason: "캐릭터 조회 결과를 채널에 전송하기 위해 필요합니다." },
   { name: "메시지 기록 읽기 (Read Message History)", reason: "슬래시 명령어 처리 및 버튼 상호작용을 위해 필요합니다." },
 ]
 
@@ -63,56 +47,77 @@ const FAQS = [
   { q: "봇이 안전한가요?", a: "메이플봇은 공개된 캐릭터 정보만 조회합니다. 개인정보나 계정 정보를 요구하거나 저장하지 않습니다." },
 ]
 
+function Section({ num, title, sub, children }: { num: string; title: string; sub?: string; children: React.ReactNode }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+      {/* 섹션 번호 라벨 */}
+      <div className="flex items-center gap-3 mb-4 px-1">
+        <div className="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-black"
+          style={{ background: "rgba(59,130,246,0.18)", color: "var(--blue-light)", border: "1px solid rgba(59,130,246,0.3)" }}>
+          {num}
+        </div>
+        <div>
+          <span className="text-base font-black" style={{ color: "var(--text)" }}>{title}</span>
+          {sub && <span className="text-sm ml-2" style={{ color: "var(--text-muted)" }}>{sub}</span>}
+        </div>
+      </div>
+      {/* 섹션 본문 카드 */}
+      <div className="glass rounded-2xl p-7">
+        {children}
+      </div>
+    </div>
+  )
+}
+
 export default function BotGuidePage() {
   return (
-    <div className="min-h-screen" style={{ paddingTop: "96px", paddingBottom: "100px" }}>
-      <div className="max-w-2xl mx-auto px-6">
+    <div className="min-h-screen" style={{ paddingTop: "96px", paddingBottom: "120px" }}>
+      <div className="mx-auto px-6" style={{ maxWidth: "680px" }}>
 
         {/* 페이지 헤더 */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl font-black mb-4" style={{ color: "var(--text)" }}>봇 기능 설명</h1>
+        <div className="text-center mb-14">
+          <h1 className="text-4xl font-black mb-3" style={{ color: "var(--text)" }}>봇 기능 설명</h1>
           <p className="text-base" style={{ color: "var(--text-sub)" }}>
             메이플봇의 디스코드 명령어와 버튼 기능을 안내합니다
           </p>
         </div>
 
-        <div className="space-y-6">
+        {/* 섹션 목록 */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "40px" }}>
 
           {/* ① 시작하는 방법 */}
-          <div className="glass rounded-3xl p-8">
-            <SectionHeader num="①" title="시작하는 방법" />
+          <Section num="①" title="시작하는 방법">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
               {STEPS.map(({ step, title, desc }) => (
                 <div key={step} className="text-center">
                   <div className="text-4xl font-black mb-3 leading-none"
                     style={{ color: "rgba(59,130,246,0.18)" }}>{step}</div>
-                  <p className="text-base font-bold mb-2" style={{ color: "var(--text)" }}>{title}</p>
-                  <p className="text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>{desc}</p>
+                  <p className="text-sm font-bold mb-2" style={{ color: "var(--text)" }}>{title}</p>
+                  <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>{desc}</p>
                 </div>
               ))}
             </div>
             <div className="flex justify-center">
               <Link href={DISCORD_URL} target="_blank"
                 className="btn-primary font-bold"
-                style={{ padding: "12px 28px", fontSize: "15px", borderRadius: "12px" }}>
+                style={{ padding: "11px 28px", fontSize: "14px", borderRadius: "10px" }}>
                 메이플봇 서버에 추가하기
               </Link>
             </div>
-          </div>
+          </Section>
 
           {/* ② 명령어 */}
-          <div className="glass rounded-3xl p-8">
-            <SectionHeader num="②" title="명령어" sub="슬래시(/) 명령어로 바로 사용할 수 있습니다" />
-            <div className="rounded-2xl p-5" style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}>
-              <div className="flex items-center gap-3 mb-5">
-                <code className="text-base px-4 py-2 rounded-xl font-mono font-bold"
+          <Section num="②" title="명령어" sub="슬래시(/) 명령어로 바로 사용 가능합니다">
+            <div className="rounded-xl p-5" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)" }}>
+              <div className="flex items-center gap-3 mb-4">
+                <code className="text-sm px-3 py-1.5 rounded-lg font-mono font-bold"
                   style={{ background: "rgba(37,99,235,0.1)", color: "var(--blue-light)", border: "1px solid rgba(59,130,246,0.2)" }}>
                   /정보 [캐릭터명]
                 </code>
                 <p className="text-sm flex-1" style={{ color: "var(--text-sub)" }}>캐릭터 기본 정보를 조회합니다</p>
                 <CopyButton text="/정보 " />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2.5">
                 {["레벨 및 직업", "전투력", "유니온 등급/레벨", "인기도"].map(d => (
                   <div key={d} className="flex items-center gap-2 text-sm" style={{ color: "var(--text-sub)" }}>
                     <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "var(--blue-light)" }} />
@@ -121,55 +126,52 @@ export default function BotGuidePage() {
                 ))}
               </div>
             </div>
-          </div>
+          </Section>
 
           {/* ③ 조회 후 버튼 */}
-          <div className="glass rounded-3xl p-8">
-            <SectionHeader num="③" title="조회 후 버튼" sub="/정보 실행 후 본인에게만 표시되는 버튼들입니다" />
-            <div className="space-y-3">
+          <Section num="③" title="조회 후 버튼" sub="/정보 실행 후 본인에게만 표시되는 버튼들">
+            <div className="space-y-2.5">
               {BUTTONS.map(b => (
-                <div key={b.label} className="flex items-center gap-4 rounded-2xl px-5 py-4"
-                  style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}>
-                  <span className="text-sm font-bold shrink-0 px-3 py-1 rounded-lg"
-                    style={{ background: "rgba(59,130,246,0.1)", color: "var(--blue-light)", border: "1px solid rgba(59,130,246,0.2)", minWidth: "80px", textAlign: "center" }}>
+                <div key={b.label} className="flex items-center gap-4 rounded-xl px-4 py-3.5"
+                  style={{ background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)" }}>
+                  <span className="text-xs font-bold shrink-0 px-3 py-1 rounded-md"
+                    style={{ background: "rgba(59,130,246,0.1)", color: "var(--blue-light)", border: "1px solid rgba(59,130,246,0.2)", minWidth: "72px", textAlign: "center" }}>
                     {b.label}
                   </span>
                   <p className="text-sm" style={{ color: "var(--text-sub)" }}>{b.desc}</p>
                 </div>
               ))}
             </div>
-          </div>
+          </Section>
 
           {/* ④ 봇 권한 안내 */}
-          <div className="glass rounded-3xl p-8">
-            <SectionHeader num="④" title="봇 권한 안내" sub="서비스 운영에 필요한 최소한의 권한만 요청합니다" />
-            <div className="space-y-3">
+          <Section num="④" title="봇 권한 안내" sub="최소한의 권한만 요청합니다">
+            <div className="space-y-2.5">
               {PERMISSIONS.map(p => (
-                <div key={p.name} className="rounded-2xl px-5 py-4"
-                  style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}>
-                  <p className="text-sm font-bold mb-1.5" style={{ color: "var(--text)" }}>{p.name}</p>
-                  <p className="text-sm" style={{ color: "var(--text-muted)" }}>{p.reason}</p>
+                <div key={p.name} className="rounded-xl px-4 py-3.5"
+                  style={{ background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)" }}>
+                  <p className="text-sm font-bold mb-1" style={{ color: "var(--text)" }}>{p.name}</p>
+                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>{p.reason}</p>
                 </div>
               ))}
             </div>
-            <p className="text-sm mt-5 text-center" style={{ color: "var(--text-muted)" }}>
+            <p className="text-xs mt-4 text-center" style={{ color: "var(--text-muted)" }}>
               봇은 이용자의 비밀번호·개인정보를 요구하거나 저장하지 않습니다.
             </p>
-          </div>
+          </Section>
 
           {/* ⑤ 자주 묻는 질문 */}
-          <div className="glass rounded-3xl p-8">
-            <SectionHeader num="⑤" title="자주 묻는 질문" />
-            <div className="space-y-6">
+          <Section num="⑤" title="자주 묻는 질문">
+            <div className="space-y-3">
               {FAQS.map(({ q, a }) => (
-                <div key={q} className="rounded-2xl px-5 py-5"
-                  style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}>
-                  <p className="text-base font-bold mb-2" style={{ color: "var(--text)" }}>Q. {q}</p>
-                  <p className="text-sm leading-relaxed" style={{ color: "var(--text-sub)" }}>A. {a}</p>
+                <div key={q} className="rounded-xl px-4 py-4"
+                  style={{ background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)" }}>
+                  <p className="text-sm font-bold mb-1.5" style={{ color: "var(--text)" }}>Q. {q}</p>
+                  <p className="text-xs leading-relaxed" style={{ color: "var(--text-sub)" }}>A. {a}</p>
                 </div>
               ))}
             </div>
-          </div>
+          </Section>
 
         </div>
       </div>
