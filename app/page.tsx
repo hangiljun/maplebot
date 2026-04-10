@@ -289,7 +289,7 @@ export default function HomePage() {
       </section>
 
       {/* ── 기능 소개 ──────────────────────────────────── */}
-      <section className="py-40" style={{ borderTop: "1px solid var(--border)" }}>
+      <section style={{ borderTop: "1px solid var(--border)", paddingTop: "160px", paddingBottom: "200px" }}>
         <div className="section-container">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-black mb-3" style={{ color: "var(--text)" }}>제공 기능</h2>
@@ -313,7 +313,7 @@ export default function HomePage() {
       </section>
 
       {/* ── 최근 업데이트 ──────────────────────────────── */}
-      <section className="py-40" style={{ borderTop: "1px solid var(--border)" }}>
+      <section style={{ borderTop: "1px solid var(--border)", paddingTop: "160px", paddingBottom: "160px" }}>
         <div className="section-container flex justify-center">
           <div className="glass rounded-2xl p-6 w-full max-w-2xl">
             <div className="flex items-center justify-between mb-5">
@@ -339,7 +339,7 @@ export default function HomePage() {
       </section>
 
       {/* ── CTA ────────────────────────────────────────── */}
-      <section className="py-40" style={{ borderTop: "1px solid var(--border)" }}>
+      <section style={{ borderTop: "1px solid var(--border)", paddingTop: "160px", paddingBottom: "160px" }}>
         <div className="section-container flex justify-center">
           <div className="rounded-3xl p-12 text-center w-full max-w-3xl"
             style={{
