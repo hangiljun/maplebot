@@ -30,7 +30,7 @@ export default function Navbar() {
           WebkitBackdropFilter: "blur(20px)",
           borderBottom: "1px solid rgba(255,255,255,0.07)",
         }}>
-        <div className="section-container h-full flex items-center">
+        <div className="section-container h-full flex items-center justify-between">
 
           {/* 로고 */}
           <Link href="/" className="shrink-0 font-black text-[16px] tracking-tight"
@@ -39,7 +39,7 @@ export default function Navbar() {
           </Link>
 
           {/* 데스크탑: 메뉴 + 버튼 */}
-          <div className="hidden md:flex items-center gap-1 flex-1 ml-6">
+          <div className="hidden md:flex items-center gap-1 ml-6 flex-1">
             {NAV_ITEMS.map(item => (
               <Link key={item.href} href={item.href}
                 className="px-4 py-2 rounded-lg text-[13px] transition-all"
@@ -57,8 +57,8 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* 모바일 햄버거 — ml-auto로 오른쪽 끝 고정 */}
-          <button onClick={() => setOpen(!open)} className="md:hidden ml-auto p-2"
+          {/* 모바일 햄버거 */}
+          <button onClick={() => setOpen(!open)} className="md:hidden p-2"
             style={{ color: "var(--text-muted)" }}>
             {open ? <X size={22} /> : <Menu size={22} />}
           </button>
