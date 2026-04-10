@@ -7,70 +7,121 @@ import { Search } from "lucide-react"
 const DISCORD_URL = "https://discord.com/oauth2/authorize?client_id=1491444296623325194&permissions=51200&integration_type=0&scope=bot"
 
 /* ── 디스코드 목업 ─────────────────────────────────────────── */
-const CMD_DATA: Record<string, { title: string; color: string; fields: { k: string; v: string }[] }> = {
+type CmdKey = "/정보" | "/유니온" | "/부캐조회"
+
+const CMD_DATA: Record<CmdKey, {
+  color: string
+  title: string
+  subtitle?: string
+  fields: { k: string; v: string }[]
+  buttons?: string[]
+  upcoming?: boolean
+}> = {
   "/정보": {
-    title: "메이플봇 (Lv.285)",
     color: "#5865f2",
+    title: "메이플봇",
+    subtitle: "Lv.285 · 아크메이지(불,독) · 크로아",
     fields: [
-      { k: "직업", v: "아크메이지(불,독)" },
-      { k: "서버", v: "크로아" },
       { k: "전투력", v: "12억 4,320만" },
       { k: "유니온", v: "그마3 Lv.9,020" },
       { k: "인기도", v: "32,104" },
-      { k: "길드", v: "Heroic" },
+      { k: "길드",   v: "Heroic" },
     ],
-  },
-  "/장비": {
-    title: "장비 목록 (착용 중)",
-    color: "#f59e0b",
-    fields: [
-      { k: "무기", v: "아케인셰이드 스태프 22성" },
-      { k: "모자", v: "앱솔랩스 위자드햇 22성" },
-      { k: "상의", v: "앱솔랩스 위자드로브 21성" },
-      { k: "반지1", v: "데스티니 링 (레전드)" },
-    ],
+    buttons: ["장비", "레벨변동", "헥사", "코디"],
   },
   "/유니온": {
-    title: "유니온 정보",
     color: "#a855f7",
+    title: "유니온 정보 · 메이플봇",
     fields: [
-      { k: "등급", v: "그랜드 마스터 3" },
-      { k: "레벨", v: "9,020" },
-      { k: "아티팩트", v: "Lv.41" },
-      { k: "포인트", v: "4,250" },
+      { k: "등급",       v: "그랜드 마스터 3" },
+      { k: "유니온 레벨", v: "9,020" },
+      { k: "아티팩트",   v: "Lv.41" },
+      { k: "포인트",     v: "4,250" },
     ],
+  },
+  "/부캐조회": {
+    color: "#6b7280",
+    title: "준비 중",
+    fields: [],
+    upcoming: true,
   },
 }
 
-function DiscordMockup({ cmd }: { cmd: string }) {
-  const c = CMD_DATA[cmd] ?? CMD_DATA["/정보"]
+function DiscordMockup({ cmd }: { cmd: CmdKey }) {
+  const c = CMD_DATA[cmd]
+  const isInfo = cmd === "/정보"
+
   return (
-    <div style={{ background: "#1e2124", borderRadius: "14px", padding: "16px", width: "300px", border: "1px solid rgba(255,255,255,0.06)" }}>
+    <div style={{ background: "#1e2124", borderRadius: "14px", padding: "14px", width: "310px", border: "1px solid rgba(255,255,255,0.06)" }}>
       {/* 채널 헤더 */}
-      <div style={{ display: "flex", alignItems: "center", gap: "6px", paddingBottom: "10px", marginBottom: "12px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "6px", paddingBottom: "10px", marginBottom: "10px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <span style={{ color: "#80848e", fontSize: "18px" }}>#</span>
         <span style={{ color: "#f2f3f5", fontWeight: 700, fontSize: "13px" }}>메이플-조회</span>
       </div>
+
       {/* 사용자 입력 */}
       <p style={{ color: "#00aff4", fontSize: "13px", marginBottom: "10px" }}>{cmd} 메이플봇</p>
+
       {/* 봇 응답 */}
       <div style={{ display: "flex", gap: "10px" }}>
+        {/* 아바타 */}
         <div style={{ width: "34px", height: "34px", borderRadius: "50%", background: "linear-gradient(135deg, #5865f2, #7289da)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: "12px" }}>M</div>
-        <div style={{ flex: 1 }}>
+
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {/* 봇 이름 */}
           <div style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "4px" }}>
             <span style={{ color: "#5865f2", fontWeight: 700, fontSize: "13px" }}>메이플봇</span>
             <span style={{ background: "#5865f2", color: "#fff", fontSize: "8px", padding: "1px 4px", borderRadius: "3px", fontWeight: 700 }}>BOT</span>
           </div>
+
+          {/* 임베드 */}
           <div style={{ borderLeft: `4px solid ${c.color}`, background: "#2b2d31", borderRadius: "4px", padding: "10px 12px" }}>
-            <p style={{ color: "#fff", fontWeight: 700, fontSize: "12px", marginBottom: "8px" }}>{c.title}</p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
-              {c.fields.map(({ k, v }) => (
-                <div key={k}>
-                  <p style={{ color: "#949ba4", fontSize: "9px", fontWeight: 700, textTransform: "uppercase", margin: "0 0 1px 0" }}>{k}</p>
-                  <p style={{ color: "#dbdee1", fontSize: "11px", fontWeight: 600, margin: 0 }}>{v}</p>
+
+            {c.upcoming ? (
+              /* 업데이트 예정 */
+              <div style={{ textAlign: "center", padding: "12px 0" }}>
+                <p style={{ color: "#6b7280", fontSize: "13px", fontWeight: 700, marginBottom: "4px" }}>🔧 업데이트 예정입니다</p>
+                <p style={{ color: "#4b5563", fontSize: "11px", margin: 0 }}>조만간 지원될 예정이에요</p>
+              </div>
+            ) : (
+              <>
+                {/* 제목 + 캐릭터 이미지 (정보 명령어만) */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
+                  <div>
+                    <p style={{ color: "#fff", fontWeight: 700, fontSize: "13px", margin: "0 0 2px 0" }}>{c.title}</p>
+                    {c.subtitle && <p style={{ color: "#949ba4", fontSize: "10px", margin: 0 }}>{c.subtitle}</p>}
+                  </div>
+                  {isInfo && (
+                    <div style={{ width: "44px", height: "44px", borderRadius: "8px", background: "linear-gradient(135deg, rgba(88,101,242,0.2), rgba(114,137,218,0.1))", border: "1px solid rgba(88,101,242,0.3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px", flexShrink: 0 }}>
+                      🧙
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
+
+                {/* 필드 그리드 */}
+                {c.fields.length > 0 && (
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", marginBottom: c.buttons?.length ? "10px" : 0 }}>
+                    {c.fields.map(({ k, v }) => (
+                      <div key={k}>
+                        <p style={{ color: "#949ba4", fontSize: "9px", fontWeight: 700, textTransform: "uppercase", margin: "0 0 1px 0" }}>{k}</p>
+                        <p style={{ color: "#dbdee1", fontSize: "11px", fontWeight: 600, margin: 0 }}>{v}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* 버튼 */}
+                {c.buttons && c.buttons.length > 0 && (
+                  <div style={{ display: "flex", gap: "4px", flexWrap: "wrap", borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: "8px" }}>
+                    {c.buttons.map(btn => (
+                      <div key={btn} style={{ background: "#4e5058", color: "#dbdee1", fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "4px", cursor: "default" }}>
+                        {btn}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -79,10 +130,10 @@ function DiscordMockup({ cmd }: { cmd: string }) {
 }
 
 /* ── 데이터 ─────────────────────────────────────────────────── */
-const CMDS = [
-  { cmd: "/정보",  desc: "레벨, 직업, 전투력, 유니온" },
-  { cmd: "/장비",  desc: "착용 장비, 잠재능력, 스타포스" },
-  { cmd: "/유니온", desc: "등급, 레벨, 아티팩트 현황" },
+const CMDS: { cmd: CmdKey; desc: string }[] = [
+  { cmd: "/정보",    desc: "레벨, 직업, 전투력, 유니온 + 버튼" },
+  { cmd: "/유니온",  desc: "등급, 레벨, 아티팩트 현황" },
+  { cmd: "/부캐조회", desc: "부캐릭터 일괄 조회 (예정)" },
 ]
 
 const FEATURES = [
@@ -95,15 +146,15 @@ const FEATURES = [
 ]
 
 const UPDATES = [
-  { date: "2026.04.09", text: "UI 전면 리뉴얼 — 넥슨 서비스 심사 대응" },
+  { date: "2026.04.09", text: "UI 전면 리뉴얼 — 사용자 경험 개선을 위한 인터페이스 최적화" },
   { date: "2026.04.09", text: "개인정보처리방침 신설, 봇 권한 안내 추가" },
-  { date: "2026.04.08", text: "헥사·코디 버튼 추가, API 이중화 적용" },
-  { date: "2026.04.07", text: "Nexon API 429 자동 폴백 및 ocid 캐싱" },
+  { date: "2026.04.01", text: "헥사·코디 버튼 추가, API 이중화 적용" },
+  { date: "2026.03.25", text: "Nexon API 429 자동 폴백 및 ocid 캐싱" },
 ]
 
 /* ── 메인 ─────────────────────────────────────────────────── */
 export default function HomePage() {
-  const [activeCmd, setActiveCmd] = useState("/정보")
+  const [activeCmd, setActiveCmd] = useState<CmdKey>("/정보")
   const inputRef = useRef<HTMLInputElement>(null)
   const router   = useRouter()
 
@@ -118,7 +169,6 @@ export default function HomePage() {
 
       {/* ── 히어로 ──────────────────────────────────────── */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
-        {/* 배경 글로우 */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/4 left-0 w-[600px] h-[600px]"
             style={{ background: "radial-gradient(ellipse, rgba(37,99,235,0.12) 0%, transparent 65%)", transform: "translateX(-30%)" }} />
@@ -130,7 +180,6 @@ export default function HomePage() {
 
           {/* 좌측 텍스트 */}
           <div className="flex-1 text-center">
-            {/* 상태 배지 */}
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-6"
               style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.2)", color: "#4ade80" }}>
               <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block"
@@ -150,20 +199,20 @@ export default function HomePage() {
               Nexon OpenAPI 기반 · 실시간 캐릭터 정보 · 디스코드 봇 연동
             </p>
 
-            {/* 검색 */}
+            {/* 검색바 */}
             <form onSubmit={(e) => { e.preventDefault(); go() }}
-              className="flex items-center rounded-3xl overflow-hidden mb-4 max-w-lg mx-auto"
-              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 8px 32px rgba(0,0,0,0.35)" }}>
-              <Search size={17} className="ml-5 shrink-0" style={{ color: "var(--text-muted)" }} />
+              className="flex items-center rounded-3xl overflow-hidden mb-5 max-w-lg mx-auto"
+              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.14)", boxShadow: "0 8px 40px rgba(0,0,0,0.4)" }}>
+              <Search size={18} className="ml-5 shrink-0" style={{ color: "var(--text-muted)" }} />
               <input
                 ref={inputRef}
                 type="text"
                 placeholder="캐릭터 닉네임 검색"
                 autoFocus
-                className="flex-1 px-4 py-5 bg-transparent focus:outline-none text-[15px] placeholder:text-white/20"
-                style={{ color: "var(--text)" }}
+                className="flex-1 px-4 bg-transparent focus:outline-none text-base placeholder:text-white/20"
+                style={{ color: "var(--text)", height: "64px" }}
               />
-              <button type="submit" className="btn-primary m-2.5 px-6 py-3 text-sm font-bold">
+              <button type="submit" className="btn-primary m-3 px-7 py-3.5 text-sm font-bold rounded-2xl">
                 검색
               </button>
             </form>
@@ -202,9 +251,7 @@ export default function HomePage() {
       <section className="py-20">
         <div className="section-container">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-black mb-3" style={{ color: "var(--text)" }}>
-              봇을 미리 체험하세요
-            </h2>
+            <h2 className="text-3xl font-black mb-3" style={{ color: "var(--text)" }}>봇을 미리 체험하세요</h2>
             <p className="text-sm" style={{ color: "var(--text-muted)" }}>
               명령어를 클릭하면 실제 출력 결과를 확인할 수 있어요
             </p>
@@ -212,19 +259,19 @@ export default function HomePage() {
 
           <div className="flex flex-col md:flex-row gap-8 items-center md:items-start justify-center">
             {/* 명령어 목록 */}
-            <div className="w-full md:w-52 space-y-2 shrink-0">
+            <div className="w-full md:w-56 flex flex-col gap-3 shrink-0">
               {CMDS.map(({ cmd, desc }) => (
                 <button key={cmd} onClick={() => setActiveCmd(cmd)}
-                  className="w-full text-left px-4 py-3 rounded-xl transition-all card-hover"
+                  className="w-full text-left px-4 py-4 rounded-xl transition-all card-hover"
                   style={{
                     background: activeCmd === cmd ? "rgba(59,130,246,0.1)" : "var(--bg-card)",
                     border: `1px solid ${activeCmd === cmd ? "rgba(59,130,246,0.4)" : "var(--border)"}`,
                   }}>
-                  <p className="text-sm font-bold font-mono mb-0.5"
+                  <p className="text-sm font-bold font-mono mb-1"
                     style={{ color: activeCmd === cmd ? "var(--blue-light)" : "var(--text)" }}>
                     {cmd}
                   </p>
-                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>{desc}</p>
+                  <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>{desc}</p>
                 </button>
               ))}
             </div>
@@ -267,8 +314,8 @@ export default function HomePage() {
 
       {/* ── 최근 업데이트 ──────────────────────────────── */}
       <section className="py-16" style={{ borderTop: "1px solid var(--border)" }}>
-        <div className="section-container">
-          <div className="glass rounded-2xl p-6 max-w-2xl mx-auto">
+        <div className="section-container flex justify-center">
+          <div className="glass rounded-2xl p-6 w-full max-w-2xl">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-sm font-bold" style={{ color: "var(--text)" }}>최근 업데이트</h3>
               <Link href="/updates" className="text-xs font-semibold hover:underline"
@@ -293,8 +340,8 @@ export default function HomePage() {
 
       {/* ── CTA ────────────────────────────────────────── */}
       <section className="py-20" style={{ borderTop: "1px solid var(--border)" }}>
-        <div className="section-container">
-          <div className="rounded-3xl p-12 text-center max-w-3xl mx-auto"
+        <div className="section-container flex justify-center">
+          <div className="rounded-3xl p-12 text-center w-full max-w-3xl"
             style={{
               background: "linear-gradient(135deg, rgba(29,78,216,0.5), rgba(59,130,246,0.3))",
               border: "1px solid rgba(96,165,250,0.25)",
@@ -306,12 +353,10 @@ export default function HomePage() {
               /정보 명령어로 캐릭터를 조회하세요
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link href={DISCORD_URL} target="_blank"
-                className="btn-primary px-8 py-3.5 text-sm">
+              <Link href={DISCORD_URL} target="_blank" className="btn-primary px-8 py-3.5 text-sm">
                 메이플봇 서버에 추가하기
               </Link>
-              <Link href="/bot-guide"
-                className="btn-outline px-8 py-3.5 text-sm">
+              <Link href="/bot-guide" className="btn-outline px-8 py-3.5 text-sm">
                 사용 방법 보기
               </Link>
             </div>
