@@ -164,12 +164,12 @@ export default function EquipmentTab({ items }: { items: EquipmentItem[] }) {
       {selected && (
         <div
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
-          style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
-          onClick={() => setSelected(null)}>
+          style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)", cursor: "pointer" }}
+          onPointerDown={() => setSelected(null)}>
           <div
             className="w-full sm:w-80 rounded-t-2xl sm:rounded-2xl p-5"
-            style={{ background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", maxHeight: "80vh", overflowY: "auto" }}
-            onClick={e => e.stopPropagation()}>
+            style={{ background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", maxHeight: "80vh", overflowY: "auto", cursor: "default" }}
+            onPointerDown={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>장비 정보</p>
               <button onClick={() => setSelected(null)} style={{ color: "var(--text-muted)" }}>
