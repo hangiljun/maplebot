@@ -4,34 +4,37 @@ import { useRouter } from "next/navigation"
 import { Search, AlertCircle, Info } from "lucide-react"
 
 export default function CharacterSearchPage() {
-  const [value, setValue]         = useState("")
-  const [warn, setWarn]           = useState(false)
-  const composingRef              = useRef(false)
-  const router                    = useRouter()
+  const [displayCount, setDisplayCount] = useState(0)
+  const [warn, setWarn]                 = useState(false)
+  const inputRef                        = useRef<HTMLInputElement>(null)
+  const router                          = useRouter()
 
-  const filter = (raw: string) => raw.replace(/[^a-zA-Z0-9가-힣]/g, "").slice(0, 12)
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value
-    if (composingRef.current) {
-      setValue(raw)
-      return
-    }
-    const filtered = filter(raw)
-    setValue(filtered)
+  const applyFilter = () => {
+    const el = inputRef.current
+    if (!el) return
+    const raw      = el.value
+    const filtered = raw.replace(/[^a-zA-Z0-9가-힣]/g, "").slice(0, 12)
+    el.value       = filtered
+    setDisplayCount(filtered.length)
     setWarn(raw.length > 0 && filtered !== raw)
   }
 
-  const handleCompositionEnd = (e: React.CompositionEvent<HTMLInputElement>) => {
-    composingRef.current = false
-    const raw = (e.target as HTMLInputElement).value
-    const filtered = filter(raw)
-    setValue(filtered)
-    setWarn(raw.length > 0 && filtered !== raw)
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // isComposing: 모바일 IME 조합 중에는 필터링 건너뜀
+    if ((e.nativeEvent as InputEvent).isComposing) {
+      setDisplayCount(e.target.value.length)
+      return
+    }
+    applyFilter()
+  }
+
+  const handleCompositionEnd = () => {
+    // 조합 완료 후 브라우저가 input.value를 확정하도록 다음 틱에 필터링
+    setTimeout(applyFilter, 0)
   }
 
   const go = () => {
-    const t = value.trim()
+    const t = (inputRef.current?.value ?? "").trim()
     if (!t) return
     router.push(`/character/${encodeURIComponent(t)}`)
   }
@@ -59,18 +62,17 @@ export default function CharacterSearchPage() {
           }}>
           <Search size={20} className="ml-6 shrink-0" style={{ color: "var(--text-muted)" }} />
           <input
+            ref={inputRef}
             type="text"
-            value={value}
             onChange={handleChange}
-            onCompositionStart={() => { composingRef.current = true }}
             onCompositionEnd={handleCompositionEnd}
             placeholder="닉네임 입력 후 Enter 또는 검색"
             className="flex-1 px-4 bg-transparent focus:outline-none placeholder:text-white/20"
             style={{ color: "var(--text)", fontSize: "16px", height: "100%" }}
           />
-          {value.length > 0 && (
+          {displayCount > 0 && (
             <span className="text-sm mr-4 tabular-nums" style={{ color: "var(--text-muted)" }}>
-              {value.length}/12
+              {displayCount}/12
             </span>
           )}
           <button type="submit" className="btn-primary shrink-0 font-bold rounded-xl"
