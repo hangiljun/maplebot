@@ -70,3 +70,29 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 })
   }
 }
+
+// ── DELETE: 기능 요청 삭제 (관리자 전용) ─────────────────────────────────────
+export async function DELETE(req: NextRequest) {
+  try {
+    const { id, adminPassword } = await req.json()
+
+    if (!id) {
+      return NextResponse.json({ error: "ID가 없습니다." }, { status: 400 })
+    }
+
+    const correctPassword = process.env.ADMIN_PASSWORD
+    if (!correctPassword || adminPassword !== correctPassword) {
+      return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 })
+    }
+
+    const { getDb } = await import("@/lib/firebase-admin")
+    const db = getDb()
+
+    await db.collection(COLLECTION).doc(id).delete()
+
+    return NextResponse.json({ success: true })
+  } catch (e) {
+    console.error("DELETE /api/feature-request", e)
+    return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 })
+  }
+}

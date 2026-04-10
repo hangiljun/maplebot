@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from "react"
 import {
   Send, AlertCircle, CheckCircle2, Clock,
-  RefreshCw, Megaphone, ArrowUpDown,
+  RefreshCw, Megaphone, ArrowUpDown, X, Trash2, Lock, Shield,
 } from "lucide-react"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -38,6 +38,123 @@ function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })
 }
 
+// ─── 상세 모달 ────────────────────────────────────────────────────────────────
+function DetailModal({ r, onClose, isAdmin, onDelete }: {
+  r: Request
+  onClose: () => void
+  isAdmin: boolean
+  onDelete: (id: string) => void
+}) {
+  const p = PRIORITY_META[r.priority]
+  const s = STATUS_META[r.status]
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose() }
+    window.addEventListener("keydown", handler)
+    return () => window.removeEventListener("keydown", handler)
+  }, [onClose])
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4"
+      style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
+      onClick={onClose}>
+      <div className="w-full max-w-lg"
+        style={{ background: "var(--bg)", border: "1px solid var(--border)", borderRadius: "10px", overflow: "hidden" }}
+        onClick={e => e.stopPropagation()}>
+
+        {/* 헤더 */}
+        <div className="flex items-start justify-between gap-3 px-6 py-5"
+          style={{ borderBottom: "1px solid var(--border)" }}>
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "3px", background: p.bg, color: p.color, border: `1px solid ${p.border}` }}>
+                {p.text}
+              </span>
+              <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "3px", background: s.bg, color: s.color, border: `1px solid ${s.border}` }}>
+                {s.text}
+              </span>
+            </div>
+            <h2 className="font-bold" style={{ fontSize: "1.1rem", color: "var(--text)", lineHeight: 1.4 }}>
+              {r.title}
+            </h2>
+          </div>
+          <button onClick={onClose} style={{ color: "var(--text-muted)", padding: "2px", flexShrink: 0 }}>
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* 본문 */}
+        <div className="px-6 py-5">
+          {r.description ? (
+            <p style={{ fontSize: "0.95rem", color: "var(--text-sub)", lineHeight: 1.8, whiteSpace: "pre-wrap" }}>
+              {r.description}
+            </p>
+          ) : (
+            <p style={{ fontSize: "0.95rem", color: "var(--text-muted)" }}>내용 없음</p>
+          )}
+        </div>
+
+        {/* 푸터 */}
+        <div className="flex items-center justify-between px-6 py-4"
+          style={{ borderTop: "1px solid var(--border)", background: "rgba(255,255,255,0.015)" }}>
+          <p style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+            {r.nickname} · {fmtDate(r.createdAt)}
+          </p>
+          {isAdmin && (
+            <button
+              onClick={() => { onDelete(r.id); onClose() }}
+              className="flex items-center gap-1.5 transition-all"
+              style={{ fontSize: "12px", color: "#f87171", padding: "5px 10px", borderRadius: "5px", border: "1px solid rgba(239,68,68,0.3)", background: "rgba(239,68,68,0.08)" }}>
+              <Trash2 size={12} />
+              삭제
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── 관리자 로그인 모달 ────────────────────────────────────────────────────────
+function AdminLoginModal({ onClose, onLogin }: { onClose: () => void; onLogin: (pw: string) => void }) {
+  const [pw, setPw] = useState("")
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose() }
+    window.addEventListener("keydown", handler)
+    return () => window.removeEventListener("keydown", handler)
+  }, [onClose])
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4"
+      style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
+      onClick={onClose}>
+      <div className="w-full max-w-sm p-6"
+        style={{ background: "var(--bg)", border: "1px solid var(--border)", borderRadius: "10px" }}
+        onClick={e => e.stopPropagation()}>
+        <div className="flex items-center gap-2 mb-4">
+          <Shield size={16} style={{ color: "var(--blue-light)" }} />
+          <h2 className="font-bold" style={{ fontSize: "1rem", color: "var(--text)" }}>관리자 로그인</h2>
+        </div>
+        <input
+          type="password"
+          value={pw}
+          onChange={e => setPw(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter") onLogin(pw) }}
+          placeholder="비밀번호"
+          autoFocus
+          className="w-full bg-transparent mb-3"
+          style={{ fontSize: "14px", color: "var(--text)", padding: "9px 12px", border: "1px solid var(--border)", borderRadius: "6px", outline: "none" }}
+        />
+        <button onClick={() => onLogin(pw)} className="w-full font-bold"
+          style={{ fontSize: "14px", padding: "10px", borderRadius: "6px", background: "var(--blue-light)", color: "#fff" }}>
+          확인
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function ContactPage() {
   const [requests, setRequests]   = useState<Request[]>([])
@@ -46,6 +163,11 @@ export default function ContactPage() {
   const [form, setForm]           = useState({ nickname: "", title: "", description: "" })
   const [submitting, setSubmitting] = useState(false)
   const [result, setResult]       = useState<{ ok: boolean; msg: string } | null>(null)
+  const [selected, setSelected]   = useState<Request | null>(null)
+  const [showAdminLogin, setShowAdminLogin] = useState(false)
+  const [isAdmin, setIsAdmin]     = useState(false)
+  const [adminPassword, setAdminPassword] = useState("")
+  const [adminError, setAdminError] = useState(false)
 
   const fetchRequests = useCallback(async () => {
     setLoading(true)
@@ -98,9 +220,39 @@ export default function ContactPage() {
     }
   }
 
+  // 관리자 로그인
+  const handleAdminLogin = async (pw: string) => {
+    // 서버에 빈 요청으로 비밀번호 검증
+    const res = await fetch("/api/feature-request", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: "__check__", adminPassword: pw }),
+    })
+    // 403이면 틀린 비밀번호, 400(id 없음)이면 맞는 비밀번호
+    if (res.status === 400) {
+      setIsAdmin(true)
+      setAdminPassword(pw)
+      setShowAdminLogin(false)
+      setAdminError(false)
+    } else {
+      setAdminError(true)
+      setTimeout(() => setAdminError(false), 2000)
+    }
+  }
+
+  // 삭제
+  const handleDelete = async (id: string) => {
+    if (!confirm("정말 삭제하시겠습니까?")) return
+    await fetch("/api/feature-request", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, adminPassword }),
+    })
+    setRequests(prev => prev.filter(r => r.id !== id))
+  }
+
   const canSubmit = !submitting && form.title.trim().length > 0 && form.description.trim().length > 0
 
-  // 통계
   const statCounts = {
     total:      requests.length,
     inProgress: requests.filter(r => r.status === "in-progress").length,
@@ -110,22 +262,55 @@ export default function ContactPage() {
 
   return (
     <div style={{ paddingTop: "56px", minHeight: "100vh" }}>
+      {/* 상세 모달 */}
+      {selected && (
+        <DetailModal
+          r={selected}
+          onClose={() => setSelected(null)}
+          isAdmin={isAdmin}
+          onDelete={handleDelete}
+        />
+      )}
+
+      {/* 관리자 로그인 모달 */}
+      {showAdminLogin && (
+        <AdminLoginModal
+          onClose={() => { setShowAdminLogin(false); setAdminError(false) }}
+          onLogin={handleAdminLogin}
+        />
+      )}
+
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12">
 
         {/* ── Hero ── */}
-        <div className="mb-10">
-          <div className="inline-flex items-center gap-1.5 mb-4"
-            style={{ fontSize: "12px", fontWeight: 600, padding: "4px 12px", borderRadius: "4px", background: "rgba(59,130,246,0.1)", color: "var(--blue-light)", border: "1px solid rgba(59,130,246,0.2)" }}>
-            <Megaphone size={12} />
-            기능 요청 게시판
+        <div className="mb-10 flex items-start justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-1.5 mb-4"
+              style={{ fontSize: "12px", fontWeight: 600, padding: "4px 12px", borderRadius: "4px", background: "rgba(59,130,246,0.1)", color: "var(--blue-light)", border: "1px solid rgba(59,130,246,0.2)" }}>
+              <Megaphone size={12} />
+              기능 요청 게시판
+            </div>
+            <h1 className="font-black mb-3" style={{ fontSize: "2.2rem", color: "var(--text)", letterSpacing: "-0.025em", lineHeight: 1.2 }}>
+              개발자 문의
+            </h1>
+            <p style={{ fontSize: "1.05rem", color: "var(--text-muted)", lineHeight: 1.78, maxWidth: "540px" }}>
+              메이플봇에 추가되었으면 하는 기능을 자유롭게 요청해주세요.
+              접수된 요청은 검토 후 우선순위를 결정하여 개발에 반영합니다.
+            </p>
           </div>
-          <h1 className="font-black mb-3" style={{ fontSize: "2.2rem", color: "var(--text)", letterSpacing: "-0.025em", lineHeight: 1.2 }}>
-            개발자 문의
-          </h1>
-          <p style={{ fontSize: "1.05rem", color: "var(--text-muted)", lineHeight: 1.78, maxWidth: "540px" }}>
-            메이플봇에 추가되었으면 하는 기능을 자유롭게 요청해주세요.
-            접수된 요청은 검토 후 우선순위를 결정하여 개발에 반영합니다.
-          </p>
+
+          {/* 관리자 버튼 */}
+          <button
+            onClick={() => isAdmin ? setIsAdmin(false) : setShowAdminLogin(true)}
+            className="flex items-center gap-1.5 shrink-0 mt-1"
+            style={{
+              fontSize: "12px", fontWeight: 600, padding: "6px 12px", borderRadius: "5px",
+              border: `1px solid ${isAdmin ? "rgba(74,222,128,0.3)" : "var(--border)"}`,
+              background: isAdmin ? "rgba(74,222,128,0.08)" : "rgba(255,255,255,0.02)",
+              color: isAdmin ? "#4ade80" : "var(--text-muted)",
+            }}>
+            {isAdmin ? <><Shield size={12} />관리자 모드</> : <><Lock size={12} />관리자</>}
+          </button>
         </div>
 
         {/* ── 통계 바 ── */}
@@ -207,14 +392,19 @@ export default function ContactPage() {
                   const p = PRIORITY_META[r.priority]
                   const s = STATUS_META[r.status]
                   return (
-                    <div key={r.id} className="p-5"
+                    <div key={r.id}
+                      onClick={() => setSelected(r)}
+                      className="p-5 cursor-pointer transition-all"
                       style={{
                         background: "rgba(255,255,255,0.02)",
                         border: "1px solid var(--border)",
                         borderRadius: "8px",
                         borderLeft: `3px solid ${p.color}`,
                         opacity: r.status === "done" ? 0.65 : 1,
-                      }}>
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.04)")}
+                      onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0.02)")}>
+
                       {/* 상단 */}
                       <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
                         <p className="font-semibold flex-1"
@@ -228,6 +418,13 @@ export default function ContactPage() {
                           <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "3px", background: s.bg, color: s.color, border: `1px solid ${s.border}` }}>
                             {s.text}
                           </span>
+                          {isAdmin && (
+                            <button
+                              onClick={e => { e.stopPropagation(); handleDelete(r.id) }}
+                              style={{ padding: "3px 6px", borderRadius: "4px", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)", color: "#f87171" }}>
+                              <Trash2 size={11} />
+                            </button>
+                          )}
                         </div>
                       </div>
 
@@ -246,6 +443,7 @@ export default function ContactPage() {
                       {/* 닉네임 · 날짜 */}
                       <p style={{ fontSize: "11px", color: "var(--text-muted)" }}>
                         {r.nickname} · {fmtDate(r.createdAt)}
+                        <span style={{ marginLeft: "8px", color: "var(--text-muted)", opacity: 0.5 }}>클릭하여 전체 보기</span>
                       </p>
                     </div>
                   )
