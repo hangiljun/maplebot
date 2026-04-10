@@ -162,15 +162,17 @@ export default function HomePage() {
             <h2 className="text-3xl font-black mb-3" style={{ color: "var(--text)" }}>최근 업데이트</h2>
             <p className="text-sm" style={{ color: "var(--text-muted)" }}>메이플봇의 최신 기능 추가 및 개선 내역을 확인하세요</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="glass rounded-2xl" style={{ border: "1px solid var(--border)" }}>
             {RECENT_UPDATES.map((u, i) => (
-              <div key={i} className="glass rounded-2xl p-6 card-hover cursor-default" style={{ border: "1px solid var(--border)" }}>
-                <p className="text-xs font-mono mb-3 tabular-nums" style={{ color: "var(--blue-light)" }}>{u.date}</p>
-                <p className="text-sm leading-relaxed" style={{ color: "var(--text-sub)" }}>{u.text}</p>
+              <div key={i} className="flex items-start gap-5 px-8 py-5"
+                style={{ borderBottom: i < RECENT_UPDATES.length - 1 ? "1px solid var(--border)" : "none" }}>
+                <span className="text-xs font-mono tabular-nums shrink-0 mt-0.5 w-24" style={{ color: "var(--blue-light)" }}>{u.date}</span>
+                <div className="w-1.5 h-1.5 rounded-full shrink-0 mt-1.5" style={{ background: "var(--blue-light)" }} />
+                <span className="text-sm leading-relaxed" style={{ color: "var(--text-sub)" }}>{u.text}</span>
               </div>
             ))}
-            <div className="glass rounded-2xl p-6 flex items-center justify-center card-hover" style={{ border: "1px solid var(--border)" }}>
-              <Link href="/updates" className="text-sm font-semibold" style={{ color: "var(--blue-light)" }}>
+            <div className="flex justify-end px-8 py-4" style={{ borderTop: "1px solid var(--border)" }}>
+              <Link href="/updates" className="text-xs font-semibold hover:underline" style={{ color: "var(--blue-light)" }}>
                 전체 업데이트 보기 →
               </Link>
             </div>
