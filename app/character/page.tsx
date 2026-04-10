@@ -39,27 +39,27 @@ export default function CharacterSearchPage() {
 
         {/* 검색창 */}
         <form onSubmit={(e) => { e.preventDefault(); go() }}
-          className="glass flex items-center rounded-2xl overflow-hidden mb-3"
-          style={{ border: warn ? "1px solid rgba(239,68,68,0.5)" : "1px solid rgba(59,130,246,0.2)" }}>
-          <Search size={17} className="ml-4 shrink-0" style={{ color: "var(--text-muted)" }} />
+          className="glass flex items-center rounded-3xl overflow-hidden mb-3"
+          style={{ border: warn ? "1px solid rgba(239,68,68,0.5)" : "1px solid rgba(59,130,246,0.25)", boxShadow: "0 8px 32px rgba(0,0,0,0.25)" }}>
+          <Search size={17} className="ml-5 shrink-0" style={{ color: "var(--text-muted)" }} />
           <input
             ref={inputRef}
             type="text"
             onInput={() => { if (!composingRef.current) applyFilter() }}
             onCompositionStart={() => { composingRef.current = true }}
             onCompositionEnd={() => { composingRef.current = false; applyFilter() }}
-            placeholder="닉네임 입력 후 Enter 또는 조회하기"
+            placeholder="닉네임 입력 후 Enter 또는 검색"
             autoFocus
-            className="flex-1 px-3 py-4 bg-transparent focus:outline-none text-[15px] placeholder:text-white/20"
+            className="flex-1 px-4 py-5 bg-transparent focus:outline-none text-[15px] placeholder:text-white/20"
             style={{ color: "var(--text)" }}
           />
           {charCount > 0 && (
-            <span className="text-xs mr-2 tabular-nums" style={{ color: "var(--text-muted)" }}>
+            <span className="text-xs mr-3 tabular-nums" style={{ color: "var(--text-muted)" }}>
               {charCount}/12
             </span>
           )}
-          <button type="submit" className="btn-primary m-2 px-6 py-2.5 text-sm shrink-0">
-            조회하기
+          <button type="submit" className="btn-primary m-2.5 px-6 py-3 text-sm font-bold shrink-0">
+            검색
           </button>
         </form>
 

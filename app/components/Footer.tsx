@@ -22,7 +22,7 @@ export default function Footer() {
           <span>·</span>
           <Link href="/privacy" className="hover:text-blue-500 transition-colors">개인정보처리방침</Link>
           <span>·</span>
-          <a href="mailto:contact@maplebot.co.kr" className="hover:text-blue-500 transition-colors">개발자 문의</a>
+          <a href="mailto:myrlfwns1@naver.com" className="hover:text-blue-500 transition-colors">개발자 문의</a>
         </div>
         © 2025 메이플봇 · Powered by Nexon OpenAPI · 비공식 서비스
       </div>

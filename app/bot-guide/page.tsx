@@ -43,46 +43,39 @@ const PERMISSIONS = [
 ]
 
 const STEPS = [
-  {
-    step: "01",
-    title: "봇 초대",
-    desc: "아래 '서버에 추가하기' 버튼을 눌러 메이플봇을 디스코드 서버에 초대하세요.",
-  },
-  {
-    step: "02",
-    title: "명령어 입력",
-    desc: "채널에서 /정보 [캐릭터명] 을 입력합니다. 슬래시(/)를 입력하면 자동완성이 나타납니다.",
-  },
-  {
-    step: "03",
-    title: "결과 확인",
-    desc: "봇이 Nexon OpenAPI에서 캐릭터 정보를 실시간으로 조회하여 임베드 카드로 응답합니다.",
-  },
+  { step: "01", title: "봇 초대", desc: "아래 '서버에 추가하기' 버튼을 눌러 메이플봇을 디스코드 서버에 초대하세요." },
+  { step: "02", title: "명령어 입력", desc: "채널에서 /정보 [캐릭터명] 을 입력합니다. 슬래시(/)를 입력하면 자동완성이 나타납니다." },
+  { step: "03", title: "결과 확인", desc: "봇이 Nexon OpenAPI에서 캐릭터 정보를 실시간으로 조회하여 임베드 카드로 응답합니다." },
+]
+
+const FAQS = [
+  { q: "봇이 응답하지 않아요.", a: "Nexon 서버 점검 중이거나 API 호출 한도를 초과한 경우 일시적으로 응답이 지연될 수 있습니다. 잠시 후 다시 시도해 주세요." },
+  { q: "캐릭터를 찾을 수 없다고 나와요.", a: "닉네임 철자를 다시 확인해 주세요. 넥슨 공식 홈페이지에서 캐릭터 이름이 정확한지 확인 후 입력해 주세요." },
+  { q: "정보가 실제와 다르게 나와요.", a: "본 서비스는 최대 1시간 캐싱을 사용합니다. 최신 정보 반영에 다소 시간이 걸릴 수 있습니다." },
+  { q: "봇이 안전한가요?", a: "메이플봇은 공개된 캐릭터 정보만 조회합니다. 개인정보나 계정 정보를 요구하거나 저장하지 않습니다." },
 ]
 
 export default function BotGuidePage() {
   return (
-    <div className="max-w-3xl mx-auto px-4 pb-20" style={{ paddingTop: "80px" }}>
+    <div className="max-w-3xl mx-auto px-4 pb-24" style={{ paddingTop: "88px" }}>
 
-      <div className="text-center mb-12">
+      <div className="text-center mb-14">
         <h1 className="text-3xl font-black mb-3" style={{ color: "var(--text)" }}>봇 기능 설명</h1>
         <p className="text-sm" style={{ color: "var(--text-sub)" }}>
           메이플봇의 디스코드 명령어와 버튼 기능을 안내합니다
         </p>
       </div>
 
-      <div className="space-y-5">
+      <div className="space-y-8">
 
-        {/* Step-by-step 가이드 */}
-        <div className="glass rounded-2xl p-6">
-          <h2 className="text-base font-bold mb-5" style={{ color: "var(--text)" }}>시작하는 방법</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+        {/* 시작 방법 */}
+        <div className="glass rounded-2xl p-8">
+          <h2 className="text-base font-bold mb-6" style={{ color: "var(--text)" }}>시작하는 방법</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
             {STEPS.map(({ step, title, desc }) => (
-              <div key={step} className="relative">
-                <div className="text-3xl font-black mb-2 leading-none" style={{ color: "rgba(37,99,235,0.15)" }}>
-                  {step}
-                </div>
-                <p className="text-sm font-bold mb-1" style={{ color: "var(--text)" }}>{title}</p>
+              <div key={step}>
+                <div className="text-3xl font-black mb-3 leading-none" style={{ color: "rgba(37,99,235,0.15)" }}>{step}</div>
+                <p className="text-sm font-bold mb-2" style={{ color: "var(--text)" }}>{title}</p>
                 <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>{desc}</p>
               </div>
             ))}
@@ -93,11 +86,11 @@ export default function BotGuidePage() {
         </div>
 
         {/* 명령어 */}
-        <div className="glass rounded-2xl p-6">
-          <h2 className="text-base font-bold mb-4" style={{ color: "var(--text)" }}>명령어</h2>
+        <div className="glass rounded-2xl p-8">
+          <h2 className="text-base font-bold mb-5" style={{ color: "var(--text)" }}>명령어</h2>
           {COMMANDS.map(c => (
             <div key={c.cmd}>
-              <div className="flex items-start gap-3 mb-3">
+              <div className="flex items-start gap-3 mb-4">
                 <code className="text-sm px-3 py-1.5 rounded-lg font-mono shrink-0"
                   style={{ background: "rgba(37,99,235,0.08)", color: "var(--blue)", border: "1px solid rgba(37,99,235,0.15)" }}>
                   {c.cmd}
@@ -118,14 +111,14 @@ export default function BotGuidePage() {
         </div>
 
         {/* 조회 후 버튼 */}
-        <div className="glass rounded-2xl p-6">
-          <h2 className="text-base font-bold mb-1" style={{ color: "var(--text)" }}>조회 후 버튼</h2>
-          <p className="text-xs mb-4" style={{ color: "var(--text-muted)" }}>
+        <div className="glass rounded-2xl p-8">
+          <h2 className="text-base font-bold mb-2" style={{ color: "var(--text)" }}>조회 후 버튼</h2>
+          <p className="text-xs mb-5" style={{ color: "var(--text-muted)" }}>
             /정보 명령어 실행 후 나타나는 버튼들입니다 (본인에게만 표시)
           </p>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {BUTTONS.map(b => (
-              <div key={b.label} className="flex items-start gap-3 py-2"
+              <div key={b.label} className="flex items-start gap-3 py-3"
                 style={{ borderBottom: "1px solid var(--border)" }}>
                 <span className="text-sm font-semibold shrink-0 pt-0.5" style={{ color: "var(--blue)", minWidth: "80px" }}>
                   {b.label}
@@ -137,39 +130,34 @@ export default function BotGuidePage() {
         </div>
 
         {/* 요구 권한 */}
-        <div className="glass rounded-2xl p-6">
-          <h2 className="text-base font-bold mb-1" style={{ color: "var(--text)" }}>봇 권한 안내</h2>
-          <p className="text-xs mb-4" style={{ color: "var(--text-muted)" }}>
+        <div className="glass rounded-2xl p-8">
+          <h2 className="text-base font-bold mb-2" style={{ color: "var(--text)" }}>봇 권한 안내</h2>
+          <p className="text-xs mb-5" style={{ color: "var(--text-muted)" }}>
             메이플봇은 서비스 운영에 필요한 최소한의 권한만 요청합니다.
           </p>
           <div className="space-y-3">
             {PERMISSIONS.map(p => (
-              <div key={p.name} className="rounded-xl px-4 py-3"
+              <div key={p.name} className="rounded-xl px-4 py-4"
                 style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}>
-                <p className="text-xs font-bold mb-0.5" style={{ color: "var(--text)" }}>{p.name}</p>
+                <p className="text-xs font-bold mb-1" style={{ color: "var(--text)" }}>{p.name}</p>
                 <p className="text-xs" style={{ color: "var(--text-muted)" }}>{p.reason}</p>
               </div>
             ))}
           </div>
-          <p className="text-xs mt-3" style={{ color: "var(--text-muted)" }}>
+          <p className="text-xs mt-4" style={{ color: "var(--text-muted)" }}>
             봇은 이용자의 비밀번호·개인정보를 요구하거나 저장하지 않습니다.
             공개된 캐릭터 정보만 Nexon OpenAPI를 통해 조회합니다.
           </p>
         </div>
 
         {/* FAQ */}
-        <div className="glass rounded-2xl p-6">
-          <h2 className="text-base font-bold mb-4" style={{ color: "var(--text)" }}>자주 묻는 질문</h2>
-          <div className="space-y-4">
-            {[
-              { q: "봇이 응답하지 않아요.", a: "Nexon 서버 점검 중이거나 API 호출 한도를 초과한 경우 일시적으로 응답이 지연될 수 있습니다. 잠시 후 다시 시도해 주세요." },
-              { q: "캐릭터를 찾을 수 없다고 나와요.", a: "닉네임 철자를 다시 확인해 주세요. 넥슨 공식 홈페이지에서 캐릭터 이름이 정확한지 확인 후 입력해 주세요." },
-              { q: "정보가 실제와 다르게 나와요.", a: "본 서비스는 최대 1시간 캐싱을 사용합니다. 최신 정보 반영에 다소 시간이 걸릴 수 있습니다." },
-              { q: "봇이 안전한가요?", a: "메이플봇은 공개된 캐릭터 정보만 조회합니다. 개인정보나 계정 정보를 요구하거나 저장하지 않습니다." },
-            ].map(({ q, a }) => (
+        <div className="glass rounded-2xl p-8">
+          <h2 className="text-base font-bold mb-6" style={{ color: "var(--text)" }}>자주 묻는 질문</h2>
+          <div className="space-y-6">
+            {FAQS.map(({ q, a }) => (
               <div key={q}>
-                <p className="text-sm font-semibold mb-1" style={{ color: "var(--text)" }}>Q. {q}</p>
-                <p className="text-sm" style={{ color: "var(--text-sub)" }}>A. {a}</p>
+                <p className="text-sm font-semibold mb-1.5" style={{ color: "var(--text)" }}>Q. {q}</p>
+                <p className="text-sm leading-relaxed" style={{ color: "var(--text-sub)" }}>A. {a}</p>
               </div>
             ))}
           </div>

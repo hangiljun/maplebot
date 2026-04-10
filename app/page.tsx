@@ -129,7 +129,7 @@ export default function HomePage() {
         <div className="section-container w-full flex flex-col lg:flex-row items-center gap-12 lg:gap-20 pt-20 pb-16">
 
           {/* 좌측 텍스트 */}
-          <div className="flex-1 text-center lg:text-left">
+          <div className="flex-1 text-center">
             {/* 상태 배지 */}
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-6"
               style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.2)", color: "#4ade80" }}>
@@ -152,23 +152,23 @@ export default function HomePage() {
 
             {/* 검색 */}
             <form onSubmit={(e) => { e.preventDefault(); go() }}
-              className="flex items-center rounded-2xl overflow-hidden mb-4 max-w-lg lg:mx-0 mx-auto"
-              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", boxShadow: "0 4px 24px rgba(0,0,0,0.3)" }}>
-              <Search size={16} className="ml-4 shrink-0" style={{ color: "var(--text-muted)" }} />
+              className="flex items-center rounded-3xl overflow-hidden mb-4 max-w-lg mx-auto"
+              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 8px 32px rgba(0,0,0,0.35)" }}>
+              <Search size={17} className="ml-5 shrink-0" style={{ color: "var(--text-muted)" }} />
               <input
                 ref={inputRef}
                 type="text"
                 placeholder="캐릭터 닉네임 검색"
                 autoFocus
-                className="flex-1 px-3 py-4 bg-transparent focus:outline-none text-[15px] placeholder:text-white/20"
+                className="flex-1 px-4 py-5 bg-transparent focus:outline-none text-[15px] placeholder:text-white/20"
                 style={{ color: "var(--text)" }}
               />
-              <button type="submit" className="btn-primary m-2 px-5 py-2.5 text-sm">
-                조회하기
+              <button type="submit" className="btn-primary m-2.5 px-6 py-3 text-sm font-bold">
+                검색
               </button>
             </form>
 
-            <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link href={DISCORD_URL} target="_blank" className="btn-primary px-7 py-3 text-sm">
                 메이플봇 서버에 추가하기
               </Link>

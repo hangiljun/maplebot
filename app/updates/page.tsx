@@ -5,7 +5,7 @@ const UPDATES = [
     tag: "기능 추가",
     color: "#4ade80",
     items: [
-      { type: "기능", text: "다크 네이비 테마 전면 적용 — 넥슨 심사 대응 UI 리뉴얼" },
+      { type: "기능", text: "다크 네이비 테마 전면 적용 — 사용자 경험 개선을 위한 인터페이스 최적화" },
       { type: "기능", text: "개인정보처리방침 페이지 신설 (/privacy)" },
       { type: "기술", text: "캐릭터 검색 입력값 검증 — 특수문자 자동 필터링, 12자 제한" },
       { type: "기술", text: "공유 Footer 컴포넌트 분리, 넥슨 저작권 고지 가이드라인 적용" },
@@ -15,7 +15,7 @@ const UPDATES = [
   },
   {
     version: "v1.3",
-    date: "2025.04.09",
+    date: "2026.04.05",
     tag: "기능 추가",
     color: "#60a5fa",
     items: [
@@ -27,7 +27,7 @@ const UPDATES = [
   },
   {
     version: "v1.2",
-    date: "2025.04.08",
+    date: "2026.04.01",
     tag: "기능 추가",
     color: "#60a5fa",
     items: [
@@ -39,7 +39,7 @@ const UPDATES = [
   },
   {
     version: "v1.1",
-    date: "2025.04.07",
+    date: "2026.03.25",
     tag: "개선",
     color: "#f59e0b",
     items: [
@@ -50,7 +50,7 @@ const UPDATES = [
   },
   {
     version: "v1.0",
-    date: "2025.04.06",
+    date: "2026.03.20",
     tag: "출시",
     color: "#a855f7",
     items: [

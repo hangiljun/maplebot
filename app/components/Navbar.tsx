@@ -12,6 +12,7 @@ const NAV_ITEMS = [
 ]
 
 const DISCORD_URL = "https://discord.com/oauth2/authorize?client_id=1491444296623325194&permissions=51200&integration_type=0&scope=bot"
+const CONTACT_MAIL = "mailto:myrlfwns1@naver.com"
 
 export default function Navbar() {
   const [open, setOpen] = useState(false)
@@ -29,7 +30,7 @@ export default function Navbar() {
           WebkitBackdropFilter: "blur(20px)",
           borderBottom: "1px solid rgba(255,255,255,0.07)",
         }}>
-        <div className="section-container h-full flex items-center gap-8">
+        <div className="section-container h-full flex items-center gap-6">
 
           {/* 로고 */}
           <Link href="/" className="shrink-0 font-black text-[16px] tracking-tight"
@@ -41,7 +42,7 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-1 flex-1">
             {NAV_ITEMS.map(item => (
               <Link key={item.href} href={item.href}
-                className="px-4 py-1.5 rounded-lg text-[13px] transition-all"
+                className="px-4 py-2 rounded-lg text-[13px] transition-all"
                 style={{
                   color: isActive(item.href) ? "var(--blue-light)" : "var(--text-muted)",
                   background: isActive(item.href) ? "rgba(59,130,246,0.1)" : "transparent",
@@ -50,6 +51,11 @@ export default function Navbar() {
                 {item.label}
               </Link>
             ))}
+            <a href={CONTACT_MAIL}
+              className="px-4 py-2 rounded-lg text-[13px] transition-all"
+              style={{ color: "var(--text-muted)", fontWeight: 400 }}>
+              개발자 문의
+            </a>
           </div>
 
           {/* 서버 추가 버튼 */}
@@ -71,7 +77,7 @@ export default function Navbar() {
             style={{ background: "rgba(13,17,23,0.98)", borderTop: "1px solid var(--border)" }}>
             {NAV_ITEMS.map(item => (
               <Link key={item.href} href={item.href} onClick={() => setOpen(false)}
-                className="block px-4 py-2.5 rounded-lg text-sm"
+                className="block px-4 py-3 rounded-lg text-sm"
                 style={{
                   color: isActive(item.href) ? "var(--blue-light)" : "var(--text-sub)",
                   background: isActive(item.href) ? "rgba(59,130,246,0.08)" : "transparent",
@@ -79,6 +85,11 @@ export default function Navbar() {
                 {item.label}
               </Link>
             ))}
+            <a href={CONTACT_MAIL} onClick={() => setOpen(false)}
+              className="block px-4 py-3 rounded-lg text-sm"
+              style={{ color: "var(--text-sub)" }}>
+              개발자 문의
+            </a>
             <Link href={DISCORD_URL} target="_blank" onClick={() => setOpen(false)}
               className="block mt-2 btn-primary text-sm px-4 py-2.5 text-center">
               서버에 추가하기

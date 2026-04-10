@@ -61,12 +61,12 @@ const SECTIONS = [
     title: "7. 개인정보 보호책임자",
     content: `개인정보 처리에 관한 업무를 총괄하여 처리하고, 개인정보 처리와 관련한 불만처리 및 피해구제를 위해 아래와 같이 개인정보 보호책임자를 지정합니다.
 
-• 이메일: contact@maplebot.co.kr
+• 이메일: myrlfwns1@naver.com
 • 서비스명: 메이플봇 (maplebot.co.kr)`,
   },
   {
     title: "8. 개인정보처리방침 변경",
-    content: `이 개인정보처리방침은 2025년 4월 6일부터 적용됩니다.
+    content: `이 개인정보처리방침은 2026년 4월 6일부터 적용됩니다.
 내용 변경 시 서비스 내 공지사항을 통해 사전 고지합니다.`,
   },
 ]
@@ -80,7 +80,7 @@ export default function PrivacyPage() {
         <p className="text-sm" style={{ color: "var(--text-sub)" }}>
           메이플봇은 이용자의 개인정보를 중요하게 생각합니다.
         </p>
-        <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>시행일: 2025년 4월 6일</p>
+        <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>시행일: 2026년 4월 6일</p>
       </div>
 
       {/* 요약 카드 */}
