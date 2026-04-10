@@ -88,6 +88,15 @@ export default function ContactPage() {
     setRequests(prev => prev.filter(r => r.id !== id))
   }
 
+  const handleUpdate = async (id: string, field: "priority" | "status", value: string) => {
+    await fetch("/api/feature-request", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, adminPassword, [field]: value }),
+    })
+    setRequests(prev => prev.map(r => r.id === id ? { ...r, [field]: value as any } : r))
+  }
+
   const canSubmit = !submitting && form.title.trim().length > 0 && form.description.trim().length > 0
 
   const stats = {
@@ -202,13 +211,37 @@ export default function ContactPage() {
                       <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
                         <p className="font-semibold flex-1" style={{ fontSize: "1rem", color: "var(--text)", lineHeight: 1.4 }}>{r.title}</p>
                         <div className="flex items-center gap-1.5 shrink-0">
-                          <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "3px", background: p.bg, color: p.color, border: `1px solid ${p.border}` }}>{p.text}</span>
-                          <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "3px", background: s.bg, color: s.color, border: `1px solid ${s.border}` }}>{s.text}</span>
-                          {isAdmin && (
-                            <button onClick={e => { e.stopPropagation(); handleDelete(r.id) }}
-                              style={{ padding: "3px 6px", borderRadius: "4px", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)", color: "#f87171" }}>
-                              <Trash2 size={11} />
-                            </button>
+                          {isAdmin ? (
+                            <>
+                              <select
+                                value={r.priority}
+                                onClick={e => e.stopPropagation()}
+                                onChange={e => { e.stopPropagation(); handleUpdate(r.id, "priority", e.target.value) }}
+                                style={{ fontSize: "11px", fontWeight: 700, padding: "2px 6px", borderRadius: "3px", background: p.bg, color: p.color, border: `1px solid ${p.border}`, cursor: "pointer", outline: "none" }}>
+                                <option value="high">높음</option>
+                                <option value="medium">보통</option>
+                                <option value="low">낮음</option>
+                              </select>
+                              <select
+                                value={r.status}
+                                onClick={e => e.stopPropagation()}
+                                onChange={e => { e.stopPropagation(); handleUpdate(r.id, "status", e.target.value) }}
+                                style={{ fontSize: "11px", fontWeight: 700, padding: "2px 6px", borderRadius: "3px", background: s.bg, color: s.color, border: `1px solid ${s.border}`, cursor: "pointer", outline: "none" }}>
+                                <option value="reviewing">검토중</option>
+                                <option value="planned">예정</option>
+                                <option value="in-progress">진행중</option>
+                                <option value="done">완료</option>
+                              </select>
+                              <button onClick={e => { e.stopPropagation(); handleDelete(r.id) }}
+                                style={{ padding: "3px 6px", borderRadius: "4px", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)", color: "#f87171" }}>
+                                <Trash2 size={11} />
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "3px", background: p.bg, color: p.color, border: `1px solid ${p.border}` }}>{p.text}</span>
+                              <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "3px", background: s.bg, color: s.color, border: `1px solid ${s.border}` }}>{s.text}</span>
+                            </>
                           )}
                         </div>
                       </div>
