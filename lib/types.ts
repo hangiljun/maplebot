@@ -99,6 +99,13 @@ export interface HexaStat {
   sub_stat_level_2: number
 }
 
+export interface BasicCharacterData {
+  basic: CharacterBasic
+  stats: StatItem[]
+  popularity: number
+  union: UnionInfo | null
+}
+
 export interface CharacterData {
   basic: CharacterBasic
   popularity: number
@@ -111,6 +118,12 @@ export interface CharacterData {
   hexaStats: HexaStat[]
   codi: CodiInfo | null
 }
+
+export interface TabEquipment { equipment: EquipmentItem[] }
+export interface TabAbility   { ability: AbilityInfo | null }
+export interface TabSymbol    { symbols: SymbolItem[] }
+export interface TabHexa      { hexaCores: HexaCore[]; hexaStats: HexaStat[] }
+export interface TabCodi      { codi: CodiInfo | null }
 
 export interface HistoryPoint {
   date: string

@@ -2,7 +2,7 @@ import { Suspense } from "react"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { Search } from "lucide-react"
-import { fetchCharacter, COMBAT_POWER_STAT } from "@/lib/maple"
+import { fetchBasicCharacter, COMBAT_POWER_STAT } from "@/lib/maple"
 import CharacterImage from "./CharacterImage"
 import CharacterTabs from "./CharacterTabs"
 import HistoryCharts from "./HistoryCharts"
@@ -29,7 +29,6 @@ function formatPower(value: string | number): string {
 function CharacterSkeleton() {
   return (
     <div className="max-w-3xl mx-auto space-y-4 animate-pulse">
-      {/* 캐릭터 카드 스켈레톤 */}
       <div className="glass rounded-3xl overflow-hidden">
         <div className="flex flex-col sm:flex-row">
           <div className="sm:w-44 shrink-0 pt-8 pb-4 px-6 flex items-end justify-center"
@@ -40,7 +39,7 @@ function CharacterSkeleton() {
             <div className="flex items-start justify-between">
               <div className="space-y-2">
                 <div className="h-7 w-32 rounded-lg" style={{ background: "rgba(255,255,255,0.08)" }} />
-                <div className="h-4 w-20 rounded" style={{ background: "rgba(255,255,255,0.05)" }} />
+                <div className="h-4 w-20 rounded"   style={{ background: "rgba(255,255,255,0.05)" }} />
               </div>
               <div className="h-9 w-14 rounded-lg" style={{ background: "rgba(255,255,255,0.08)" }} />
             </div>
@@ -52,20 +51,18 @@ function CharacterSkeleton() {
           </div>
         </div>
       </div>
-      {/* 히스토리 스켈레톤 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {[1, 2].map(i => (
           <div key={i} className="glass rounded-2xl p-5 h-44" style={{ background: "rgba(255,255,255,0.03)" }} />
         ))}
       </div>
-      {/* 탭 스켈레톤 */}
       <div className="glass rounded-2xl p-5 h-64" style={{ background: "rgba(255,255,255,0.03)" }} />
     </div>
   )
 }
 
 async function CharacterContent({ name }: { name: string }) {
-  const data = await fetchCharacter(name)
+  const data = await fetchBasicCharacter(name)
 
   if (!data) {
     return (
@@ -91,13 +88,8 @@ async function CharacterContent({ name }: { name: string }) {
             <div className="rounded-xl p-4 text-left mb-7"
               style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}>
               <p className="text-xs font-semibold mb-2" style={{ color: "var(--text-muted)" }}>확인해 보세요</p>
-              {[
-                "닉네임 철자가 정확한지 확인",
-                "메이플스토리 공식 홈페이지에서 캐릭터 조회 후 복사",
-                "잠시 후(1~2분) 다시 시도",
-              ].map((tip, i) => (
-                <div key={i} className="flex items-center gap-2 text-xs mt-1.5"
-                  style={{ color: "var(--text-sub)" }}>
+              {["닉네임 철자가 정확한지 확인", "메이플스토리 공식 홈페이지에서 캐릭터 조회 후 복사", "잠시 후(1~2분) 다시 시도"].map((tip, i) => (
+                <div key={i} className="flex items-center gap-2 text-xs mt-1.5" style={{ color: "var(--text-sub)" }}>
                   <div className="w-1 h-1 rounded-full shrink-0" style={{ background: "var(--blue-light)" }} />
                   {tip}
                 </div>
@@ -113,15 +105,15 @@ async function CharacterContent({ name }: { name: string }) {
     )
   }
 
-  const { basic } = data
-  const combatPower = data.stats.find(s => s.stat_name === COMBAT_POWER_STAT)?.stat_value ?? "0"
+  const { basic, stats, popularity, union } = data
+  const combatPower = stats.find(s => s.stat_name === COMBAT_POWER_STAT)?.stat_value ?? "0"
 
   const infoItems = [
     { label: "서버",   value: basic.world_name },
     { label: "직업",   value: basic.character_class },
     { label: "길드",   value: basic.character_guild_name || "없음" },
-    { label: "유니온", value: data.union ? `${data.union.union_grade} Lv.${(data.union.union_level ?? 0).toLocaleString()}` : "없음" },
-    { label: "인기도", value: (data.popularity ?? 0).toLocaleString() },
+    { label: "유니온", value: union ? `${union.union_grade} Lv.${(union.union_level ?? 0).toLocaleString()}` : "없음" },
+    { label: "인기도", value: (popularity ?? 0).toLocaleString() },
     { label: "전투력", value: formatPower(combatPower), gold: true },
   ]
 
@@ -148,21 +140,14 @@ async function CharacterContent({ name }: { name: string }) {
                   style={{ fontFamily: "GmarketSans, sans-serif", color: "var(--blue-light)" }}>
                   {basic.character_level}
                 </p>
-                <p className="text-[10px] font-bold uppercase tracking-widest mt-0.5" style={{ color: "var(--text-muted)" }}>
-                  Level
-                </p>
+                <p className="text-[10px] font-bold uppercase tracking-widest mt-0.5" style={{ color: "var(--text-muted)" }}>Level</p>
               </div>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {infoItems.map(({ label, value, gold }) => (
                 <div key={label} className="glass rounded-xl px-3 py-2.5">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider mb-0.5" style={{ color: "var(--text-muted)" }}>
-                    {label}
-                  </p>
-                  <p className="text-sm font-bold truncate"
-                    style={{ color: gold ? "var(--blue-light)" : "var(--text)" }}>
-                    {value}
-                  </p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider mb-0.5" style={{ color: "var(--text-muted)" }}>{label}</p>
+                  <p className="text-sm font-bold truncate" style={{ color: gold ? "var(--blue-light)" : "var(--text)" }}>{value}</p>
                 </div>
               ))}
             </div>
@@ -173,10 +158,9 @@ async function CharacterContent({ name }: { name: string }) {
       {/* 히스토리 */}
       <HistoryCharts name={basic.character_name} />
 
-      {/* 탭 */}
-      <CharacterTabs data={data} />
+      {/* 탭 — 기본/유니온은 즉시, 나머지는 클릭 시 on-demand */}
+      <CharacterTabs basic={basic} stats={stats} union={union} />
 
-      {/* 다시 검색 */}
       <div className="flex justify-center pt-2">
         <Link href="/" className="flex items-center gap-2 text-sm transition-all hover:text-white"
           style={{ color: "var(--text-muted)" }}>
