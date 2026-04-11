@@ -102,11 +102,12 @@ function ItemDetail({ item }: { item: EquipmentItem }) {
   )
 }
 
-function SlotCell({ item, col, onClick }: { item: EquipmentItem | undefined; col: number; onClick: (item: EquipmentItem) => void }) {
+function SlotCell({ item, col, row, onClick }: { item: EquipmentItem | undefined; col: number; row: number; onClick: (item: EquipmentItem) => void }) {
   const grade     = item?.potential_option_grade ?? null
   const sfNum     = parseInt(item?.starforce ?? "0") || 0
   const borderCls = grade ? (GRADE_BORDER[grade] ?? "border-gray-600") : "border-gray-600"
   const tipSide   = col >= 4 ? "right-full mr-2" : "left-full ml-2"
+  const tipVert   = row >= 4 ? "bottom-0" : "top-0"
 
   return (
     <div className="relative group flex items-center justify-center">
@@ -129,7 +130,7 @@ function SlotCell({ item, col, onClick }: { item: EquipmentItem | undefined; col
 
       {/* 데스크탑 hover 툴팁 */}
       {item && (
-        <div className={`hidden md:group-hover:block absolute z-50 top-0 w-64 ${tipSide}`}>
+        <div className={`hidden md:group-hover:block absolute z-50 ${tipVert} w-64 ${tipSide}`}>
           <div className="bg-[#1a1a2e] text-white rounded-xl shadow-2xl border border-gray-700 p-3">
             <ItemDetail item={item} />
           </div>
@@ -153,7 +154,7 @@ export default function EquipmentTab({ items }: { items: EquipmentItem[] }) {
         <div className="grid gap-1.5" style={{ gridTemplateColumns: "repeat(5, 52px)", gridTemplateRows: "repeat(6, 52px)" }}>
           {SLOT_LAYOUT.map(({ slot, col, row }) => (
             <div key={slot} style={{ gridColumn: col, gridRow: row }}>
-              <SlotCell item={itemMap.get(slot)} col={col} onClick={setSelected} />
+              <SlotCell item={itemMap.get(slot)} col={col} row={row} onClick={setSelected} />
             </div>
           ))}
         </div>
