@@ -86,12 +86,12 @@ function PotentialBlock({ label, grade, opts }: {
 }
 
 function ItemDetail({ item }: { item: EquipmentItem }) {
-  const potGrade  = item.potential_option_grade ?? null
-  const addGrade  = item.additional_potential_option_grade ?? null
-  const sfNum     = parseInt(item.starforce ?? "0") || 0
-  const nameColor = potGrade ? (GRADE_COLOR[potGrade] ?? "#fff") : "#fff"
+  const potGrade   = item.potential_option_grade ?? null
+  const addGrade   = item.additional_potential_option_grade ?? null
+  const sfNum      = parseInt(item.starforce ?? "0") || 0
+  const nameColor  = potGrade ? (GRADE_COLOR[potGrade] ?? "#fff") : "#fff"
 
-  const totalOpts = item.item_total_option ?? {}
+  const totalOpts  = item.item_total_option ?? {}
   const stats = STAT_ORDER
     .filter(k => totalOpts[k] && totalOpts[k] !== "0" && totalOpts[k] !== "")
     .map(k => ({ k, v: totalOpts[k] }))
@@ -106,51 +106,63 @@ function ItemDetail({ item }: { item: EquipmentItem }) {
   const soulName    = item.soul_name
   const soulOption  = item.soul_option
 
+  // 스타포스 ★ 문자열
+  const sfStars = sfNum > 0
+    ? "★".repeat(Math.min(sfNum, 25)) + (sfNum > 25 ? ` (${sfNum}성)` : "")
+    : null
+
   return (
-    <div className="text-[12px] leading-relaxed" style={{ color: "#e0e0e0" }}>
-      {sfNum > 0 && (
-        <p className="text-center text-[11px] font-bold mb-1" style={{ color: "#f0c040", letterSpacing: "1px" }}>
-          {"★".repeat(Math.min(sfNum, 15))}{sfNum > 15 ? `+${sfNum - 15}` : ""}
+    <div className="text-[12px]" style={{ color: "#e8e8e8", minWidth: 0 }}>
+
+      {/* 아이템 이름 */}
+      <p className="font-bold text-[14px] text-center mb-1 leading-snug" style={{ color: nameColor }}>
+        {item.item_name}
+      </p>
+
+      {/* 스타포스 */}
+      {sfStars && (
+        <p className="text-center text-[11px] font-bold mb-2" style={{ color: "#f0c040", letterSpacing: "2px", wordBreak: "break-all" }}>
+          {sfStars}
         </p>
       )}
 
-      <div className="flex items-center gap-3 mb-2">
+      {/* 아이콘 + 슬롯/레벨 */}
+      <div className="flex items-center gap-3 mb-3">
         {item.item_icon && (
-          <img src={item.item_icon} alt={item.item_name}
-            className="w-14 h-14 object-contain shrink-0"
-            style={{ imageRendering: "pixelated" }} />
+          <div className="shrink-0" style={{ width: 64, height: 64, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <img
+              src={item.item_icon}
+              alt={item.item_name}
+              style={{ imageRendering: "pixelated", maxWidth: 64, maxHeight: 64, objectFit: "contain" }}
+            />
+          </div>
         )}
-        <div>
-          <p className="font-bold text-[13px] leading-tight" style={{ color: nameColor }}>{item.item_name}</p>
-          <p className="text-[10px] mt-0.5" style={{ color: "#888" }}>{item.item_equipment_slot}</p>
-          {reqLevel && <p className="text-[10px] mt-0.5" style={{ color: "#aaa" }}>요구 레벨 : {reqLevel}</p>}
+        <div className="flex flex-col gap-1">
+          <span className="text-[11px] font-bold px-2 py-0.5 rounded"
+            style={{ background: "rgba(255,255,255,0.1)", color: "#ccc", width: "fit-content" }}>
+            {item.item_equipment_slot}
+          </span>
+          {reqLevel && (
+            <p className="text-[11px]" style={{ color: "#aaa" }}>요구 레벨 : Lv. {reqLevel}</p>
+          )}
         </div>
       </div>
 
       <Divider />
 
+      {/* 스탯 */}
       {stats.length > 0 && (
         <div className="space-y-0.5 mb-1">
           {stats.map(({ k, v }) => (
-            <div key={k} className="flex justify-between gap-4">
-              <span style={{ color: "#ccc" }}>{STAT_KO[k] ?? k}</span>
+            <div key={k} className="flex justify-between">
+              <span style={{ color: "#bbb" }}>{STAT_KO[k] ?? k}</span>
               <span style={{ color: "#fff", fontWeight: 600 }}>+{v}</span>
             </div>
           ))}
         </div>
       )}
 
-      {(scrollUp !== undefined || scrollLeft !== undefined) && (
-        <>
-          <Divider />
-          <p className="text-[11px]" style={{ color: scrollLeft === "0" ? "#666" : "#aaa" }}>
-            {scrollLeft === "0"
-              ? "주문서 강화 불가"
-              : `주문서 강화 +${scrollUp ?? 0} (남은 횟수: ${scrollLeft}${goldenHammer ? ", 황금망치" : ""})`}
-          </p>
-        </>
-      )}
-
+      {/* 소울 */}
       {soulName && (
         <>
           <Divider />
@@ -159,8 +171,23 @@ function ItemDetail({ item }: { item: EquipmentItem }) {
         </>
       )}
 
+      {/* 스크롤 강화 */}
+      {(scrollUp !== undefined || scrollLeft !== undefined) && (
+        <>
+          <Divider />
+          <p className="text-[11px]" style={{ color: scrollLeft === "0" ? "#666" : "#aaa" }}>
+            {scrollLeft === "0"
+              ? "주문서 강화 불가"
+              : `주문서 강화 +${scrollUp ?? 0}  (남은 횟수 : ${scrollLeft}${goldenHammer ? ", 황금망치" : ""})`}
+          </p>
+        </>
+      )}
+
+      {/* 잠재능력 */}
       <PotentialBlock label="잠재능력" grade={potGrade}
         opts={[item.potential_option_1, item.potential_option_2, item.potential_option_3]} />
+
+      {/* 에디셔널 잠재능력 */}
       <PotentialBlock label="에디셔널 잠재능력" grade={addGrade}
         opts={[item.additional_potential_option_1, item.additional_potential_option_2, item.additional_potential_option_3]} />
     </div>
