@@ -2,6 +2,7 @@
 import { useState, useMemo } from "react"
 import { X } from "lucide-react"
 import { EquipmentItem } from "@/lib/maple"
+import MapleItemDetail from "./MapleItemDetail"
 
 const SLOT_LAYOUT: { slot: string; col: number; row: number }[] = [
   { slot: "반지1",       col: 1, row: 1 },
@@ -36,164 +37,6 @@ const GRADE_BORDER: Record<string, string> = {
   "레어":     "border-[#3B82F6]",
 }
 
-const GRADE_COLOR: Record<string, string> = {
-  "레전드리": "#FF8C00",
-  "유니크":   "#f0c040",
-  "에픽":     "#c060ff",
-  "레어":     "#60a8ff",
-}
-
-const STAT_ORDER = [
-  "str","dex","int","luk","max_hp","max_mp",
-  "attack_power","magic_power","armor","speed","jump",
-  "boss_damage","ignore_monster_armor","damage","all_stat",
-  "critical_rate","critical_damage","equipment_level_decrease",
-]
-
-const STAT_KO: Record<string, string> = {
-  str: "STR", dex: "DEX", int: "INT", luk: "LUK",
-  max_hp: "최대 HP", max_mp: "최대 MP",
-  attack_power: "공격력", magic_power: "마력",
-  armor: "방어력", speed: "이동속도", jump: "점프력",
-  boss_damage: "보스 데미지", ignore_monster_armor: "방어율 무시",
-  critical_rate: "크리티컬 확률", critical_damage: "크리티컬 데미지",
-  damage: "데미지", all_stat: "올스탯",
-  equipment_level_decrease: "착용 레벨 감소",
-  max_hp_rate: "최대 HP %", max_mp_rate: "최대 MP %",
-}
-
-function Divider() {
-  return <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", margin: "6px 0" }} />
-}
-
-function PotentialBlock({ label, grade, opts }: {
-  label: string
-  grade: string | null | undefined
-  opts: (string | null | undefined)[]
-}) {
-  const lines = opts.filter(Boolean)
-  if (!lines.length || !grade) return null
-  const color = GRADE_COLOR[grade] ?? "#aaa"
-  return (
-    <div>
-      <Divider />
-      <p className="text-[11px] font-bold mb-1" style={{ color }}>■ {label} : {grade}</p>
-      {lines.map((opt, i) => (
-        <p key={i} className="text-[11px] leading-snug" style={{ color }}>■ {opt}</p>
-      ))}
-    </div>
-  )
-}
-
-function ItemDetail({ item }: { item: EquipmentItem }) {
-  const potGrade   = item.potential_option_grade ?? null
-  const addGrade   = item.additional_potential_option_grade ?? null
-  const sfNum      = parseInt(item.starforce ?? "0") || 0
-  const nameColor  = potGrade ? (GRADE_COLOR[potGrade] ?? "#fff") : "#fff"
-
-  const totalOpts  = item.item_total_option ?? {}
-  const stats = STAT_ORDER
-    .filter(k => totalOpts[k] && totalOpts[k] !== "0" && totalOpts[k] !== "")
-    .map(k => ({ k, v: totalOpts[k] }))
-  Object.entries(totalOpts).forEach(([k, v]) => {
-    if (!STAT_ORDER.includes(k) && v !== "0" && v !== "") stats.push({ k, v })
-  })
-
-  const reqLevel    = item.item_base_option?.["base_equipment_level"]
-  const scrollUp    = item.scroll_upgrade
-  const scrollLeft  = item.scroll_upgradeable_count
-  const goldenHammer = item.golden_hammer_flag === "Y"
-  const soulName    = item.soul_name
-  const soulOption  = item.soul_option
-
-  // 스타포스 ★ 문자열
-  const sfStars = sfNum > 0
-    ? "★".repeat(Math.min(sfNum, 25)) + (sfNum > 25 ? ` (${sfNum}성)` : "")
-    : null
-
-  return (
-    <div className="text-[12px]" style={{ color: "#e8e8e8", minWidth: 0 }}>
-
-      {/* 아이템 이름 */}
-      <p className="font-bold text-[14px] text-center mb-1 leading-snug" style={{ color: nameColor }}>
-        {item.item_name}
-      </p>
-
-      {/* 스타포스 */}
-      {sfStars && (
-        <p className="text-center text-[11px] font-bold mb-2" style={{ color: "#f0c040", letterSpacing: "2px", wordBreak: "break-all" }}>
-          {sfStars}
-        </p>
-      )}
-
-      {/* 아이콘 + 슬롯/레벨 */}
-      <div className="flex items-center gap-3 mb-3">
-        {item.item_icon && (
-          <div className="shrink-0" style={{ width: 64, height: 64, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <img
-              src={item.item_icon}
-              alt={item.item_name}
-              style={{ imageRendering: "pixelated", maxWidth: 64, maxHeight: 64, objectFit: "contain" }}
-            />
-          </div>
-        )}
-        <div className="flex flex-col gap-1">
-          <span className="text-[11px] font-bold px-2 py-0.5 rounded"
-            style={{ background: "rgba(255,255,255,0.1)", color: "#ccc", width: "fit-content" }}>
-            {item.item_equipment_slot}
-          </span>
-          {reqLevel && (
-            <p className="text-[11px]" style={{ color: "#aaa" }}>요구 레벨 : Lv. {reqLevel}</p>
-          )}
-        </div>
-      </div>
-
-      <Divider />
-
-      {/* 스탯 */}
-      {stats.length > 0 && (
-        <div className="space-y-0.5 mb-1">
-          {stats.map(({ k, v }) => (
-            <div key={k} className="flex justify-between">
-              <span style={{ color: "#bbb" }}>{STAT_KO[k] ?? k}</span>
-              <span style={{ color: "#fff", fontWeight: 600 }}>+{v}</span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* 소울 */}
-      {soulName && (
-        <>
-          <Divider />
-          <p className="text-[11px] font-bold" style={{ color: "#a0c8ff" }}>{soulName}</p>
-          {soulOption && <p className="text-[11px]" style={{ color: "#a0c8ff" }}>{soulOption}</p>}
-        </>
-      )}
-
-      {/* 스크롤 강화 */}
-      {(scrollUp !== undefined || scrollLeft !== undefined) && (
-        <>
-          <Divider />
-          <p className="text-[11px]" style={{ color: scrollLeft === "0" ? "#666" : "#aaa" }}>
-            {scrollLeft === "0"
-              ? "주문서 강화 불가"
-              : `주문서 강화 +${scrollUp ?? 0}  (남은 횟수 : ${scrollLeft}${goldenHammer ? ", 황금망치" : ""})`}
-          </p>
-        </>
-      )}
-
-      {/* 잠재능력 */}
-      <PotentialBlock label="잠재능력" grade={potGrade}
-        opts={[item.potential_option_1, item.potential_option_2, item.potential_option_3]} />
-
-      {/* 에디셔널 잠재능력 */}
-      <PotentialBlock label="에디셔널 잠재능력" grade={addGrade}
-        opts={[item.additional_potential_option_1, item.additional_potential_option_2, item.additional_potential_option_3]} />
-    </div>
-  )
-}
-
 function SlotCell({ item, col, row, onClick }: {
   item: EquipmentItem | undefined
   col: number
@@ -214,7 +57,7 @@ function SlotCell({ item, col, row, onClick }: {
         {item ? (
           <>
             {item.item_icon
-              ? <img src={item.item_icon} alt={item.item_name} className="w-10 h-10 object-contain" />
+              ? <img src={item.item_icon} alt={item.item_name} className="w-10 h-10 object-contain" style={{ imageRendering: "pixelated" }} />
               : <span className="text-xl">🗡️</span>}
             {sfNum > 0 && (
               <span className="absolute -top-1.5 -right-1 bg-yellow-400 text-[#111] text-[9px] font-extrabold px-1 rounded-full leading-tight">{sfNum}</span>
@@ -225,11 +68,10 @@ function SlotCell({ item, col, row, onClick }: {
         )}
       </div>
 
+      {/* 데스크탑 hover 툴팁 */}
       {item && (
-        <div className={`hidden md:group-hover:block absolute z-50 ${tipVert} w-72 ${tipSide}`}>
-          <div className="text-white rounded-xl shadow-2xl p-3" style={{ background: "#1a1422", border: "1px solid rgba(255,255,255,0.15)" }}>
-            <ItemDetail item={item} />
-          </div>
+        <div className={`hidden md:group-hover:block absolute z-50 ${tipVert} ${tipSide}`} style={{ width: 292 }}>
+          <MapleItemDetail item={item} />
         </div>
       )}
     </div>
@@ -256,22 +98,27 @@ export default function EquipmentTab({ items }: { items: EquipmentItem[] }) {
         </div>
       </div>
 
+      {/* 모바일 클릭 모달 */}
       {selected && (
         <div
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
-          style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)", cursor: "pointer" }}
+          style={{ background: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)", cursor: "pointer" }}
           onPointerDown={() => setSelected(null)}>
           <div
-            className="w-full sm:w-80 rounded-t-2xl sm:rounded-2xl p-5"
-            style={{ background: "#1a1422", border: "1px solid rgba(255,255,255,0.15)", maxHeight: "80vh", overflowY: "auto", cursor: "default" }}
+            className="w-full sm:w-auto sm:min-w-[280px] sm:max-w-xs rounded-t-2xl sm:rounded-xl overflow-hidden"
+            style={{ maxHeight: "88vh", overflowY: "auto", cursor: "default" }}
             onPointerDown={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>장비 정보</p>
-              <button onClick={() => setSelected(null)} style={{ color: "var(--text-muted)" }}>
+            {/* 닫기 버튼 */}
+            <div style={{
+              display: "flex", justifyContent: "flex-end",
+              padding: "8px 12px 0",
+              background: "linear-gradient(175deg, #1c1228 0%, #0e0818 100%)",
+            }}>
+              <button onClick={() => setSelected(null)} style={{ color: "#888", padding: 2 }}>
                 <X size={16} />
               </button>
             </div>
-            <ItemDetail item={selected} />
+            <MapleItemDetail item={selected} />
           </div>
         </div>
       )}
