@@ -75,10 +75,13 @@ export default function HistoryCharts({ name }: { name: string }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    let cancelled = false
+    setLoading(true)
     fetch(`/api/history/${encodeURIComponent(name)}`)
       .then(r => r.ok ? r.json() : null)
-      .then(d => setData(d))
-      .finally(() => setLoading(false))
+      .then(d => { if (!cancelled) setData(d) })
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
   }, [name])
 
   if (loading) {

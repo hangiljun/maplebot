@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, useCallback, useMemo, useRef } from "react"
 import {
   type CharacterBasic, type UnionInfo, type StatItem,
   type EquipmentItem, type AbilityInfo, type SymbolItem,
@@ -73,24 +73,36 @@ export default function CharacterTabs({
   const [activeTab, setActiveTab] = useState("stat")
   const [tabCache, setTabCache]   = useState<TabCache>({})
   const [loading, setLoading]     = useState<string | null>(null)
+  const abortRef                  = useRef<AbortController | null>(null)
 
-  const handleTab = async (key: string, lazy: boolean) => {
+  const handleTab = useCallback(async (key: string, lazy: boolean) => {
     setActiveTab(key)
     if (!lazy || key in tabCache) return
 
+    abortRef.current?.abort()
+    abortRef.current = new AbortController()
+
     setLoading(key)
     try {
-      const res = await fetch(`/api/maple/tab?name=${encodeURIComponent(basic.character_name)}&tab=${key}`)
+      const res = await fetch(
+        `/api/maple/tab?name=${encodeURIComponent(basic.character_name)}&tab=${key}`,
+        { signal: abortRef.current.signal },
+      )
       if (res.ok) {
         const data = await res.json()
         setTabCache(prev => ({ ...prev, ...data }))
       }
+    } catch (e: unknown) {
+      if ((e as Error).name !== "AbortError") console.error(e)
     } finally {
       setLoading(null)
     }
-  }
+  }, [basic.character_name, tabCache])
 
-  const combatPower = stats.find(s => s.stat_name === COMBAT_POWER_STAT)
+  const combatPower = useMemo(() => stats.find(s => s.stat_name === COMBAT_POWER_STAT), [stats])
+  const mainStats   = useMemo(() => pickStats(stats, MAIN_STATS),   [stats])
+  const battleStats = useMemo(() => pickStats(stats, BATTLE_STATS), [stats])
+  const detailStats = useMemo(() => pickStats(stats, DETAIL_STATS), [stats])
   const isLoading   = loading === activeTab
 
   return (
@@ -123,9 +135,9 @@ export default function CharacterTabs({
                 </span>
               </div>
             )}
-            <StatGrid title="기본 능력치" items={pickStats(stats, MAIN_STATS)} />
-            <StatGrid title="전투 능력치" items={pickStats(stats, BATTLE_STATS)} />
-            <StatGrid title="전투 상세"   items={pickStats(stats, DETAIL_STATS)} />
+            <StatGrid title="기본 능력치" items={mainStats} />
+            <StatGrid title="전투 능력치" items={battleStats} />
+            <StatGrid title="전투 상세"   items={detailStats} />
           </div>
         )}
 

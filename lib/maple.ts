@@ -227,8 +227,6 @@ export async function fetchCharacter(name: string): Promise<CharacterData | null
 
   if (!basicR) return null
 
-  await new Promise(r => setTimeout(r, 100))
-
   const [symbolR, hexaCoreR, hexaStatR, codiR, beautyR] = await Promise.all([
     nexonFetch(`/maplestory/v1/character/symbol-equipment?${q}`),
     nexonFetch(`/maplestory/v1/character/hexamatrix?${q}`),

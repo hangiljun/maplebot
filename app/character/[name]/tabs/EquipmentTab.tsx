@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { X } from "lucide-react"
 import { EquipmentItem, POTENTIAL_COLORS } from "@/lib/maple"
 
@@ -141,12 +141,11 @@ function SlotCell({ item, col, onClick }: { item: EquipmentItem | undefined; col
 
 export default function EquipmentTab({ items }: { items: EquipmentItem[] }) {
   const [selected, setSelected] = useState<EquipmentItem | null>(null)
+  const itemMap = useMemo(() => new Map(items.map(it => [it.item_equipment_slot, it])), [items])
 
   if (!items.length) {
     return <div className="text-center py-12 text-sm" style={{ color: "var(--text-muted)" }}>장비 정보를 불러올 수 없어요</div>
   }
-
-  const itemMap = new Map(items.map(it => [it.item_equipment_slot, it]))
 
   return (
     <>
