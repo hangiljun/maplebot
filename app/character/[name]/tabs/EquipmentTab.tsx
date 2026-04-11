@@ -48,56 +48,146 @@ const GRADE_BORDER: Record<string, string> = {
   "레어":     "border-[#3B82F6]",
 }
 
-function PotentialBlock({ grade, opts }: { grade: string | null | undefined; opts: (string | null | undefined)[] }) {
+const GRADE_COLOR: Record<string, string> = {
+  "레전드리": "#FF8C00",
+  "유니크":   "#f0c040",
+  "에픽":     "#c060ff",
+  "레어":     "#60a8ff",
+}
+
+// 스탯 표시 순서 및 한글 명
+const STAT_ORDER = ["str","dex","int","luk","max_hp","max_mp","attack_power","magic_power","armor","speed","jump","boss_damage","ignore_monster_armor","damage","all_stat","critical_rate","critical_damage","equipment_level_decrease"]
+const STAT_KO: Record<string, string> = {
+  str: "STR", dex: "DEX", int: "INT", luk: "LUK",
+  max_hp: "최대 HP", max_mp: "최대 MP",
+  attack_power: "공격력", magic_power: "마력",
+  armor: "방어력", speed: "이동속도", jump: "점프력",
+  boss_damage: "보스 데미지", ignore_monster_armor: "방어율 무시",
+  critical_rate: "크리티컬 확률", critical_damage: "크리티컬 데미지",
+  damage: "데미지", all_stat: "올스탯",
+  equipment_level_decrease: "착용 레벨 감소",
+  max_hp_rate: "최대 HP %", max_mp_rate: "최대 MP %",
+}
+
+function Divider() {
+  return <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", margin: "6px 0" }} />
+}
+
+function PotentialBlock({ label, grade, opts }: { label: string; grade: string | null | undefined; opts: (string | null | undefined)[] }) {
   const lines = opts.filter(Boolean)
   if (!lines.length || !grade) return null
-  const color = POTENTIAL_COLORS[grade] ?? "#888"
+  const color = GRADE_COLOR[grade] ?? "#aaa"
   return (
-    <div className="border-t border-gray-700 pt-2 mb-1">
-      <p className="text-[10px] font-bold mb-1" style={{ color }}>[{grade}]</p>
-      {lines.map((opt, i) => <p key={i} className="leading-snug" style={{ color }}>{opt}</p>)}
+    <div>
+      <Divider />
+      <p className="text-[11px] font-bold mb-1" style={{ color }}>
+        ■ {label} : {grade}
+      </p>
+      {lines.map((opt, i) => (
+        <p key={i} className="text-[11px] leading-snug" style={{ color }}>
+          ■ {opt}
+        </p>
+      ))}
     </div>
   )
 }
 
 function ItemDetail({ item }: { item: EquipmentItem }) {
-  const grade = item.potential_option_grade ?? null
-  const sfNum = parseInt(item.starforce ?? "0") || 0
-  const stats = Object.entries(item.item_total_option ?? {}).filter(([, v]) => v !== "0" && v !== "")
+  const potGrade  = item.potential_option_grade ?? null
+  const addGrade  = item.additional_potential_option_grade ?? null
+  const sfNum     = parseInt(item.starforce ?? "0") || 0
+  const nameColor = potGrade ? (GRADE_COLOR[potGrade] ?? "#fff") : "#fff"
+
+  // 총합 스탯 (STAT_ORDER 순서대로)
+  const totalOpts = item.item_total_option ?? {}
+  const stats = STAT_ORDER
+    .filter(k => totalOpts[k] && totalOpts[k] !== "0" && totalOpts[k] !== "")
+    .map(k => ({ k, v: totalOpts[k] }))
+  // ORDER에 없는 나머지 필드도 추가
+  Object.entries(totalOpts).forEach(([k, v]) => {
+    if (!STAT_ORDER.includes(k) && v !== "0" && v !== "") stats.push({ k, v })
+  })
+
+  // 요구 레벨
+  const reqLevel = item.item_base_option?.["base_equipment_level"]
+
+  // 스크롤 정보
+  const scrollUp    = item.scroll_upgrade
+  const scrollLeft  = item.scroll_upgradeable_count
+  const goldenHammer = item.golden_hammer_flag === "Y"
+
+  // 소울
+  const soulName   = item.soul_name
+  const soulOption = item.soul_option
 
   return (
-    <div className="text-[12px]">
-      <div className="flex items-start gap-3 mb-3">
+    <div className="text-[12px] leading-relaxed" style={{ color: "#e0e0e0" }}>
+      {/* 스타포스 */}
+      {sfNum > 0 && (
+        <p className="text-center text-[11px] font-bold mb-1" style={{ color: "#f0c040", letterSpacing: "1px" }}>
+          {"★".repeat(Math.min(sfNum, 15))}{sfNum > 15 ? `+${sfNum - 15}` : ""}
+        </p>
+      )}
+
+      {/* 아이콘 + 이름 */}
+      <div className="flex items-center gap-3 mb-2">
         {item.item_icon && (
-          <img src={item.item_icon} alt={item.item_name} className="w-12 h-12 object-contain shrink-0" />
+          <img src={item.item_icon} alt={item.item_name}
+            className="w-14 h-14 object-contain shrink-0"
+            style={{ imageRendering: "pixelated" }} />
         )}
         <div>
-          <p className="font-bold text-[14px] leading-tight mb-0.5"
-            style={{ color: grade ? (POTENTIAL_COLORS[grade] ?? "#fff") : "#fff" }}>
-            {sfNum > 0 && (
-              <span className="text-yellow-400 mr-1">
-                {"★".repeat(Math.min(sfNum, 5))}{sfNum > 5 ? ` ${sfNum}성` : ""}
-              </span>
-            )}
-            {item.item_name}
-          </p>
-          <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>{item.item_equipment_slot}</p>
+          <p className="font-bold text-[13px] leading-tight" style={{ color: nameColor }}>{item.item_name}</p>
+          <p className="text-[10px] mt-0.5" style={{ color: "#888" }}>{item.item_equipment_slot}</p>
+          {reqLevel && (
+            <p className="text-[10px] mt-0.5" style={{ color: "#aaa" }}>요구 레벨 : {reqLevel}</p>
+          )}
         </div>
       </div>
 
+      <Divider />
+
+      {/* 스탯 */}
       {stats.length > 0 && (
-        <div className="border-t border-gray-700 pt-2 mb-2 space-y-0.5">
-          {stats.map(([k, v]) => (
-            <div key={k} className="flex justify-between">
-              <span className="text-gray-300">{STAT_KO[k] ?? k}</span>
-              <span className="text-white font-semibold">+{v}</span>
+        <div className="space-y-0.5 mb-1">
+          {stats.map(({ k, v }) => (
+            <div key={k} className="flex justify-between gap-4">
+              <span style={{ color: "#ccc" }}>{STAT_KO[k] ?? k}</span>
+              <span style={{ color: "#fff", fontWeight: 600 }}>+{v}</span>
             </div>
           ))}
         </div>
       )}
 
-      <PotentialBlock grade={item.potential_option_grade} opts={[item.potential_option_1, item.potential_option_2, item.potential_option_3]} />
-      <PotentialBlock grade={item.additional_potential_option_grade} opts={[item.additional_potential_option_1, item.additional_potential_option_2, item.additional_potential_option_3]} />
+      {/* 스크롤 강화 정보 */}
+      {(scrollUp !== undefined || scrollLeft !== undefined) && (
+        <>
+          <Divider />
+          <p className="text-[11px]" style={{ color: scrollLeft === "0" ? "#888" : "#aaa" }}>
+            {scrollLeft === "0"
+              ? "주문서 강화 불가"
+              : `주문서 강화 +${scrollUp ?? 0} (남은 횟수: ${scrollLeft}${goldenHammer ? ", 황금망치" : ""})`
+            }
+          </p>
+        </>
+      )}
+
+      {/* 소울 */}
+      {soulName && (
+        <>
+          <Divider />
+          <p className="text-[11px] font-bold" style={{ color: "#a0c8ff" }}>{soulName}</p>
+          {soulOption && <p className="text-[11px]" style={{ color: "#a0c8ff" }}>{soulOption}</p>}
+        </>
+      )}
+
+      {/* 잠재능력 */}
+      <PotentialBlock label="잠재능력" grade={potGrade}
+        opts={[item.potential_option_1, item.potential_option_2, item.potential_option_3]} />
+
+      {/* 에디셔널 잠재능력 */}
+      <PotentialBlock label="에디셔널 잠재능력" grade={addGrade}
+        opts={[item.additional_potential_option_1, item.additional_potential_option_2, item.additional_potential_option_3]} />
     </div>
   )
 }
@@ -130,8 +220,8 @@ function SlotCell({ item, col, row, onClick }: { item: EquipmentItem | undefined
 
       {/* 데스크탑 hover 툴팁 */}
       {item && (
-        <div className={`hidden md:group-hover:block absolute z-50 ${tipVert} w-64 ${tipSide}`}>
-          <div className="bg-[#1a1a2e] text-white rounded-xl shadow-2xl border border-gray-700 p-3">
+        <div className={`hidden md:group-hover:block absolute z-50 ${tipVert} w-72 ${tipSide}`}>
+          <div className="text-white rounded-xl shadow-2xl p-3" style={{ background: "#1a1422", border: "1px solid rgba(255,255,255,0.15)" }}>
             <ItemDetail item={item} />
           </div>
         </div>
@@ -168,7 +258,7 @@ export default function EquipmentTab({ items }: { items: EquipmentItem[] }) {
           onPointerDown={() => setSelected(null)}>
           <div
             className="w-full sm:w-80 rounded-t-2xl sm:rounded-2xl p-5"
-            style={{ background: "#1a1a2e", border: "1px solid rgba(255,255,255,0.1)", maxHeight: "80vh", overflowY: "auto", cursor: "default" }}
+            style={{ background: "#1a1422", border: "1px solid rgba(255,255,255,0.15)", maxHeight: "80vh", overflowY: "auto", cursor: "default" }}
             onPointerDown={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>장비 정보</p>

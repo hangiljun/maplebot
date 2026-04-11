@@ -32,6 +32,16 @@ export interface EquipmentItem {
   additional_potential_option_2: string | null
   additional_potential_option_3: string | null
   item_total_option: Record<string, string>
+  item_base_option?: Record<string, string>
+  item_add_option?: Record<string, string>
+  item_etc_option?: Record<string, string>
+  item_starforce_option?: Record<string, string>
+  scroll_upgrade?: string
+  scroll_upgradeable_count?: string
+  golden_hammer_flag?: string
+  soul_name?: string | null
+  soul_option?: string | null
+  item_exceptional_option?: Record<string, string>
 }
 
 export interface AbilityLine {
