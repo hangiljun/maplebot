@@ -1,19 +1,7 @@
 "use client"
 import { useState, useMemo } from "react"
 import { X } from "lucide-react"
-import { EquipmentItem, POTENTIAL_COLORS } from "@/lib/maple"
-
-const STAT_KO: Record<string, string> = {
-  str: "STR", dex: "DEX", int: "INT", luk: "LUK",
-  max_hp: "최대 HP", max_mp: "최대 MP",
-  attack_power: "공격력", magic_power: "마력",
-  armor: "방어력", speed: "이동속도", jump: "점프력",
-  boss_damage: "보스 데미지", ignore_monster_armor: "방어율 무시",
-  critical_rate: "크리티컬 확률", critical_damage: "크리티컬 데미지",
-  damage: "데미지", all_stat: "올스탯",
-  equipment_level_decrease: "착용 레벨 감소",
-  max_hp_rate: "최대 HP %", max_mp_rate: "최대 MP %",
-}
+import { EquipmentItem } from "@/lib/maple"
 
 const SLOT_LAYOUT: { slot: string; col: number; row: number }[] = [
   { slot: "반지1",       col: 1, row: 1 },
@@ -55,8 +43,13 @@ const GRADE_COLOR: Record<string, string> = {
   "레어":     "#60a8ff",
 }
 
-// 스탯 표시 순서 및 한글 명
-const STAT_ORDER = ["str","dex","int","luk","max_hp","max_mp","attack_power","magic_power","armor","speed","jump","boss_damage","ignore_monster_armor","damage","all_stat","critical_rate","critical_damage","equipment_level_decrease"]
+const STAT_ORDER = [
+  "str","dex","int","luk","max_hp","max_mp",
+  "attack_power","magic_power","armor","speed","jump",
+  "boss_damage","ignore_monster_armor","damage","all_stat",
+  "critical_rate","critical_damage","equipment_level_decrease",
+]
+
 const STAT_KO: Record<string, string> = {
   str: "STR", dex: "DEX", int: "INT", luk: "LUK",
   max_hp: "최대 HP", max_mp: "최대 MP",
@@ -73,20 +66,20 @@ function Divider() {
   return <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", margin: "6px 0" }} />
 }
 
-function PotentialBlock({ label, grade, opts }: { label: string; grade: string | null | undefined; opts: (string | null | undefined)[] }) {
+function PotentialBlock({ label, grade, opts }: {
+  label: string
+  grade: string | null | undefined
+  opts: (string | null | undefined)[]
+}) {
   const lines = opts.filter(Boolean)
   if (!lines.length || !grade) return null
   const color = GRADE_COLOR[grade] ?? "#aaa"
   return (
     <div>
       <Divider />
-      <p className="text-[11px] font-bold mb-1" style={{ color }}>
-        ■ {label} : {grade}
-      </p>
+      <p className="text-[11px] font-bold mb-1" style={{ color }}>■ {label} : {grade}</p>
       {lines.map((opt, i) => (
-        <p key={i} className="text-[11px] leading-snug" style={{ color }}>
-          ■ {opt}
-        </p>
+        <p key={i} className="text-[11px] leading-snug" style={{ color }}>■ {opt}</p>
       ))}
     </div>
   )
@@ -98,38 +91,29 @@ function ItemDetail({ item }: { item: EquipmentItem }) {
   const sfNum     = parseInt(item.starforce ?? "0") || 0
   const nameColor = potGrade ? (GRADE_COLOR[potGrade] ?? "#fff") : "#fff"
 
-  // 총합 스탯 (STAT_ORDER 순서대로)
   const totalOpts = item.item_total_option ?? {}
   const stats = STAT_ORDER
     .filter(k => totalOpts[k] && totalOpts[k] !== "0" && totalOpts[k] !== "")
     .map(k => ({ k, v: totalOpts[k] }))
-  // ORDER에 없는 나머지 필드도 추가
   Object.entries(totalOpts).forEach(([k, v]) => {
     if (!STAT_ORDER.includes(k) && v !== "0" && v !== "") stats.push({ k, v })
   })
 
-  // 요구 레벨
-  const reqLevel = item.item_base_option?.["base_equipment_level"]
-
-  // 스크롤 정보
+  const reqLevel    = item.item_base_option?.["base_equipment_level"]
   const scrollUp    = item.scroll_upgrade
   const scrollLeft  = item.scroll_upgradeable_count
   const goldenHammer = item.golden_hammer_flag === "Y"
-
-  // 소울
-  const soulName   = item.soul_name
-  const soulOption = item.soul_option
+  const soulName    = item.soul_name
+  const soulOption  = item.soul_option
 
   return (
     <div className="text-[12px] leading-relaxed" style={{ color: "#e0e0e0" }}>
-      {/* 스타포스 */}
       {sfNum > 0 && (
         <p className="text-center text-[11px] font-bold mb-1" style={{ color: "#f0c040", letterSpacing: "1px" }}>
           {"★".repeat(Math.min(sfNum, 15))}{sfNum > 15 ? `+${sfNum - 15}` : ""}
         </p>
       )}
 
-      {/* 아이콘 + 이름 */}
       <div className="flex items-center gap-3 mb-2">
         {item.item_icon && (
           <img src={item.item_icon} alt={item.item_name}
@@ -139,15 +123,12 @@ function ItemDetail({ item }: { item: EquipmentItem }) {
         <div>
           <p className="font-bold text-[13px] leading-tight" style={{ color: nameColor }}>{item.item_name}</p>
           <p className="text-[10px] mt-0.5" style={{ color: "#888" }}>{item.item_equipment_slot}</p>
-          {reqLevel && (
-            <p className="text-[10px] mt-0.5" style={{ color: "#aaa" }}>요구 레벨 : {reqLevel}</p>
-          )}
+          {reqLevel && <p className="text-[10px] mt-0.5" style={{ color: "#aaa" }}>요구 레벨 : {reqLevel}</p>}
         </div>
       </div>
 
       <Divider />
 
-      {/* 스탯 */}
       {stats.length > 0 && (
         <div className="space-y-0.5 mb-1">
           {stats.map(({ k, v }) => (
@@ -159,20 +140,17 @@ function ItemDetail({ item }: { item: EquipmentItem }) {
         </div>
       )}
 
-      {/* 스크롤 강화 정보 */}
       {(scrollUp !== undefined || scrollLeft !== undefined) && (
         <>
           <Divider />
-          <p className="text-[11px]" style={{ color: scrollLeft === "0" ? "#888" : "#aaa" }}>
+          <p className="text-[11px]" style={{ color: scrollLeft === "0" ? "#666" : "#aaa" }}>
             {scrollLeft === "0"
               ? "주문서 강화 불가"
-              : `주문서 강화 +${scrollUp ?? 0} (남은 횟수: ${scrollLeft}${goldenHammer ? ", 황금망치" : ""})`
-            }
+              : `주문서 강화 +${scrollUp ?? 0} (남은 횟수: ${scrollLeft}${goldenHammer ? ", 황금망치" : ""})`}
           </p>
         </>
       )}
 
-      {/* 소울 */}
       {soulName && (
         <>
           <Divider />
@@ -181,18 +159,20 @@ function ItemDetail({ item }: { item: EquipmentItem }) {
         </>
       )}
 
-      {/* 잠재능력 */}
       <PotentialBlock label="잠재능력" grade={potGrade}
         opts={[item.potential_option_1, item.potential_option_2, item.potential_option_3]} />
-
-      {/* 에디셔널 잠재능력 */}
       <PotentialBlock label="에디셔널 잠재능력" grade={addGrade}
         opts={[item.additional_potential_option_1, item.additional_potential_option_2, item.additional_potential_option_3]} />
     </div>
   )
 }
 
-function SlotCell({ item, col, row, onClick }: { item: EquipmentItem | undefined; col: number; row: number; onClick: (item: EquipmentItem) => void }) {
+function SlotCell({ item, col, row, onClick }: {
+  item: EquipmentItem | undefined
+  col: number
+  row: number
+  onClick: (item: EquipmentItem) => void
+}) {
   const grade     = item?.potential_option_grade ?? null
   const sfNum     = parseInt(item?.starforce ?? "0") || 0
   const borderCls = grade ? (GRADE_BORDER[grade] ?? "border-gray-600") : "border-gray-600"
@@ -218,7 +198,6 @@ function SlotCell({ item, col, row, onClick }: { item: EquipmentItem | undefined
         )}
       </div>
 
-      {/* 데스크탑 hover 툴팁 */}
       {item && (
         <div className={`hidden md:group-hover:block absolute z-50 ${tipVert} w-72 ${tipSide}`}>
           <div className="text-white rounded-xl shadow-2xl p-3" style={{ background: "#1a1422", border: "1px solid rgba(255,255,255,0.15)" }}>
@@ -250,7 +229,6 @@ export default function EquipmentTab({ items }: { items: EquipmentItem[] }) {
         </div>
       </div>
 
-      {/* 모바일 + 데스크탑 클릭 모달 */}
       {selected && (
         <div
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
