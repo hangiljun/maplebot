@@ -214,6 +214,7 @@ export default function BotGuidePage() {
                       { field: "전투력",    desc: "캐릭터의 총 전투력 수치입니다. 장비·스탯·링크·유니온이 모두 반영됩니다." },
                       { field: "유니온",    desc: "유니온 등급과 총 유니온 레벨입니다. (예: 레전드 · Lv.9,000)" },
                       { field: "인기도",    desc: "다른 유저에게 받은 인기도 수치입니다." },
+                      { field: "캐릭터 역사", desc: "버튼 클릭 시 최근 6개월 내 닉네임 변경·길드 가입 및 탈퇴 이력을 날짜와 함께 조회합니다. 2023년 12월 이후 기록만 확인 가능합니다." },
                     ].map(({ field, desc }) => (
                       <div key={field} className="flex items-start gap-4 px-4 py-3"
                         style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "6px" }}>
