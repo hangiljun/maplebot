@@ -55,7 +55,8 @@ export async function POST(req: NextRequest) {
     const { getDb } = await import("@/lib/firebase-admin")
     const db = getDb()
 
-    await db.collection(COLLECTION).add({
+    const now = new Date()
+    const docRef = await db.collection(COLLECTION).add({
       title:       title.trim(),
       description: description.trim(),
       nickname:    nickname?.trim() || "익명",
@@ -64,7 +65,19 @@ export async function POST(req: NextRequest) {
       createdAt:   FieldValue.serverTimestamp(),
     })
 
-    return NextResponse.json({ success: true })
+    // 새 아이템을 응답으로 반환 → 클라이언트에서 즉시 목록에 추가
+    return NextResponse.json({
+      success: true,
+      item: {
+        id:          docRef.id,
+        title:       title.trim(),
+        description: description.trim(),
+        nickname:    nickname?.trim() || "익명",
+        priority:    "medium",
+        status:      "reviewing",
+        createdAt:   now.toISOString(),
+      },
+    })
   } catch (e) {
     console.error("POST /api/feature-request", e)
     return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 })

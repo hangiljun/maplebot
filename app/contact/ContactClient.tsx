@@ -52,7 +52,12 @@ export default function ContactClient({ initialRequests }: { initialRequests: Re
       if (res.ok) {
         setResult({ ok: true, msg: "요청이 등록되었습니다! 검토 후 우선순위를 결정합니다." })
         setForm({ nickname: "", title: "", description: "" })
-        setTimeout(fetchRequests, 1500)
+        // 서버에서 반환한 새 아이템을 즉시 목록 맨 위에 추가
+        if (data.item) {
+          setRequests(prev => [data.item, ...prev])
+        } else {
+          setTimeout(fetchRequests, 2000)
+        }
       } else {
         setResult({ ok: false, msg: data.error || "요청 전송에 실패했습니다." })
       }
