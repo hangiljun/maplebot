@@ -96,16 +96,24 @@ function StarIcon({ lit }: { lit: boolean }) {
 
 function Stars({ count, maxStars }: { count: number; maxStars: number }) {
   if (maxStars <= 0) return null
-  // 전체 별 배열 (lit=달성, false=미달성)
   const stars = Array.from({ length: maxStars }, (_, i) => i < count)
-  // 15개씩 2행으로 분할
-  const rows: boolean[][] = []
-  for (let i = 0; i < maxStars; i += 15) rows.push(stars.slice(i, i + 15))
+  // 15개씩 2행, 각 행을 다시 5개 그룹으로 분할
+  const rows: boolean[][][] = []
+  for (let r = 0; r < maxStars; r += 15) {
+    const rowStars = stars.slice(r, r + 15)
+    const groups: boolean[][] = []
+    for (let g = 0; g < rowStars.length; g += 5) groups.push(rowStars.slice(g, g + 5))
+    rows.push(groups)
+  }
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, marginBottom: 6 }}>
-      {rows.map((row, ri) => (
-        <div key={ri} style={{ display: "flex", gap: 2 }}>
-          {row.map((lit, ci) => <StarIcon key={ci} lit={lit} />)}
+      {rows.map((groups, ri) => (
+        <div key={ri} style={{ display: "flex", gap: 6 }}>
+          {groups.map((group, gi) => (
+            <div key={gi} style={{ display: "flex", gap: 2 }}>
+              {group.map((lit, ci) => <StarIcon key={ci} lit={lit} />)}
+            </div>
+          ))}
         </div>
       ))}
     </div>
