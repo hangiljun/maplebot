@@ -45,6 +45,13 @@ client.on(Events.InteractionCreate, async (interaction) => {
       const grade = rest[0] as "B" | "A" | "S" | "SS" | "SSS"
       const query = rest.slice(1).join(":")
       await unionCommand.handleUnionGradeButton(interaction, grade, query)
+    } else if (action === "ucat") {
+      const group = rest[0]
+      const subclass = rest.slice(1).join(":")
+      await unionCommand.handleCatButton(interaction, group, subclass)
+    } else if (action === "uchar") {
+      const name = rest.join(":")
+      await unionCommand.handleCharButton(interaction, name)
     }
   }
 })
