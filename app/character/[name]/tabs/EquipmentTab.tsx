@@ -1,5 +1,5 @@
 "use client"
-import { useState, useMemo, useEffect, useCallback } from "react"
+import { useState, useMemo, useEffect, useCallback, useRef } from "react"
 import { createPortal } from "react-dom"
 import { X } from "lucide-react"
 import { EquipmentItem } from "@/lib/maple"
@@ -86,15 +86,17 @@ function SlotCell({ item, col, onClick, onEnter, onLeave }: {
 
 // ── 탭 메인 ──────────────────────────────────────────────
 export default function EquipmentTab({ items }: { items: EquipmentItem[] }) {
-  const [selected, setSelected] = useState<EquipmentItem | null>(null)
-  const [tip,      setTip]      = useState<TipState>(null)
-  const [mounted,  setMounted]  = useState(false)
+  const [selected,  setSelected] = useState<EquipmentItem | null>(null)
+  const [tip,       setTip]      = useState<TipState>(null)
+  const [mounted,   setMounted]  = useState(false)
+  const closeTimer               = useRef<ReturnType<typeof setTimeout> | null>(null)
   const itemMap = useMemo(() => new Map(items.map(it => [it.item_equipment_slot, it])), [items])
 
   // 포털은 클라이언트 마운트 후에만 사용 가능
   useEffect(() => { setMounted(true) }, [])
 
   const handleEnter = useCallback((rect: DOMRect, item: EquipmentItem, col: number) => {
+    if (closeTimer.current) clearTimeout(closeTimer.current)
     const toLeft = col >= 4
     const x = toLeft
       ? Math.max(8, rect.left - TIPW - 8)
@@ -103,7 +105,18 @@ export default function EquipmentTab({ items }: { items: EquipmentItem[] }) {
     setTip({ item, x, y })
   }, [])
 
-  const handleLeave = useCallback(() => setTip(null), [])
+  // 셀에서 나갈 때: 150ms 지연 (툴팁으로 마우스 이동 시 취소됨)
+  const handleLeave = useCallback(() => {
+    closeTimer.current = setTimeout(() => setTip(null), 150)
+  }, [])
+
+  // 툴팁 위에 있는 동안: 타이머 취소 → 툴팁 유지
+  const handleTipEnter = useCallback(() => {
+    if (closeTimer.current) clearTimeout(closeTimer.current)
+  }, [])
+
+  // 툴팁 밖으로 나갈 때: 즉시 닫기
+  const handleTipLeave = useCallback(() => setTip(null), [])
 
   if (!items.length) {
     return <div className="text-center py-12 text-sm" style={{ color: "var(--text-muted)" }}>장비 정보를 불러올 수 없어요</div>
@@ -129,21 +142,23 @@ export default function EquipmentTab({ items }: { items: EquipmentItem[] }) {
       </div>
 
       {/* 데스크탑 hover 툴팁 — position:fixed 포털로 렌더링
-          → 어떤 조상의 overflow:hidden 에도 영향받지 않음
-          → 레이아웃을 전혀 밀어내지 않음 */}
+          → 레이아웃 전혀 밀어내지 않음 / 페이지 스크롤에 영향 없음
+          → pointerEvents:auto → 툴팁 위에서 스크롤 가능 */}
       {mounted && tip && createPortal(
         <div
           className="hidden md:block"
           style={{
-            position:  "fixed",
-            left:      tip.x,
-            top:       tip.y,
-            width:     TIPW,
-            maxHeight: TIPH_MAX,
-            overflowY: "auto",
-            zIndex:    9999,
-            pointerEvents: "none",   // 마우스 이벤트 통과 → 셀의 onMouseLeave 정상 작동
-          }}>
+            position:      "fixed",
+            left:          tip.x,
+            top:           tip.y,
+            width:         TIPW,
+            maxHeight:     TIPH_MAX,
+            overflowY:     "auto",
+            zIndex:        9999,
+            pointerEvents: "auto",   // 스크롤·클릭 이벤트 수신 가능
+          }}
+          onMouseEnter={handleTipEnter}
+          onMouseLeave={handleTipLeave}>
           <MapleItemDetail item={tip.item} />
         </div>,
         document.body
