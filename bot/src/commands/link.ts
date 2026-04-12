@@ -10,7 +10,7 @@ export const data = new SlashCommandBuilder()
   .setDescription("링크 스킬을 검색합니다 (직업명 또는 효과 키워드)")
   .addStringOption(opt =>
     opt.setName("검색어")
-       .setDescription("직업명(예: 메르세데스) 또는 효과 키워드(예: 경험치)")
+       .setDescription("직업명(예: 메르세데스) 또는 효과 키워드(예: 경험치, 공격력)")
        .setRequired(true)
   )
 
@@ -18,14 +18,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const query = interaction.options.getString("검색어", true).trim()
   await interaction.deferReply()
 
-  if (LINK_DATA.length === 0) {
-    await interaction.editReply("⚙️ 링크 스킬 데이터가 아직 준비되지 않았습니다.")
-    return
-  }
-
   const lq = query.toLowerCase()
 
-  // 1) 직업명 완전 일치 → 상세 정보
+  // 1) 직업명 완전 일치 → 레벨별 효과 상세 표시
   const exact = LINK_DATA.find(c => c.name === query || c.name.toLowerCase() === lq)
   if (exact) {
     const effectLines = exact.effects
@@ -36,12 +31,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       .setColor(0x22c55e)
       .setTitle(`🔗 ${exact.name} — ${exact.skillName}`)
       .setDescription(effectLines || "효과 정보 없음")
+      .addFields(
+        { name: "카테고리", value: exact.category, inline: true },
+        { name: "최대 레벨", value: `Lv.${exact.maxLevel}`, inline: true },
+      )
       .setFooter({ text: "메이플봇 · 링크 스킬 정보" })
-
-    if (exact.category) {
-      embed.addFields({ name: "직업 계열", value: exact.category, inline: true })
-    }
-    embed.addFields({ name: "최대 레벨", value: `Lv.${exact.maxLevel}`, inline: true })
 
     await interaction.editReply({ embeds: [embed] })
     return
@@ -51,8 +45,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const matches = LINK_DATA.filter(c =>
     c.name.toLowerCase().includes(lq) ||
     c.skillName.toLowerCase().includes(lq) ||
-    c.effects.some(e => e.toLowerCase().includes(lq)) ||
-    (c.category?.toLowerCase().includes(lq) ?? false)
+    c.category.toLowerCase().includes(lq) ||
+    c.effects.some(e => e.toLowerCase().includes(lq))
   )
 
   if (matches.length === 0) {
@@ -60,15 +54,16 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return
   }
 
-  // 결과 목록 (최대 25개)
   const shown = matches.slice(0, 25)
-  const lines = shown.map(c => `**${c.name}** (${c.skillName}) — ${c.effects[c.effects.length - 1] ?? ""}`)
+  const lines = shown.map(c =>
+    `**${c.name}** (${c.skillName}) — ${c.effects[c.effects.length - 1]}`
+  )
 
   const embed = new EmbedBuilder()
     .setColor(0x22c55e)
     .setTitle(`🔗 링크 스킬 검색 결과 — "${query}" (${matches.length}개)`)
     .setDescription(lines.join("\n"))
-    .setFooter({ text: matches.length > 25 ? `상위 25개만 표시됩니다 · 메이플봇` : "메이플봇 · 링크 스킬 정보" })
+    .setFooter({ text: matches.length > 25 ? "상위 25개만 표시됩니다 · 메이플봇" : "메이플봇 · 링크 스킬 정보" })
 
   await interaction.editReply({ embeds: [embed] })
 }
