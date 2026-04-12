@@ -32,10 +32,10 @@ const SLOT_LAYOUT: { slot: string; col: number; row: number }[] = [
 ]
 
 const GRADE_BORDER: Record<string, string> = {
-  "레전드리": "border-[#FF8C00]",
-  "유니크":   "border-[#EAB308]",
-  "에픽":     "border-[#A855F7]",
-  "레어":     "border-[#3B82F6]",
+  "레전드리": "border-[#00B800]",
+  "유니크":   "border-[#f0c040]",
+  "에픽":     "border-[#c060ff]",
+  "레어":     "border-[#60a8ff]",
 }
 
 // 툴팁 너비 고정, 높이는 자연스럽게 (스크롤 없이 전체 표시)

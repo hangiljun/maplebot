@@ -3,7 +3,7 @@ import { EquipmentItem } from "@/lib/maple"
 
 // ── 등급 색상 (maple.gg / 실제 게임 기준) ─────────────────
 const GRADE_COLOR: Record<string, string> = {
-  "레전드리": "#FF8C00",
+  "레전드리": "#00B800",
   "유니크":   "#f0c040",
   "에픽":     "#c060ff",
   "레어":     "#60a8ff",
