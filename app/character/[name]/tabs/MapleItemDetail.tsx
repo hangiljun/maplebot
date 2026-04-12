@@ -222,16 +222,23 @@ export default function MapleItemDetail({ item }: { item: EquipmentItem }) {
       <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 6 }}>
         {item.item_icon && (
           <div style={{
-            width: 46, height: 46, flexShrink: 0,
+            width: 54, height: 54, flexShrink: 0,
             display: "flex", alignItems: "center", justifyContent: "center",
             background: "rgba(0,0,0,0.55)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            borderRadius: 2,
+            border: "1px solid rgba(255,255,255,0.12)",
+            borderRadius: 3,
+            overflow: "hidden",   /* 아이콘이 컨테이너 밖으로 나오지 않도록 */
           }}>
             <img
               src={item.item_icon}
               alt={item.item_name}
-              style={{ imageRendering: "pixelated", maxWidth: 38, maxHeight: 38, objectFit: "contain" }}
+              style={{
+                imageRendering: "pixelated",
+                width: 44,
+                height: 44,
+                objectFit: "contain",
+                display: "block",
+              }}
             />
           </div>
         )}
@@ -288,7 +295,7 @@ export default function MapleItemDetail({ item }: { item: EquipmentItem }) {
       )}
 
       {/* 가위 사용 가능 횟수 */}
-      {item.cuttable_count !== undefined && item.cuttable_count !== null && (
+      {item.cuttable_count !== undefined && item.cuttable_count !== null && item.cuttable_count !== "255" && (
         <div style={{ fontSize: 11, color: item.cuttable_count === "0" ? "#555" : "#888", marginTop: 1 }}>
           가위 사용 가능 횟수 : {item.cuttable_count}회
         </div>
