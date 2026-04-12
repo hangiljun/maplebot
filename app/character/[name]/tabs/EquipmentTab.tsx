@@ -70,7 +70,8 @@ function SlotCell({ item, col, row, onClick }: {
 
       {/* 데스크탑 hover 툴팁 */}
       {item && (
-        <div className={`hidden md:group-hover:block absolute z-50 ${tipVert} ${tipSide}`} style={{ width: 292 }}>
+        <div className={`hidden md:group-hover:block absolute z-[9999] ${tipVert} ${tipSide}`}
+          style={{ width: 300, maxHeight: "calc(100vh - 120px)", overflowY: "auto", overflowX: "visible" }}>
           <MapleItemDetail item={item} />
         </div>
       )}

@@ -106,9 +106,9 @@ export default function CharacterTabs({
   const isLoading   = loading === activeTab
 
   return (
-    <div className="glass rounded-3xl overflow-hidden">
+    <div className="glass rounded-3xl" style={{ overflow: "visible" }}>
       {/* 탭 바 */}
-      <div className="flex overflow-x-auto" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+      <div className="flex overflow-x-auto rounded-t-3xl overflow-hidden" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
         {TABS.map(t => (
           <button key={t.key} onClick={() => handleTab(t.key, t.lazy)}
             className="flex-1 py-3.5 text-[13px] font-semibold whitespace-nowrap transition-all"

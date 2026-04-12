@@ -66,7 +66,16 @@ function n(v: string | undefined): number {
   return parseInt(v ?? "0") || 0
 }
 
-// ── 스타포스 별 ───────────────────────────────────────────
+// ── 스타포스 별 (SVG) ─────────────────────────────────────
+function StarIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="#ffd433" xmlns="http://www.w3.org/2000/svg"
+      style={{ filter: "drop-shadow(0 0 3px rgba(255,212,51,0.85))", flexShrink: 0 }}>
+      <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z" />
+    </svg>
+  )
+}
+
 function Stars({ count }: { count: number }) {
   if (count <= 0) return null
   const capped = Math.min(count, 25)
@@ -75,10 +84,8 @@ function Stars({ count }: { count: number }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, marginBottom: 6 }}>
       {rows.map((len, ri) => (
-        <div key={ri} style={{ display: "flex", gap: 1 }}>
-          {Array.from({ length: len }).map((_, ci) => (
-            <span key={ci} style={{ color: "#ffd433", fontSize: 12, lineHeight: 1 }}>★</span>
-          ))}
+        <div key={ri} style={{ display: "flex", gap: 2 }}>
+          {Array.from({ length: len }).map((_, ci) => <StarIcon key={ci} />)}
         </div>
       ))}
     </div>
