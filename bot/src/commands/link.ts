@@ -3,79 +3,72 @@ import {
   ChatInputCommandInteraction,
   EmbedBuilder,
 } from "discord.js"
-import { fetchLinkSkills } from "../maple"
+import { LINK_DATA } from "../data/link"
 
 export const data = new SlashCommandBuilder()
   .setName("링크")
-  .setDescription("메이플스토리 캐릭터의 링크 스킬 정보를 조회합니다")
+  .setDescription("링크 스킬을 검색합니다 (직업명 또는 효과 키워드)")
   .addStringOption(opt =>
-    opt.setName("캐릭터명")
-       .setDescription("조회할 캐릭터 닉네임")
+    opt.setName("검색어")
+       .setDescription("직업명(예: 메르세데스) 또는 효과 키워드(예: 경험치)")
        .setRequired(true)
   )
 
 export async function execute(interaction: ChatInputCommandInteraction) {
-  const name = interaction.options.getString("캐릭터명", true).trim()
+  const query = interaction.options.getString("검색어", true).trim()
   await interaction.deferReply()
 
-  try {
-    const info = await fetchLinkSkills(name)
-
-    if (!info) {
-      await interaction.editReply(`❌ **${name}** 캐릭터를 찾을 수 없어요.`)
-      return
-    }
-
-    const embeds: EmbedBuilder[] = []
-
-    // ── 이 캐릭터의 링크 스킬 (다른 캐릭터에게 제공) ──
-    const ownEmbed = new EmbedBuilder()
-      .setColor(0x22c55e)
-      .setTitle(`🔗 ${name} 링크 스킬`)
-
-    if (info.ownSkill) {
-      ownEmbed.addFields({
-        name:  `✨ 보유 링크 스킬 — ${info.ownSkill.name} Lv.${info.ownSkill.level}`,
-        value: info.ownSkill.effect || "효과 정보 없음",
-        inline: false,
-      })
-    } else {
-      ownEmbed.setDescription("보유 링크 스킬 정보가 없습니다.")
-    }
-
-    embeds.push(ownEmbed)
-
-    // ── 장착된 링크 스킬 목록 ──
-    if (info.linkedSkills.length > 0) {
-      const lines = info.linkedSkills.map(s =>
-        `\`Lv.${s.level}\` **${s.name}**\n${s.effect}`
-      )
-
-      // Discord embed description 4096자 제한 대응
-      const chunks: string[][] = []
-      let cur: string[] = []
-      let len = 0
-      for (const line of lines) {
-        if (len + line.length > 3800) { chunks.push(cur); cur = []; len = 0 }
-        cur.push(line); len += line.length
-      }
-      if (cur.length) chunks.push(cur)
-
-      chunks.forEach((chunk, i) => {
-        embeds.push(
-          new EmbedBuilder()
-            .setColor(0x3b82f6)
-            .setTitle(i === 0 ? `📋 장착된 링크 스킬 (${info.linkedSkills.length}개)` : "\u200b")
-            .setDescription(chunk.join("\n\n"))
-        )
-      })
-    }
-
-    embeds[embeds.length - 1].setFooter({ text: "메이플봇 · 실시간 조회" })
-
-    await interaction.editReply({ embeds: embeds.slice(0, 10) })
-  } catch (err) {
-    console.error("[링크] 오류:", err)
-    await interaction.editReply("❌ 링크 스킬 정보 조회 중 오류가 발생했어요.")
+  if (LINK_DATA.length === 0) {
+    await interaction.editReply("⚙️ 링크 스킬 데이터가 아직 준비되지 않았습니다.")
+    return
   }
+
+  const lq = query.toLowerCase()
+
+  // 1) 직업명 완전 일치 → 상세 정보
+  const exact = LINK_DATA.find(c => c.name === query || c.name.toLowerCase() === lq)
+  if (exact) {
+    const effectLines = exact.effects
+      .map((eff, i) => `**Lv.${i + 1}** ${eff}`)
+      .join("\n")
+
+    const embed = new EmbedBuilder()
+      .setColor(0x22c55e)
+      .setTitle(`🔗 ${exact.name} — ${exact.skillName}`)
+      .setDescription(effectLines || "효과 정보 없음")
+      .setFooter({ text: "메이플봇 · 링크 스킬 정보" })
+
+    if (exact.category) {
+      embed.addFields({ name: "직업 계열", value: exact.category, inline: true })
+    }
+    embed.addFields({ name: "최대 레벨", value: `Lv.${exact.maxLevel}`, inline: true })
+
+    await interaction.editReply({ embeds: [embed] })
+    return
+  }
+
+  // 2) 키워드 검색 → 매칭 목록
+  const matches = LINK_DATA.filter(c =>
+    c.name.toLowerCase().includes(lq) ||
+    c.skillName.toLowerCase().includes(lq) ||
+    c.effects.some(e => e.toLowerCase().includes(lq)) ||
+    (c.category?.toLowerCase().includes(lq) ?? false)
+  )
+
+  if (matches.length === 0) {
+    await interaction.editReply(`❌ **"${query}"** 에 해당하는 링크 스킬을 찾을 수 없어요.`)
+    return
+  }
+
+  // 결과 목록 (최대 25개)
+  const shown = matches.slice(0, 25)
+  const lines = shown.map(c => `**${c.name}** (${c.skillName}) — ${c.effects[c.effects.length - 1] ?? ""}`)
+
+  const embed = new EmbedBuilder()
+    .setColor(0x22c55e)
+    .setTitle(`🔗 링크 스킬 검색 결과 — "${query}" (${matches.length}개)`)
+    .setDescription(lines.join("\n"))
+    .setFooter({ text: matches.length > 25 ? `상위 25개만 표시됩니다 · 메이플봇` : "메이플봇 · 링크 스킬 정보" })
+
+  await interaction.editReply({ embeds: [embed] })
 }
