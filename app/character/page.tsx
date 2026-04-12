@@ -100,6 +100,7 @@ export default function CharacterSearchPage() {
               "심볼 (아케인 / 사크레드)",
               "헥사 (코어, 스탯)",
               "코디 (헤어, 성형, 캐시 장비)",
+              "캐릭터 역사 (닉네임·길드 변경, 6개월)",
             ].map(item => (
               <div key={item} className="flex items-center gap-2 text-sm"
                 style={{ color: "var(--text-sub)" }}>
