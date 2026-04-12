@@ -288,9 +288,9 @@ export default function MapleItemDetail({ item }: { item: EquipmentItem }) {
       )}
 
       {/* 가위 사용 가능 횟수 */}
-      {item.item_exceptional_option && Object.keys(item.item_exceptional_option).length > 0 && (
-        <div style={{ fontSize: 11, color: "#888", marginTop: 1 }}>
-          가위 사용 가능 횟수 : 2회
+      {item.cuttable_count !== undefined && item.cuttable_count !== null && (
+        <div style={{ fontSize: 11, color: item.cuttable_count === "0" ? "#555" : "#888", marginTop: 1 }}>
+          가위 사용 가능 횟수 : {item.cuttable_count}회
         </div>
       )}
 

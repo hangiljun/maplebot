@@ -1,5 +1,6 @@
 "use client"
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect, useCallback } from "react"
+import { createPortal } from "react-dom"
 import { X } from "lucide-react"
 import { EquipmentItem } from "@/lib/maple"
 import MapleItemDetail from "./MapleItemDetail"
@@ -37,23 +38,35 @@ const GRADE_BORDER: Record<string, string> = {
   "레어":     "border-[#3B82F6]",
 }
 
-function SlotCell({ item, col, row, onClick }: {
+// 툴팁 고정 크기 (fixed 계산용)
+const TIPW    = 304
+const TIPH_MAX = 540
+
+type TipState = { item: EquipmentItem; x: number; y: number } | null
+
+// ── 슬롯 셀 ──────────────────────────────────────────────
+// 툴팁을 직접 렌더링하지 않고, 마우스 진입/이탈만 부모에 알림
+function SlotCell({ item, col, onClick, onEnter, onLeave }: {
   item: EquipmentItem | undefined
   col: number
-  row: number
   onClick: (item: EquipmentItem) => void
+  onEnter: (rect: DOMRect, item: EquipmentItem, col: number) => void
+  onLeave: () => void
 }) {
   const grade     = item?.potential_option_grade ?? null
   const sfNum     = parseInt(item?.starforce ?? "0") || 0
   const borderCls = grade ? (GRADE_BORDER[grade] ?? "border-gray-600") : "border-gray-600"
-  const tipSide   = col >= 4 ? "right-full mr-2" : "left-full ml-2"
-  const tipVert   = row >= 4 ? "bottom-0" : "top-0"
 
   return (
-    <div className="relative group flex items-center justify-center">
+    <div
+      className="relative flex items-center justify-center"
+      onMouseEnter={e => item && onEnter(e.currentTarget.getBoundingClientRect(), item, col)}
+      onMouseLeave={onLeave}>
       <div
         onClick={() => item && onClick(item)}
-        className={`w-[52px] h-[52px] rounded-lg border-2 flex items-center justify-center bg-[#12122a] transition-all ${item ? borderCls + " hover:brightness-110 cursor-pointer" : "border-gray-700 opacity-40 cursor-default"}`}>
+        className={`w-[52px] h-[52px] rounded-lg border-2 flex items-center justify-center bg-[#12122a] transition-all ${
+          item ? borderCls + " hover:brightness-110 cursor-pointer" : "border-gray-700 opacity-40 cursor-default"
+        }`}>
         {item ? (
           <>
             {item.item_icon
@@ -67,21 +80,30 @@ function SlotCell({ item, col, row, onClick }: {
           <span className="text-gray-600 text-xs">–</span>
         )}
       </div>
-
-      {/* 데스크탑 hover 툴팁 */}
-      {item && (
-        <div className={`hidden md:group-hover:block absolute z-[9999] ${tipVert} ${tipSide}`}
-          style={{ width: 300, maxHeight: "calc(100vh - 120px)", overflowY: "auto", overflowX: "visible" }}>
-          <MapleItemDetail item={item} />
-        </div>
-      )}
     </div>
   )
 }
 
+// ── 탭 메인 ──────────────────────────────────────────────
 export default function EquipmentTab({ items }: { items: EquipmentItem[] }) {
   const [selected, setSelected] = useState<EquipmentItem | null>(null)
+  const [tip,      setTip]      = useState<TipState>(null)
+  const [mounted,  setMounted]  = useState(false)
   const itemMap = useMemo(() => new Map(items.map(it => [it.item_equipment_slot, it])), [items])
+
+  // 포털은 클라이언트 마운트 후에만 사용 가능
+  useEffect(() => { setMounted(true) }, [])
+
+  const handleEnter = useCallback((rect: DOMRect, item: EquipmentItem, col: number) => {
+    const toLeft = col >= 4
+    const x = toLeft
+      ? Math.max(8, rect.left - TIPW - 8)
+      : Math.min(rect.right + 8, window.innerWidth - TIPW - 8)
+    const y = Math.max(8, Math.min(rect.top, window.innerHeight - TIPH_MAX - 8))
+    setTip({ item, x, y })
+  }, [])
+
+  const handleLeave = useCallback(() => setTip(null), [])
 
   if (!items.length) {
     return <div className="text-center py-12 text-sm" style={{ color: "var(--text-muted)" }}>장비 정보를 불러올 수 없어요</div>
@@ -89,20 +111,48 @@ export default function EquipmentTab({ items }: { items: EquipmentItem[] }) {
 
   return (
     <>
+      {/* 장비 그리드 */}
       <div className="flex justify-center">
         <div className="grid gap-1.5" style={{ gridTemplateColumns: "repeat(5, 52px)", gridTemplateRows: "repeat(6, 52px)" }}>
           {SLOT_LAYOUT.map(({ slot, col, row }) => (
             <div key={slot} style={{ gridColumn: col, gridRow: row }}>
-              <SlotCell item={itemMap.get(slot)} col={col} row={row} onClick={setSelected} />
+              <SlotCell
+                item={itemMap.get(slot)}
+                col={col}
+                onClick={setSelected}
+                onEnter={handleEnter}
+                onLeave={handleLeave}
+              />
             </div>
           ))}
         </div>
       </div>
 
+      {/* 데스크탑 hover 툴팁 — position:fixed 포털로 렌더링
+          → 어떤 조상의 overflow:hidden 에도 영향받지 않음
+          → 레이아웃을 전혀 밀어내지 않음 */}
+      {mounted && tip && createPortal(
+        <div
+          className="hidden md:block"
+          style={{
+            position:  "fixed",
+            left:      tip.x,
+            top:       tip.y,
+            width:     TIPW,
+            maxHeight: TIPH_MAX,
+            overflowY: "auto",
+            zIndex:    9999,
+            pointerEvents: "none",   // 마우스 이벤트 통과 → 셀의 onMouseLeave 정상 작동
+          }}>
+          <MapleItemDetail item={tip.item} />
+        </div>,
+        document.body
+      )}
+
       {/* 모바일 클릭 모달 */}
       {selected && (
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+          className="fixed inset-0 z-[9998] flex items-end sm:items-center justify-center"
           style={{ background: "rgba(0,0,0,0.65)", backdropFilter: "blur(6px)", cursor: "pointer" }}
           onPointerDown={() => setSelected(null)}>
           <div
@@ -113,7 +163,7 @@ export default function EquipmentTab({ items }: { items: EquipmentItem[] }) {
             <div style={{
               display: "flex", justifyContent: "flex-end",
               padding: "8px 12px 0",
-              background: "linear-gradient(175deg, #1c1228 0%, #0e0818 100%)",
+              background: "linear-gradient(175deg, #131522 0%, #0b0d1c 100%)",
             }}>
               <button onClick={() => setSelected(null)} style={{ color: "#888", padding: 2 }}>
                 <X size={16} />

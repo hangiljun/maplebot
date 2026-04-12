@@ -38,6 +38,8 @@ export interface EquipmentItem {
   item_starforce_option?: Record<string, string>
   scroll_upgrade?: string
   scroll_upgradeable_count?: string
+  scroll_resilience_count?: string
+  cuttable_count?: string
   golden_hammer_flag?: string
   soul_name?: string | null
   soul_option?: string | null
