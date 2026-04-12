@@ -122,8 +122,8 @@ export default function CharacterTabs({
         ))}
       </div>
 
-      {/* 콘텐츠 */}
-      <div className="p-5">
+      {/* 콘텐츠 — minHeight 로 탭 영역을 충분히 확보, 페이지 스크롤 자연 발생 */}
+      <div className="p-6" style={{ minHeight: "520px" }}>
         {activeTab === "stat" && (
           <div className="space-y-5">
             {combatPower?.stat_value && (

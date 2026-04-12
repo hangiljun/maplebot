@@ -118,7 +118,7 @@ async function CharacterContent({ name }: { name: string }) {
   ]
 
   return (
-    <div className="max-w-3xl mx-auto space-y-4">
+    <div className="max-w-3xl mx-auto space-y-6">
       {/* 캐릭터 카드 */}
       <div className="glass rounded-3xl overflow-hidden">
         <div className="flex flex-col sm:flex-row">
@@ -176,7 +176,7 @@ export default async function CharacterDetailPage({ params }: Props) {
   const decoded = decodeURIComponent(name)
 
   return (
-    <div className="section-container pb-16" style={{ paddingTop: "80px" }}>
+    <div className="section-container pb-24" style={{ paddingTop: "88px" }}>
       <Suspense fallback={<CharacterSkeleton />}>
         <CharacterContent name={decoded} />
       </Suspense>
