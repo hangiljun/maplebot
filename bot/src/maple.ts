@@ -337,6 +337,61 @@ export async function fetchLevelHistory(name: string): Promise<{ expHistory: { d
   return { expHistory, levelHistory }
 }
 
+export interface UnionDetail {
+  grade: string
+  level: number
+  artifactLevel: number
+  artifactExp: number
+  artifactPoint: number
+}
+
+export async function fetchUnion(name: string): Promise<UnionDetail | null> {
+  const ocid = await getOcid(name)
+  if (!ocid) return null
+
+  const r = await nexonFetch(`/maplestory/v1/user/union?ocid=${ocid}`)
+  if (!r) return null
+
+  return {
+    grade:         r.union_grade         ?? "정보 없음",
+    level:         r.union_level         ?? 0,
+    artifactLevel: r.union_artifact_level ?? 0,
+    artifactExp:   r.union_artifact_exp   ?? 0,
+    artifactPoint: r.union_artifact_point ?? 0,
+  }
+}
+
+export interface LinkSkill {
+  name:   string
+  level:  number
+  effect: string
+}
+
+export interface LinkSkillInfo {
+  ownSkill:      LinkSkill | null   // 이 캐릭터가 제공하는 링크 스킬
+  linkedSkills:  LinkSkill[]        // 장착된 링크 스킬 목록
+}
+
+export async function fetchLinkSkills(name: string): Promise<LinkSkillInfo | null> {
+  const ocid = await getOcid(name)
+  if (!ocid) return null
+
+  const r = await nexonFetch(`/maplestory/v1/character/link-skill?ocid=${ocid}`)
+  if (!r) return null
+
+  const mapSkill = (s: any): LinkSkill => ({
+    name:   s.skill_name   ?? "",
+    level:  s.skill_level  ?? 0,
+    effect: s.skill_effect ?? "",
+  })
+
+  const own = r.character_class_link_skill?.[0]
+  return {
+    ownSkill:     own ? mapSkill(own) : null,
+    linkedSkills: (r.character_link_skill ?? []).map(mapSkill),
+  }
+}
+
 export async function fetchCharacterSummary(name: string): Promise<CharacterSummary | null> {
   const ocid = await getOcid(name)
   if (!ocid) return null

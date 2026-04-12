@@ -1,6 +1,8 @@
 import { Client, GatewayIntentBits, Events, ChatInputCommandInteraction } from "discord.js"
 import * as dotenv from "dotenv"
-import * as infoCommand from "./commands/info"
+import * as infoCommand  from "./commands/info"
+import * as unionCommand from "./commands/union"
+import * as linkCommand  from "./commands/link"
 
 dotenv.config()
 
@@ -14,6 +16,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
   if (interaction.isChatInputCommand()) {
     if (interaction.commandName === "정보") {
       await infoCommand.execute(interaction as ChatInputCommandInteraction)
+    } else if (interaction.commandName === "유니온") {
+      await unionCommand.execute(interaction as ChatInputCommandInteraction)
+    } else if (interaction.commandName === "링크") {
+      await linkCommand.execute(interaction as ChatInputCommandInteraction)
     }
     return
   }
