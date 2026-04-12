@@ -7,7 +7,7 @@ import {
   ActionRowBuilder,
   ButtonInteraction,
 } from "discord.js"
-import { fetchCharacterSummary, fetchEquipment, fetchLevelHistory, fetchHexa, fetchCodi } from "../maple"
+import { fetchCharacterSummary, fetchEquipment, fetchLevelHistory, fetchHexa, fetchCodi, fetchCharacterTimeline } from "../maple"
 
 export const data = new SlashCommandBuilder()
   .setName("정보")
@@ -85,7 +85,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       .setLabel("👗 코디")
       .setStyle(ButtonStyle.Secondary)
 
-    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(equipBtn, levelBtn, hexaBtn, codiBtn)
+    const historyBtn = new ButtonBuilder()
+      .setCustomId(`history:${char.name}`)
+      .setLabel("🕰️ 캐릭터 역사")
+      .setStyle(ButtonStyle.Secondary)
+
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(equipBtn, levelBtn, hexaBtn, codiBtn, historyBtn)
 
     await interaction.editReply({ embeds: [embed], components: [row] })
   } catch (err) {
@@ -270,6 +275,46 @@ export async function handleHexaButton(interaction: ButtonInteraction, charName:
   } catch (err) {
     console.error(err)
     await interaction.editReply("❌ 헥사 정보 조회 중 오류가 발생했어요.")
+  }
+}
+
+export async function handleHistoryButton(interaction: ButtonInteraction, charName: string) {
+  await interaction.deferReply({ ephemeral: true })
+  try {
+    const result = await fetchCharacterTimeline(charName)
+    if (!result) {
+      await interaction.editReply("❌ 캐릭터 역사를 불러올 수 없어요.")
+      return
+    }
+
+    const { events, checkedFrom } = result
+
+    let description: string
+    if (events.length === 0) {
+      description = "최근 6개월 내 닉네임·길드 변경 기록이 없습니다."
+    } else {
+      description = events.map(ev => {
+        const icon = ev.type === "nickname" ? "🏷️" : "🏰"
+        const label = ev.type === "nickname" ? "닉네임 변경" : "길드 변경"
+        const d = new Date(ev.date)
+        const dateStr = `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`
+        return `${icon} **${label}** \`${dateStr}\`\n  ${ev.from || "없음"} → **${ev.to || "없음"}**`
+      }).join("\n\n")
+    }
+
+    const fromDate = new Date(checkedFrom)
+    const fromStr = `${fromDate.getFullYear()}.${String(fromDate.getMonth() + 1).padStart(2, "0")}.${String(fromDate.getDate()).padStart(2, "0")}`
+
+    const embed = new EmbedBuilder()
+      .setColor(0xa78bfa)
+      .setTitle(`🕰️ ${charName} 캐릭터 역사`)
+      .setDescription(description)
+      .setFooter({ text: `조회 범위: ${fromStr} ~ 현재 (약 6개월 · ±1일 오차 가능)` })
+
+    await interaction.editReply({ embeds: [embed] })
+  } catch (err) {
+    console.error(err)
+    await interaction.editReply("❌ 캐릭터 역사 조회 중 오류가 발생했어요.")
   }
 }
 

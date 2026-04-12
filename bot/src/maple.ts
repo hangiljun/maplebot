@@ -204,6 +204,82 @@ export async function fetchHexa(name: string): Promise<{ cores: HexaCore[]; stat
   }
 }
 
+export interface TimelineEvent {
+  type: "nickname" | "guild"
+  date: string
+  from: string
+  to: string
+}
+
+async function binarySearchChange(
+  ocid: string,
+  startDate: string,
+  endDate: string,
+  field: "character_name" | "character_guild_name",
+  startValue: string,
+  depth = 0,
+): Promise<string> {
+  if (depth >= 8) return endDate
+  const s = new Date(startDate).getTime()
+  const e = new Date(endDate).getTime()
+  if ((e - s) / 86400000 <= 1) return endDate
+  const midDate = new Date(Math.floor((s + e) / 2)).toISOString().split("T")[0]
+  const r = await nexonFetch(`/maplestory/v1/character/basic?ocid=${ocid}&date=${midDate}`).catch(() => null)
+  const midValue = r?.[field] ?? startValue
+  return midValue === startValue
+    ? binarySearchChange(ocid, midDate, endDate, field, startValue, depth + 1)
+    : binarySearchChange(ocid, startDate, midDate, field, startValue, depth + 1)
+}
+
+export async function fetchCharacterTimeline(name: string): Promise<{ events: TimelineEvent[]; checkedFrom: string } | null> {
+  const ocid = await getOcid(name)
+  if (!ocid) return null
+
+  const today = new Date(Date.now() + 9 * 3600000)
+  const checkpoints: string[] = []
+  for (let days = 14; days <= 182; days += 14) {
+    const d = new Date(today)
+    d.setDate(d.getDate() - days)
+    checkpoints.push(d.toISOString().split("T")[0])
+  }
+  checkpoints.reverse()
+
+  const snapshots = await Promise.all(
+    checkpoints.map(date =>
+      nexonFetch(`/maplestory/v1/character/basic?ocid=${ocid}&date=${date}`)
+        .then((r: any) => r ? { date, name: r.character_name as string, guild: (r.character_guild_name as string) ?? "" } : null)
+        .catch(() => null),
+    ),
+  )
+
+  const valid = snapshots.filter(Boolean) as { date: string; name: string; guild: string }[]
+  if (valid.length < 2) return { events: [], checkedFrom: checkpoints[0] }
+
+  const changeJobs: Promise<TimelineEvent | null>[] = []
+  for (let i = 1; i < valid.length; i++) {
+    const prev = valid[i - 1]
+    const curr = valid[i]
+    if (prev.name !== curr.name) {
+      changeJobs.push(
+        binarySearchChange(ocid, prev.date, curr.date, "character_name", prev.name)
+          .then(date => ({ type: "nickname" as const, date, from: prev.name, to: curr.name }))
+      )
+    }
+    if (prev.guild !== curr.guild) {
+      changeJobs.push(
+        binarySearchChange(ocid, prev.date, curr.date, "character_guild_name", prev.guild)
+          .then(date => ({ type: "guild" as const, date, from: prev.guild || "없음", to: curr.guild || "없음" }))
+      )
+    }
+  }
+
+  const results = await Promise.all(changeJobs)
+  const events = (results.filter(Boolean) as TimelineEvent[])
+    .sort((a, b) => b.date.localeCompare(a.date))
+
+  return { events, checkedFrom: valid[0].date }
+}
+
 function kstDateString(daysAgo: number): string {
   const now = Date.now() + 9 * 60 * 60 * 1000
   const d = new Date(now - daysAgo * 86400000)
