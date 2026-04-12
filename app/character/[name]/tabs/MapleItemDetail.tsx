@@ -66,26 +66,46 @@ function n(v: string | undefined): number {
   return parseInt(v ?? "0") || 0
 }
 
+// ── 아이템 레벨 → 스타포스 최대치 ───────────────────────
+function getMaxStars(reqLevel: number): number {
+  if (reqLevel >= 138) return 25
+  if (reqLevel >= 128) return 20
+  if (reqLevel >= 118) return 15
+  if (reqLevel >= 108) return 10
+  if (reqLevel >= 95)  return 8
+  if (reqLevel >= 1)   return 5
+  return 0
+}
+
 // ── 스타포스 별 (SVG) ─────────────────────────────────────
-function StarIcon() {
-  return (
+function StarIcon({ lit }: { lit: boolean }) {
+  return lit ? (
+    // 달성한 별 — 노란 불빛
     <svg width="13" height="13" viewBox="0 0 24 24" fill="#ffd433" xmlns="http://www.w3.org/2000/svg"
-      style={{ filter: "drop-shadow(0 0 3px rgba(255,212,51,0.85))", flexShrink: 0 }}>
+      style={{ filter: "drop-shadow(0 0 3px rgba(255,212,51,0.9))", flexShrink: 0 }}>
+      <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z" />
+    </svg>
+  ) : (
+    // 미달성 별 — 어두운 외곽선만
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="#2a2a2a" stroke="#555" strokeWidth="1.5" xmlns="http://www.w3.org/2000/svg"
+      style={{ flexShrink: 0 }}>
       <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z" />
     </svg>
   )
 }
 
-function Stars({ count }: { count: number }) {
-  if (count <= 0) return null
-  const capped = Math.min(count, 25)
-  const rows: number[] = []
-  for (let i = 0; i < capped; i += 5) rows.push(Math.min(5, capped - i))
+function Stars({ count, maxStars }: { count: number; maxStars: number }) {
+  if (maxStars <= 0) return null
+  // 전체 별 배열 (lit=달성, false=미달성)
+  const stars = Array.from({ length: maxStars }, (_, i) => i < count)
+  // 5개씩 행 분할
+  const rows: boolean[][] = []
+  for (let i = 0; i < maxStars; i += 5) rows.push(stars.slice(i, i + 5))
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, marginBottom: 6 }}>
-      {rows.map((len, ri) => (
-        <div key={ri} style={{ display: "flex", gap: 2 }}>
-          {Array.from({ length: len }).map((_, ci) => <StarIcon key={ci} />)}
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, marginBottom: 6 }}>
+      {rows.map((row, ri) => (
+        <div key={ri} style={{ display: "flex", gap: 3 }}>
+          {row.map((lit, ci) => <StarIcon key={ci} lit={lit} />)}
         </div>
       ))}
     </div>
@@ -177,7 +197,8 @@ export default function MapleItemDetail({ item }: { item: EquipmentItem }) {
   const optEx    = item.item_exceptional_option ?? {}
   const optTotal = item.item_total_option       ?? {}
 
-  const reqLevel = optBase.base_equipment_level
+  const reqLevel = parseInt(optBase.base_equipment_level ?? "0") || 0
+  const maxStars = getMaxStars(reqLevel)
   const potOpts  = [item.potential_option_1, item.potential_option_2, item.potential_option_3]
   const addOpts  = [item.additional_potential_option_1, item.additional_potential_option_2, item.additional_potential_option_3]
 
@@ -195,7 +216,7 @@ export default function MapleItemDetail({ item }: { item: EquipmentItem }) {
     }}>
 
       {/* 스타포스 별 */}
-      <Stars count={sfNum} />
+      <Stars count={sfNum} maxStars={maxStars} />
 
       {/* 아이템 이름 */}
       <p style={{
