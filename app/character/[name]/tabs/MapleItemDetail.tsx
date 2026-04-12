@@ -66,16 +66,8 @@ function n(v: string | undefined): number {
   return parseInt(v ?? "0") || 0
 }
 
-// ── 아이템 레벨 → 스타포스 최대치 ───────────────────────
-function getMaxStars(reqLevel: number): number {
-  if (reqLevel >= 138) return 25
-  if (reqLevel >= 128) return 20
-  if (reqLevel >= 118) return 15
-  if (reqLevel >= 108) return 10
-  if (reqLevel >= 95)  return 8
-  if (reqLevel >= 1)   return 5
-  return 0
-}
+// 별은 항상 30개 고정 표시
+const MAX_STARS = 30
 
 // ── 스타포스 별 (SVG) ─────────────────────────────────────
 function StarIcon({ lit }: { lit: boolean }) {
@@ -108,9 +100,9 @@ function Stars({ count, maxStars }: { count: number; maxStars: number }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, marginBottom: 6 }}>
       {rows.map((groups, ri) => (
-        <div key={ri} style={{ display: "flex", gap: 6 }}>
+        <div key={ri} style={{ display: "flex", gap: 10 }}>
           {groups.map((group, gi) => (
-            <div key={gi} style={{ display: "flex", gap: 2 }}>
+            <div key={gi} style={{ display: "flex", gap: 3 }}>
               {group.map((lit, ci) => <StarIcon key={ci} lit={lit} />)}
             </div>
           ))}
@@ -205,8 +197,6 @@ export default function MapleItemDetail({ item }: { item: EquipmentItem }) {
   const optEx    = item.item_exceptional_option ?? {}
   const optTotal = item.item_total_option       ?? {}
 
-  const reqLevel = parseInt(optBase.base_equipment_level ?? "0") || 0
-  const maxStars = getMaxStars(reqLevel)
   const potOpts  = [item.potential_option_1, item.potential_option_2, item.potential_option_3]
   const addOpts  = [item.additional_potential_option_1, item.additional_potential_option_2, item.additional_potential_option_3]
 
@@ -224,7 +214,7 @@ export default function MapleItemDetail({ item }: { item: EquipmentItem }) {
     }}>
 
       {/* 스타포스 별 */}
-      <Stars count={sfNum} maxStars={maxStars} />
+      <Stars count={sfNum} maxStars={MAX_STARS} />
 
       {/* 아이템 이름 */}
       <p style={{
@@ -272,9 +262,9 @@ export default function MapleItemDetail({ item }: { item: EquipmentItem }) {
           </div>
         )}
         <div style={{ fontSize: 11, display: "flex", flexDirection: "column", gap: 3, paddingTop: 2 }}>
-          {reqLevel && (
+          {optBase.base_equipment_level && (
             <span style={{ color: "#888" }}>
-              REQ LEV : <span style={{ color: "#cccccc" }}>{reqLevel}</span>
+              REQ LEV : <span style={{ color: "#cccccc" }}>{optBase.base_equipment_level}</span>
             </span>
           )}
           <span style={{ color: "#888" }}>
