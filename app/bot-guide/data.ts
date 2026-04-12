@@ -1,6 +1,5 @@
 import { Zap, Terminal, Layers, Lock, Shield, TrendingUp, Star, Sparkles } from "lucide-react"
-
-export const DISCORD_URL = "https://discord.com/oauth2/authorize?client_id=1491444296623325194&permissions=51200&integration_type=0&scope=bot"
+export { DISCORD_URL } from "@/lib/constants"
 export const M = { red: "#e84040", orange: "#f5832e", gold: "#fbbf24" }
 
 export const SECTIONS = [

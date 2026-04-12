@@ -3,6 +3,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { usePathname } from "next/navigation"
 import { Menu, X } from "lucide-react"
+import { DISCORD_URL } from "@/lib/constants"
 
 const NAV_ITEMS = [
   { href: "/",          label: "메인" },
@@ -11,8 +12,6 @@ const NAV_ITEMS = [
   { href: "/updates",   label: "업데이트 내용" },
   { href: "/contact",   label: "개발자 문의" },
 ]
-
-const DISCORD_URL = "https://discord.com/oauth2/authorize?client_id=1491444296623325194&permissions=51200&integration_type=0&scope=bot"
 
 export default function Navbar() {
   const [open, setOpen] = useState(false)

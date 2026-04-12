@@ -1,5 +1,5 @@
 "use client"
-import { useState, useCallback } from "react"
+import { useState, useCallback, useMemo } from "react"
 import { Send, AlertCircle, CheckCircle2, Clock, RefreshCw, Megaphone, ArrowUpDown, Trash2, Lock, Shield } from "lucide-react"
 import { Request, Priority, PRIORITY_META, STATUS_META } from "./types"
 import { DetailModal } from "./DetailModal"
@@ -29,13 +29,14 @@ export default function ContactClient({ initialRequests }: { initialRequests: Re
     }
   }, [])
 
-  const sorted = [...requests].sort((a, b) => {
-    if (sortBy === "priority") {
-      const order: Record<Priority, number> = { high: 0, medium: 1, low: 2 }
-      return order[a.priority] - order[b.priority]
-    }
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  })
+  const sorted = useMemo(() => {
+    const order: Record<Priority, number> = { high: 0, medium: 1, low: 2 }
+    return [...requests].sort((a, b) =>
+      sortBy === "priority"
+        ? order[a.priority] - order[b.priority]
+        : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
+  }, [requests, sortBy])
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -103,25 +104,25 @@ export default function ContactClient({ initialRequests }: { initialRequests: Re
   const handleUpdate = async (id: string, field: "priority" | "status", value: string) => {
     const pw = sessionStorage.getItem("adminPassword") ?? adminPassword
     const prev = requests.find(r => r.id === id)
-    setRequests(rs => rs.map(r => r.id === id ? { ...r, [field]: value as any } : r))
+    setRequests(rs => rs.map(r => r.id === id ? { ...r, [field]: value } : r))
     const res = await fetch("/api/feature-request", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, adminPassword: pw, [field]: value }),
     })
     if (!res.ok && prev) {
-      setRequests(rs => rs.map(r => r.id === id ? { ...r, [field]: (prev as any)[field] } : r))
+      setRequests(rs => rs.map(r => r.id === id ? { ...r, [field]: prev[field] } : r))
     }
   }
 
   const canSubmit = !submitting && form.title.trim().length > 0 && form.description.trim().length > 0
 
-  const stats = {
+  const stats = useMemo(() => ({
     total:      requests.length,
     inProgress: requests.filter(r => r.status === "in-progress").length,
     done:       requests.filter(r => r.status === "done").length,
     high:       requests.filter(r => r.priority === "high").length,
-  }
+  }), [requests])
 
   return (
     <div style={{ paddingTop: "56px", minHeight: "100vh" }}>

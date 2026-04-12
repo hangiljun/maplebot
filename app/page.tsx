@@ -4,8 +4,7 @@ import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Search } from "lucide-react"
 import { DiscordMockup, CmdKey } from "./components/DiscordMockup"
-
-const DISCORD_URL = "https://discord.com/oauth2/authorize?client_id=1491444296623325194&permissions=51200&integration_type=0&scope=bot"
+import { DISCORD_URL } from "@/lib/constants"
 
 const CMDS: { cmd: CmdKey; desc: string }[] = [
   { cmd: "/정보",    desc: "레벨, 직업, 전투력, 유니온 + 버튼" },

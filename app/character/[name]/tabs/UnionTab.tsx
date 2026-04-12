@@ -1,32 +1,23 @@
 import { UnionInfo, CharacterBasic } from "@/lib/maple"
 import Image from "next/image"
 
-function getGradeBadge(grade: string): string {
-  if (grade.includes("그랜드 마스터")) {
-    if (grade.includes("3")) return "SSS"
-    if (grade.includes("2")) return "SS"
-    return "S"
-  }
-  if (grade.includes("마스터")) {
-    if (grade.includes("3")) return "A+"
-    if (grade.includes("2")) return "A"
-    return "A-"
-  }
-  if (grade.includes("다이아몬드")) return "B+"
-  if (grade.includes("플래티넘"))  return "B"
-  if (grade.includes("골드"))      return "C+"
-  if (grade.includes("실버"))      return "C"
-  if (grade.includes("브론즈"))    return "D"
-  return "?"
-}
+const GRADE_MAP: { match: string; badge: string; style: string }[] = [
+  { match: "그랜드 마스터 3", badge: "SSS", style: "bg-orange-500 text-white shadow-orange-400/60" },
+  { match: "그랜드 마스터 2", badge: "SS",  style: "bg-amber-400 text-white shadow-amber-400/60"  },
+  { match: "그랜드 마스터",   badge: "S",   style: "bg-yellow-300 text-yellow-900 shadow-yellow-300/60" },
+  { match: "마스터 3",        badge: "A+",  style: "bg-purple-500 text-white shadow-purple-400/60" },
+  { match: "마스터 2",        badge: "A",   style: "bg-purple-500 text-white shadow-purple-400/60" },
+  { match: "마스터",          badge: "A-",  style: "bg-purple-500 text-white shadow-purple-400/60" },
+  { match: "다이아몬드",      badge: "B+",  style: "bg-blue-500 text-white shadow-blue-400/60"    },
+  { match: "플래티넘",        badge: "B",   style: "bg-blue-500 text-white shadow-blue-400/60"    },
+  { match: "골드",            badge: "C+",  style: "bg-gray-400 text-white shadow-gray-400/60"    },
+  { match: "실버",            badge: "C",   style: "bg-gray-400 text-white shadow-gray-400/60"    },
+  { match: "브론즈",          badge: "D",   style: "bg-gray-400 text-white shadow-gray-400/60"    },
+]
 
-function getBadgeStyle(badge: string): string {
-  if (badge === "SSS") return "bg-orange-500 text-white shadow-orange-400/60"
-  if (badge === "SS")  return "bg-amber-400 text-white shadow-amber-400/60"
-  if (badge === "S")   return "bg-yellow-300 text-yellow-900 shadow-yellow-300/60"
-  if (badge.startsWith("A")) return "bg-purple-500 text-white shadow-purple-400/60"
-  if (badge.startsWith("B")) return "bg-blue-500 text-white shadow-blue-400/60"
-  return "bg-gray-400 text-white shadow-gray-400/60"
+function getGradeInfo(grade: string) {
+  const found = GRADE_MAP.find(g => grade.includes(g.match))
+  return found ?? { badge: "?", style: "bg-gray-400 text-white shadow-gray-400/60" }
 }
 
 export default function UnionTab({ union, basic }: { union: UnionInfo | null; basic: CharacterBasic }) {
@@ -38,8 +29,7 @@ export default function UnionTab({ union, basic }: { union: UnionInfo | null; ba
     )
   }
 
-  const badge = getGradeBadge(union.union_grade)
-  const badgeStyle = getBadgeStyle(badge)
+  const { badge, style: badgeStyle } = getGradeInfo(union.union_grade)
 
   return (
     <div className="space-y-4">

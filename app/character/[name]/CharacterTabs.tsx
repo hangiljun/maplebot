@@ -74,10 +74,12 @@ export default function CharacterTabs({
   const [tabCache, setTabCache]   = useState<TabCache>({})
   const [loading, setLoading]     = useState<string | null>(null)
   const abortRef                  = useRef<AbortController | null>(null)
+  const tabCacheRef               = useRef<TabCache>({})
+  tabCacheRef.current = tabCache
 
   const handleTab = useCallback(async (key: string, lazy: boolean) => {
     setActiveTab(key)
-    if (!lazy || key in tabCache) return
+    if (!lazy || key in tabCacheRef.current) return
 
     abortRef.current?.abort()
     abortRef.current = new AbortController()
@@ -97,7 +99,7 @@ export default function CharacterTabs({
     } finally {
       setLoading(null)
     }
-  }, [basic.character_name, tabCache])
+  }, [basic.character_name])
 
   const combatPower = useMemo(() => stats.find(s => s.stat_name === COMBAT_POWER_STAT), [stats])
   const mainStats   = useMemo(() => pickStats(stats, MAIN_STATS),   [stats])

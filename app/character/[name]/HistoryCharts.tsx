@@ -75,13 +75,14 @@ export default function HistoryCharts({ name }: { name: string }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    let cancelled = false
+    const controller = new AbortController()
     setLoading(true)
-    fetch(`/api/history/${encodeURIComponent(name)}`)
+    fetch(`/api/history/${encodeURIComponent(name)}`, { signal: controller.signal })
       .then(r => r.ok ? r.json() : null)
-      .then(d => { if (!cancelled) setData(d) })
-      .finally(() => { if (!cancelled) setLoading(false) })
-    return () => { cancelled = true }
+      .then(d => setData(d))
+      .catch(e => { if ((e as Error).name !== "AbortError") console.error(e) })
+      .finally(() => setLoading(false))
+    return () => controller.abort()
   }, [name])
 
   if (loading) {
