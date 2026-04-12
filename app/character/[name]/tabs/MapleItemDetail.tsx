@@ -98,13 +98,13 @@ function Stars({ count, maxStars }: { count: number; maxStars: number }) {
   if (maxStars <= 0) return null
   // 전체 별 배열 (lit=달성, false=미달성)
   const stars = Array.from({ length: maxStars }, (_, i) => i < count)
-  // 5개씩 행 분할
+  // 15개씩 2행으로 분할
   const rows: boolean[][] = []
-  for (let i = 0; i < maxStars; i += 5) rows.push(stars.slice(i, i + 5))
+  for (let i = 0; i < maxStars; i += 15) rows.push(stars.slice(i, i + 15))
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, marginBottom: 6 }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, marginBottom: 6 }}>
       {rows.map((row, ri) => (
-        <div key={ri} style={{ display: "flex", gap: 3 }}>
+        <div key={ri} style={{ display: "flex", gap: 2 }}>
           {row.map((lit, ci) => <StarIcon key={ci} lit={lit} />)}
         </div>
       ))}
