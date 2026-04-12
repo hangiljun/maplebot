@@ -195,11 +195,11 @@ export default function EquipmentTab({ items }: { items: EquipmentItem[] }) {
             {/* 닫기 버튼 */}
             <div style={{
               display: "flex", justifyContent: "flex-end",
-              padding: "8px 12px 0",
+              padding: "4px 8px 0",
               background: "linear-gradient(175deg, #131522 0%, #0b0d1c 100%)",
             }}>
-              <button onClick={() => setSelected(null)} style={{ color: "#888", padding: 2 }}>
-                <X size={16} />
+              <button onClick={() => setSelected(null)} style={{ color: "#888", padding: "10px", minWidth: "44px", minHeight: "44px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <X size={18} />
               </button>
             </div>
             <MapleItemDetail item={selected} />

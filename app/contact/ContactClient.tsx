@@ -196,12 +196,12 @@ export default function ContactClient({ initialRequests }: { initialRequests: Re
               <div className="flex items-center gap-2">
                 <button onClick={() => setSortBy(s => s === "date" ? "priority" : "date")}
                   className="flex items-center gap-1.5"
-                  style={{ fontSize: "12px", color: "var(--text-muted)", padding: "4px 8px", borderRadius: "4px", border: "1px solid var(--border)", background: "rgba(255,255,255,0.02)" }}>
+                  style={{ fontSize: "12px", color: "var(--text-muted)", padding: "8px 10px", borderRadius: "4px", border: "1px solid var(--border)", background: "rgba(255,255,255,0.02)" }}>
                   <ArrowUpDown size={11} />{sortBy === "date" ? "최신순" : "우선순위순"}
                 </button>
                 <button onClick={fetchRequests} disabled={loading}
                   className="flex items-center gap-1.5"
-                  style={{ fontSize: "12px", color: "var(--text-muted)", padding: "4px 8px", borderRadius: "4px", border: "1px solid var(--border)", background: "rgba(255,255,255,0.02)" }}>
+                  style={{ fontSize: "12px", color: "var(--text-muted)", padding: "8px 10px", borderRadius: "4px", border: "1px solid var(--border)", background: "rgba(255,255,255,0.02)" }}>
                   <RefreshCw size={11} className={loading ? "animate-spin" : ""} />새로고침
                 </button>
               </div>
@@ -300,7 +300,7 @@ export default function ContactClient({ initialRequests }: { initialRequests: Re
                       onChange={e => setForm(prev => ({ ...prev, [f.key]: e.target.value }))}
                       placeholder={f.placeholder} required={f.required} maxLength={f.max}
                       className="w-full bg-transparent"
-                      style={{ fontSize: "14px", color: "var(--text)", padding: "9px 12px", border: "1px solid var(--border)", borderRadius: "6px", outline: "none" }}
+                      style={{ fontSize: "16px", color: "var(--text)", padding: "9px 12px", border: "1px solid var(--border)", borderRadius: "6px", outline: "none" }}
                       onFocus={e => e.target.style.borderColor = "var(--blue-light)"}
                       onBlur={e => e.target.style.borderColor = "var(--border)"} />
                   </div>
@@ -315,7 +315,7 @@ export default function ContactClient({ initialRequests }: { initialRequests: Re
                     placeholder="어떤 기능인지, 왜 필요한지 자세히 설명해주세요"
                     required rows={5} maxLength={500}
                     className="w-full bg-transparent resize-none"
-                    style={{ fontSize: "14px", color: "var(--text)", padding: "9px 12px", border: "1px solid var(--border)", borderRadius: "6px", outline: "none", lineHeight: 1.65 }}
+                    style={{ fontSize: "16px", color: "var(--text)", padding: "9px 12px", border: "1px solid var(--border)", borderRadius: "6px", outline: "none", lineHeight: 1.65 }}
                     onFocus={e => e.target.style.borderColor = "var(--blue-light)"}
                     onBlur={e => e.target.style.borderColor = "var(--border)"} />
                   <p style={{ fontSize: "11px", color: "var(--text-muted)", textAlign: "right", marginTop: "3px" }}>{form.description.length} / 500</p>
