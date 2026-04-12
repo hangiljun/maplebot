@@ -129,7 +129,7 @@ export function DiscordEmbed() {
                 ))}
               </div>
               {/* ③ 푸터 */}
-              <p style={{ color: "rgba(255,255,255,0.22)", fontSize: "11px" }}>Nexon OpenAPI · 실시간 조회</p>
+              <p style={{ color: "rgba(255,255,255,0.22)", fontSize: "11px" }}>메이플봇 · 실시간 조회</p>
             </div>
             {/* ④ 버튼 영역 */}
             <div className="flex flex-wrap gap-2 px-4 py-3" style={{ background: "rgba(0,0,0,0.15)", borderTop: "1px solid rgba(255,255,255,0.04)" }}>

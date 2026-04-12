@@ -30,8 +30,8 @@ export default function BotGuidePage() {
       <div className="section-container">
         <div className="flex">
 
-          {/* 사이드바 — self-start + sticky로 스크롤 시에도 화면에 고정 */}
-          <aside className="hidden md:block shrink-0 self-start" style={{ width: "200px", position: "sticky", top: "56px" }}>
+          {/* 사이드바 */}
+          <aside className="hidden md:block shrink-0" style={{ width: "200px", position: "sticky", top: "56px", alignSelf: "flex-start", maxHeight: "calc(100vh - 56px)", overflowY: "auto" }}>
             <div className="py-10 pr-6">
               <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text-muted)", marginBottom: "10px", paddingLeft: "10px" }}>목차</p>
               <nav className="space-y-0.5">
@@ -111,7 +111,7 @@ export default function BotGuidePage() {
                   </Link>
                 </div>
                 <div className="flex flex-wrap gap-x-6 gap-y-2">
-                  {[{ v: "실시간", l: "Nexon API 연동" }, { v: "무료", l: "서버 추가 비용 없음" }, { v: "1시간", l: "최대 캐싱 주기" }].map(s => (
+                  {[{ v: "실시간", l: "데이터 조회" }, { v: "무료", l: "서버 추가 비용 없음" }, { v: "1시간", l: "최대 캐싱 주기" }].map(s => (
                     <div key={s.v} className="flex items-center gap-1.5" style={{ fontSize: "13px", color: "var(--text-muted)" }}>
                       <CheckCircle2 size={13} style={{ color: M.orange, flexShrink: 0 }} />
                       <strong style={{ color: "var(--text-sub)", fontWeight: 600 }}>{s.v}</strong>&nbsp;{s.l}
@@ -161,7 +161,7 @@ export default function BotGuidePage() {
                   </div>
                   <div className="px-6 py-6 space-y-6">
                     <p style={{ fontSize: "1.05rem", color: "var(--text-sub)", lineHeight: 1.85 }}>
-                      Nexon OpenAPI를 통해 캐릭터의 기본 정보를 실시간으로 조회합니다. 슬래시(/)를 입력하면 자동완성 목록이 나타납니다.
+                      캐릭터 이름을 입력하면 기본 정보를 실시간으로 조회합니다. 슬래시(/)를 입력하면 자동완성 목록이 나타납니다.
                     </p>
                     <div>
                       <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text-muted)", marginBottom: "10px" }}>명령어 구문</p>
@@ -182,11 +182,6 @@ export default function BotGuidePage() {
                           </div>
                         ))}
                       </div>
-                    </div>
-                    <div className="flex items-start gap-3 px-4 py-4"
-                      style={{ background: "rgba(59,130,246,0.05)", border: "1px solid rgba(59,130,246,0.13)", borderRadius: "6px" }}>
-                      <InfoIcon size={15} className="shrink-0 mt-0.5" style={{ color: "var(--blue-light)" }} />
-                      <p style={{ fontSize: "0.95rem", color: "var(--text-muted)", lineHeight: 1.7 }}>조회 결과는 서버 부하 방지를 위해 최대 1시간 캐싱됩니다.</p>
                     </div>
                   </div>
                 </div>
@@ -246,7 +241,7 @@ export default function BotGuidePage() {
                     <div>
                       <p style={{ fontSize: "1rem", fontWeight: 600, color: M.gold, marginBottom: "6px" }}>개인정보 안전 안내</p>
                       <p style={{ fontSize: "1rem", color: "var(--text-muted)", lineHeight: 1.78 }}>
-                        메이플봇은 <strong style={{ color: "var(--text-sub)" }}>Nexon OpenAPI</strong>를 통해 공개된 캐릭터 정보만 조회합니다. 이용자의 비밀번호·계정 정보·개인정보를 요구하거나 저장하지 않습니다.
+                        메이플봇은 공개된 캐릭터 정보만 조회합니다. 이용자의 비밀번호·계정 정보·개인정보를 요구하거나 저장하지 않습니다.
                       </p>
                     </div>
                   </div>
