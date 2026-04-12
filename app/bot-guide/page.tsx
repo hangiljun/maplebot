@@ -1,6 +1,6 @@
 "use client"
 import Link from "next/link"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { ChevronDown, ExternalLink, Zap, Terminal, Layers, Lock, ArrowRight, CheckCircle2, AlertTriangle } from "lucide-react"
 import { DISCORD_URL, M, SECTIONS, FEATURES } from "./data"
 import { CopyButton, SectionHeading, DiscordEmbed, FeatureCard, InfoIcon } from "./components"
@@ -8,6 +8,8 @@ import { CopyButton, SectionHeading, DiscordEmbed, FeatureCard, InfoIcon } from 
 export default function BotGuidePage() {
   const [active, setActive]         = useState("start")
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [sidebarLeft, setSidebarLeft] = useState(0)
+  const asideRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -16,6 +18,16 @@ export default function BotGuidePage() {
     )
     SECTIONS.forEach(s => { const el = document.getElementById(s.id); if (el) observer.observe(el) })
     return () => observer.disconnect()
+  }, [])
+
+  // aside의 실제 left 위치를 측정해 fixed nav에 사용
+  useEffect(() => {
+    const update = () => {
+      if (asideRef.current) setSidebarLeft(asideRef.current.getBoundingClientRect().left)
+    }
+    update()
+    window.addEventListener("resize", update)
+    return () => window.removeEventListener("resize", update)
   }, [])
 
   const scrollTo = (id: string) => {
@@ -31,8 +43,8 @@ export default function BotGuidePage() {
         <div className="flex">
 
           {/* 사이드바 */}
-          <aside className="hidden md:block shrink-0" style={{ width: "200px", position: "sticky", top: "56px", alignSelf: "flex-start", maxHeight: "calc(100vh - 56px)", overflowY: "auto" }}>
-            <div className="py-10 pr-6">
+          <aside ref={asideRef} className="hidden md:block shrink-0" style={{ width: "200px" }}>
+            <div className="py-10 pr-6" style={{ position: "fixed", top: "56px", width: "200px", left: sidebarLeft, maxHeight: "calc(100vh - 56px)", overflowY: "auto" }}>
               <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text-muted)", marginBottom: "10px", paddingLeft: "10px" }}>목차</p>
               <nav className="space-y-0.5">
                 {SECTIONS.map(sec => {
