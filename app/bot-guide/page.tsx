@@ -123,12 +123,12 @@ export default function BotGuidePage() {
 
             {/* 01 시작하기 */}
             <section id="start" style={{ scrollMarginTop: "84px", marginBottom: "64px" }}>
-              <SectionHeading num="01" Icon={Zap} title="시작하기" sub="별도의 설정 없이 봇을 초대하는 즉시 명령어를 사용할 수 있습니다." />
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <SectionHeading num="01" Icon={Zap} title="봇 서버 추가 방법" sub="별도의 설정 없이 봇을 초대하는 즉시 명령어를 사용할 수 있습니다." />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
                 {[
-                  { n: "1", t: "봇 초대",     d: "'서버에 추가하기'를 눌러 원하는 서버를 선택하고 권한을 허용합니다." },
-                  { n: "2", t: "명령어 입력",  d: "채널에서 /정보 [닉네임] 을 입력합니다. 슬래시(/) 입력 시 자동완성이 나타납니다." },
-                  { n: "3", t: "결과 확인",    d: "봇이 캐릭터 정보를 Nexon OpenAPI에서 조회해 임베드 카드로 응답합니다." },
+                  { n: "1", t: "봇 초대 링크 클릭",  d: "이 페이지 상단 또는 사이드바의 '서버에 추가하기' 버튼을 클릭합니다." },
+                  { n: "2", t: "서버 선택 및 권한 허용", d: "Discord 팝업에서 봇을 추가할 서버를 선택하고 요청 권한을 확인 후 승인합니다." },
+                  { n: "3", t: "명령어 즉시 사용",   d: "추가 설정 없이 채널에 /정보 [닉네임] 을 입력하면 바로 사용 가능합니다." },
                 ].map((s, i) => (
                   <div key={s.n} className="relative p-5" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid var(--border)", borderRadius: "8px" }}>
                     {i < 2 && <ArrowRight size={14} className="hidden sm:block absolute -right-3 top-1/2 -translate-y-1/2 z-10" style={{ color: "rgba(245,131,46,0.35)" }} />}
@@ -137,6 +137,16 @@ export default function BotGuidePage() {
                     <p style={{ fontSize: "0.95rem", color: "var(--text-muted)", lineHeight: 1.75 }}>{s.d}</p>
                   </div>
                 ))}
+              </div>
+              {/* 추가 안내 */}
+              <div className="flex items-start gap-3 px-5 py-4"
+                style={{ background: "rgba(245,131,46,0.05)", border: "1px solid rgba(245,131,46,0.18)", borderRadius: "8px" }}>
+                <InfoIcon size={15} className="shrink-0 mt-0.5" style={{ color: M.orange }} />
+                <div style={{ fontSize: "0.95rem", color: "var(--text-muted)", lineHeight: 1.75 }}>
+                  <strong style={{ color: "var(--text-sub)" }}>관리자 권한이 있는 서버</strong>에만 봇을 추가할 수 있습니다.
+                  추가 후 봇에게 채널 읽기·쓰기 권한이 있는지 확인해주세요.
+                  봇이 응답하지 않으면 해당 채널의 권한 설정을 확인해보세요.
+                </div>
               </div>
             </section>
 
@@ -188,12 +198,43 @@ export default function BotGuidePage() {
                   <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text-muted)", marginBottom: "10px" }}>실제 응답 예시</p>
                   <DiscordEmbed />
                 </div>
+                {/* 응답 임베드 항목 설명 */}
+                <div>
+                  <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text-muted)", marginBottom: "12px" }}>응답 카드 항목 설명</p>
+                  <div className="space-y-2">
+                    {[
+                      { field: "캐릭터명",  desc: "조회한 메이플스토리 캐릭터의 닉네임입니다." },
+                      { field: "직업",      desc: "캐릭터의 직업명입니다. (예: 패스파인더, 아크, 일리움)" },
+                      { field: "서버",      desc: "캐릭터가 속한 메이플스토리 월드입니다. (예: 리부트, 스카니아, 베라)" },
+                      { field: "레벨",      desc: "캐릭터의 현재 레벨입니다." },
+                      { field: "전투력",    desc: "캐릭터의 총 전투력 수치입니다. 장비·스탯·링크·유니온이 모두 반영됩니다." },
+                      { field: "유니온",    desc: "유니온 등급과 총 유니온 레벨입니다. (예: 레전드 · Lv.9,000)" },
+                      { field: "인기도",    desc: "다른 유저에게 받은 인기도 수치입니다." },
+                    ].map(({ field, desc }) => (
+                      <div key={field} className="flex items-start gap-4 px-4 py-3"
+                        style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "6px" }}>
+                        <span className="shrink-0 font-bold" style={{ fontSize: "13px", color: "var(--blue-light)", minWidth: "56px" }}>{field}</span>
+                        <span style={{ fontSize: "13px", color: "var(--text-muted)", lineHeight: 1.6 }}>{desc}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </section>
 
             {/* 03 버튼 기능 */}
             <section id="features" style={{ scrollMarginTop: "84px", marginBottom: "64px" }}>
-              <SectionHeading num="03" Icon={Layers} title="버튼 기능" sub="/정보 실행 후 본인에게만 표시되는 버튼입니다. 원하는 정보를 즉시 조회할 수 있습니다." />
+              <SectionHeading num="03" Icon={Layers} title="버튼 기능"
+                sub="/정보 응답 카드 하단에 버튼이 표시됩니다. 버튼을 누르면 해당 정보가 본인에게만 보이는 비공개 메시지로 전송됩니다." />
+              {/* 버튼 동작 안내 */}
+              <div className="flex items-start gap-3 px-5 py-4 mb-6"
+                style={{ background: "rgba(59,130,246,0.05)", border: "1px solid rgba(59,130,246,0.15)", borderRadius: "8px" }}>
+                <InfoIcon size={15} className="shrink-0 mt-0.5" style={{ color: "var(--blue-light)" }} />
+                <p style={{ fontSize: "0.95rem", color: "var(--text-muted)", lineHeight: 1.75 }}>
+                  버튼을 클릭하면 해당 정보가 <strong style={{ color: "var(--text-sub)" }}>나에게만 보이는 임시 메시지</strong>로 전송됩니다.
+                  채널에는 공개되지 않으므로 다른 유저에게 노출되지 않습니다.
+                </p>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {FEATURES.map(f => <FeatureCard key={f.label} f={f} />)}
               </div>

@@ -62,17 +62,18 @@ export function DiscordCommandDemo() {
   return (
     <div style={{ background: "#313338", borderRadius: "8px", overflow: "hidden", boxShadow: "0 4px 16px rgba(0,0,0,0.3)" }}>
       <DiscordChannelHeader />
+      {/* 자동완성 드롭업 */}
       <div className="px-4 pt-3.5">
         <div style={{ background: "#1e1f22", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "6px", overflow: "hidden" }}>
           <div className="px-3 py-1.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-            <span style={{ color: "rgba(255,255,255,0.25)", fontSize: "10px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" }}>명령어</span>
+            <span style={{ color: "rgba(255,255,255,0.25)", fontSize: "10px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" }}>명령어 자동완성</span>
           </div>
           <div className="flex items-center gap-3 px-3 py-3" style={{ background: "rgba(88,101,242,0.18)" }}>
             <BotAvatar size={36} />
             <div className="flex-1 min-w-0">
-              <div className="flex items-baseline gap-2">
+              <div className="flex items-baseline gap-2 flex-wrap">
                 <code style={{ fontSize: "15px", fontWeight: 700, color: "#fff", fontFamily: "monospace" }}>/정보</code>
-                <span style={{ fontSize: "14px", color: "rgba(255,255,255,0.4)" }}>캐릭터명</span>
+                <span style={{ fontSize: "14px", color: "rgba(255,255,255,0.4)" }}>캐릭터명: <span style={{ color: "rgba(255,255,255,0.65)" }}>가을이조하</span></span>
               </div>
               <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.28)", lineHeight: 1.4, marginTop: "2px" }}>캐릭터 기본 정보를 조회합니다</p>
             </div>
@@ -80,10 +81,11 @@ export function DiscordCommandDemo() {
           </div>
         </div>
       </div>
+      {/* 입력창 */}
       <div className="px-4 pb-4 pt-2">
         <div className="flex items-center gap-2 px-4 py-3" style={{ background: "#383a40", borderRadius: "6px" }}>
           <code style={{ fontSize: "15px", fontWeight: 700, color: "#fff", fontFamily: "monospace" }}>/정보</code>
-          <span style={{ fontSize: "15px", color: "rgba(255,255,255,0.55)" }}>메이플유저</span>
+          <span style={{ fontSize: "15px", color: "rgba(255,255,255,0.85)" }}>가을이조하</span>
           <span style={{ display: "inline-block", width: "2px", height: "16px", background: "rgba(255,255,255,0.75)", borderRadius: "1px" }} />
         </div>
       </div>
@@ -103,22 +105,34 @@ export function DiscordEmbed() {
             <span style={{ background: "#5865f2", color: "#fff", fontSize: "10px", fontWeight: 700, padding: "2px 5px", borderRadius: "3px" }}>APP</span>
             <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.28)" }}>오늘 오후 3:42</span>
           </div>
+          {/* 임베드 카드 */}
           <div style={{ background: "#2b2d31", borderLeft: "4px solid #5865f2", borderRadius: "4px", overflow: "hidden", maxWidth: "420px" }}>
             <div className="px-4 py-3.5">
-              <p style={{ fontWeight: 700, color: "#fff", fontSize: "15px", marginBottom: "12px" }}>메이플유저</p>
+              {/* ① 캐릭터명 */}
+              <p style={{ fontWeight: 700, color: "#fff", fontSize: "15px", marginBottom: "12px" }}>가을이조하</p>
+              {/* ② 필드 그리드 */}
               <div className="grid grid-cols-2 gap-x-8 gap-y-2.5" style={{ marginBottom: "12px" }}>
-                {[["직업","아크"],["서버","리부트"],["레벨","261"],["전투력","1,234,567"],["유니온","시즌3 · Lv.8,945"],["인기도","999"]].map(([k, v]) => (
+                {[
+                  ["직업",   "패스파인더"],
+                  ["서버",   "리부트"],
+                  ["레벨",   "280"],
+                  ["전투력", "12,345,678"],
+                  ["유니온", "레전드 · Lv.9,000"],
+                  ["인기도", "1,234"],
+                ].map(([k, v]) => (
                   <div key={k}>
                     <p style={{ color: "rgba(255,255,255,0.35)", fontSize: "11px", marginBottom: "2px" }}>{k}</p>
                     <p style={{ color: "rgba(255,255,255,0.88)", fontSize: "13px", fontWeight: 600 }}>{v}</p>
                   </div>
                 ))}
               </div>
+              {/* ③ 푸터 */}
               <p style={{ color: "rgba(255,255,255,0.22)", fontSize: "11px" }}>Nexon OpenAPI · 실시간 조회</p>
             </div>
+            {/* ④ 버튼 영역 */}
             <div className="flex flex-wrap gap-2 px-4 py-3" style={{ background: "rgba(0,0,0,0.15)", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
               {["장비 보기","레벨 변동","헥사","코디"].map(b => (
-                <span key={b} style={{ background: "#4e5058", color: "rgba(255,255,255,0.88)", fontSize: "13px", fontWeight: 500, padding: "6px 14px", borderRadius: "3px" }}>{b}</span>
+                <span key={b} style={{ background: "#4e5058", color: "rgba(255,255,255,0.88)", fontSize: "13px", fontWeight: 500, padding: "6px 14px", borderRadius: "3px", cursor: "pointer" }}>{b}</span>
               ))}
             </div>
           </div>
