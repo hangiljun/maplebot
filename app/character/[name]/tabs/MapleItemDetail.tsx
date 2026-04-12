@@ -171,9 +171,12 @@ function PotBlock({ label, grade, opts }: {
   return (
     <>
       <HLine />
-      <p style={{ fontSize: 11, fontWeight: 700, color, marginBottom: 2 }}>■ {label}</p>
+      {/* 헤더: ■ 잠재능력 : 레전드리 */}
+      <p style={{ fontSize: 11, fontWeight: 700, color, marginBottom: 3 }}>
+        ■ {label} : <span style={{ fontWeight: 700 }}>{grade}</span>
+      </p>
       {lines.map((opt, i) => (
-        <p key={i} style={{ fontSize: 11, color, lineHeight: 1.55 }}>■ {opt}</p>
+        <p key={i} style={{ fontSize: 11, color, lineHeight: 1.6 }}>■ {opt}</p>
       ))}
     </>
   )
@@ -330,10 +333,10 @@ export default function MapleItemDetail({ item }: { item: EquipmentItem }) {
       )}
 
       {/* 잠재 옵션 */}
-      <PotBlock label="잠재 옵션" grade={grade} opts={potOpts} />
+      <PotBlock label="잠재능력" grade={grade} opts={potOpts} />
 
-      {/* 에디셔널 잠재 옵션 */}
-      <PotBlock label="에디셔널 잠재 옵션" grade={addGrade} opts={addOpts} />
+      {/* 에디셔널 잠재능력 */}
+      <PotBlock label="에디셔널 잠재능력" grade={addGrade} opts={addOpts} />
     </div>
   )
 }
