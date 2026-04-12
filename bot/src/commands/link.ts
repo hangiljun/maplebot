@@ -43,8 +43,7 @@ function buildSearchEmbed(query: string, level: number) {
     }
   }
 
-  const shown = matches.slice(0, 15)
-  const lines = shown.map(c => {
+  const lines = matches.map(c => {
     const idx = Math.min(level - 1, c.effects.length - 1)
     const effect = c.effects[idx]
     const actualLv = idx + 1
@@ -52,15 +51,23 @@ function buildSearchEmbed(query: string, level: number) {
     return `**${c.name}** - ${c.skillName}${lvNote}\n → ${effect}`
   })
 
-  const embed = new EmbedBuilder()
-    .setColor(0x22c55e)
-    .setTitle(`🔗 링크 스킬 검색 — "${query}" (${matches.length}개) · Lv.${level}`)
-    .setDescription(lines.join("\n\n"))
-    .setFooter({
-      text: matches.length > 15
-        ? "상위 15개만 표시됩니다 · 메이플봇"
-        : "메이플봇 · 링크 스킬 정보",
-    })
+  // 4000자 기준으로 여러 embed에 나눠 담기
+  const chunks: string[] = []
+  let cur = ""
+  for (const line of lines) {
+    const next = cur ? cur + "\n\n" + line : line
+    if (next.length > 4000) { chunks.push(cur); cur = line }
+    else cur = next
+  }
+  if (cur) chunks.push(cur)
+
+  const embeds = chunks.map((chunk, i) =>
+    new EmbedBuilder()
+      .setColor(0x22c55e)
+      .setTitle(i === 0 ? `🔗 링크 스킬 검색 — "${query}" (${matches.length}개) · Lv.${level}` : "\u200b")
+      .setDescription(chunk)
+      .setFooter(i === chunks.length - 1 ? { text: "메이플봇 · 링크 스킬 정보" } : null)
+  )
 
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
@@ -80,7 +87,7 @@ function buildSearchEmbed(query: string, level: number) {
       .setDisabled(level === 3),
   )
 
-  return { embeds: [embed], components: [row] }
+  return { embeds, components: [row] }
 }
 
 export async function execute(interaction: ChatInputCommandInteraction) {
