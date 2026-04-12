@@ -20,13 +20,14 @@ export async function GET() {
     const requests = snapshot.docs.map(doc => {
       const d = doc.data()
       return {
-        id:          doc.id,
-        title:       d.title,
-        description: d.description,
-        nickname:    d.nickname || "익명",
-        priority:    d.priority ?? "medium",
-        status:      d.status   ?? "reviewing",
-        createdAt:   d.createdAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
+        id:           doc.id,
+        title:        d.title,
+        description:  d.description,
+        nickname:     d.nickname || "익명",
+        priority:     d.priority ?? "medium",
+        status:       d.status   ?? "reviewing",
+        createdAt:    d.createdAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
+        adminComment: d.adminComment ?? null,
       }
     })
 
@@ -87,7 +88,7 @@ export async function POST(req: NextRequest) {
 // ── PATCH: 우선순위/상태 변경 (관리자 전용) ──────────────────────────────────
 export async function PATCH(req: NextRequest) {
   try {
-    const { id, adminPassword, priority, status } = await req.json()
+    const { id, adminPassword, priority, status, adminComment } = await req.json()
 
     if (!id) return NextResponse.json({ error: "ID가 없습니다." }, { status: 400 })
 
@@ -96,9 +97,10 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "권한이 없습니다." }, { status: 403 })
     }
 
-    const update: Record<string, string> = {}
-    if (priority) update.priority = priority
-    if (status)   update.status   = status
+    const update: Record<string, string | null> = {}
+    if (priority)                update.priority     = priority
+    if (status)                  update.status       = status
+    if (adminComment !== undefined) update.adminComment = adminComment ?? null
 
     if (Object.keys(update).length === 0) {
       return NextResponse.json({ error: "변경할 항목이 없습니다." }, { status: 400 })

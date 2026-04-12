@@ -1,6 +1,6 @@
 "use client"
 import { useState, useCallback, useMemo } from "react"
-import { Send, AlertCircle, CheckCircle2, Clock, RefreshCw, Megaphone, ArrowUpDown, Trash2, Lock, Shield } from "lucide-react"
+import { Send, AlertCircle, CheckCircle2, Clock, RefreshCw, Megaphone, ArrowUpDown, Trash2, Lock, Shield, MessageSquare } from "lucide-react"
 import { Request, Priority, PRIORITY_META, STATUS_META } from "./types"
 import { DetailModal } from "./DetailModal"
 import { AdminLoginModal } from "./AdminLoginModal"
@@ -91,6 +91,19 @@ export default function ContactClient({ initialRequests }: { initialRequests: Re
     sessionStorage.removeItem("adminPassword")
   }
 
+  const handleComment = async (id: string, adminComment: string | null) => {
+    const pw = sessionStorage.getItem("adminPassword") ?? adminPassword
+    const res = await fetch("/api/feature-request", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, adminPassword: pw, adminComment }),
+    })
+    if (res.ok) {
+      setRequests(rs => rs.map(r => r.id === id ? { ...r, adminComment } : r))
+      if (selected?.id === id) setSelected(prev => prev ? { ...prev, adminComment } : null)
+    }
+  }
+
   const handleDelete = async (id: string) => {
     if (!confirm("정말 삭제하시겠습니까?")) return
     await fetch("/api/feature-request", {
@@ -126,7 +139,7 @@ export default function ContactClient({ initialRequests }: { initialRequests: Re
 
   return (
     <div style={{ paddingTop: "56px", minHeight: "100vh" }}>
-      {selected && <DetailModal r={selected} onClose={() => setSelected(null)} isAdmin={isAdmin} onDelete={handleDelete} />}
+      {selected && <DetailModal r={selected} onClose={() => setSelected(null)} isAdmin={isAdmin} onDelete={handleDelete} onComment={handleComment} />}
       {showAdminLogin && <AdminLoginModal onClose={() => setShowAdminLogin(false)} onLogin={handleAdminLogin} />}
 
       <div className="section-container py-12">
@@ -268,10 +281,17 @@ export default function ContactClient({ initialRequests }: { initialRequests: Re
                           {r.description}
                         </p>
                       )}
-                      <p style={{ fontSize: "11px", color: "var(--text-muted)" }}>
-                        {r.nickname} · {new Date(r.createdAt).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })}
-                        <span style={{ marginLeft: "8px", opacity: 0.5 }}>클릭하여 전체 보기</span>
-                      </p>
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <p style={{ fontSize: "11px", color: "var(--text-muted)" }}>
+                          {r.nickname} · {new Date(r.createdAt).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })}
+                          <span style={{ marginLeft: "8px", opacity: 0.5 }}>클릭하여 전체 보기</span>
+                        </p>
+                        {r.adminComment && (
+                          <span className="flex items-center gap-1" style={{ fontSize: "11px", fontWeight: 600, color: "#f5832e", padding: "1px 7px", borderRadius: "3px", background: "rgba(245,131,46,0.1)", border: "1px solid rgba(245,131,46,0.25)" }}>
+                            <MessageSquare size={10} />개발자 답변
+                          </span>
+                        )}
+                      </div>
                     </div>
                   )
                 })}

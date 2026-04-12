@@ -9,6 +9,7 @@ export type Request = {
   priority: Priority
   status: Status
   createdAt: string
+  adminComment?: string | null
 }
 
 export const PRIORITY_META: Record<Priority, { text: string; color: string; bg: string; border: string }> = {
