@@ -239,15 +239,15 @@ export async function fetchCharacterTimeline(name: string): Promise<CharacterTim
   const ocid = await getOcid(name)
   if (!ocid) return null
 
-  // 2주 간격으로 체크포인트 생성 (6개월 = 13개 포인트)
+  // 14일(2주) 간격으로 체크포인트 생성 (6개월 ≈ 182일 = 13개 포인트)
   const today = new Date(Date.now() + 9 * 3600000) // KST
   const checkpoints: string[] = []
-  for (let weeks = 1; weeks <= 26; weeks += 2) {
+  for (let days = 14; days <= 182; days += 14) {
     const d = new Date(today)
-    d.setDate(d.getDate() - weeks)
+    d.setDate(d.getDate() - days)
     checkpoints.push(d.toISOString().split("T")[0])
   }
-  checkpoints.reverse() // 오래된 순
+  checkpoints.reverse() // 오래된 순 (182일 전 → 14일 전)
 
   // 모든 체크포인트 병렬 조회
   const snapshots = await Promise.all(
