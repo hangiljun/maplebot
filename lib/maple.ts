@@ -2,6 +2,7 @@ export * from "./types"
 import type {
   BasicCharacterData, CharacterData, CharacterHistory, HistoryPoint,
   CashItem, HexaCore, HexaStat,
+  TimelineEvent, CharacterTimeline,
 } from "./types"
 
 const BASE_URL = "https://open.api.nexon.com"
@@ -205,6 +206,88 @@ export async function fetchHistory(name: string): Promise<CharacterHistory | nul
   const levelHistory: HistoryPoint[] = allLevels.filter((p, i) => i === 0 || p.value !== allLevels[i - 1].value)
 
   return { expHistory, levelHistory }
+}
+
+// ── 캐릭터 역사: 과거 6개월 닉네임·길드 변경 이력 ──────────────
+
+/** 두 날짜 사이에서 field 값이 바뀐 정확한 날짜를 이진 탐색으로 찾음 */
+async function binarySearchChange(
+  ocid: string,
+  startDate: string,
+  endDate: string,
+  field: "character_name" | "character_guild_name",
+  startValue: string,
+  depth = 0,
+): Promise<string> {
+  if (depth >= 8) return endDate
+  const s = new Date(startDate).getTime()
+  const e = new Date(endDate).getTime()
+  if ((e - s) / 86400000 <= 1) return endDate
+
+  const midDate = new Date(Math.floor((s + e) / 2)).toISOString().split("T")[0]
+  const r = await nexonFetch(
+    `/maplestory/v1/character/basic?ocid=${ocid}&date=${midDate}`,
+  ).catch(() => null)
+
+  const midValue = r?.[field] ?? startValue
+  return midValue === startValue
+    ? binarySearchChange(ocid, midDate, endDate, field, startValue, depth + 1)
+    : binarySearchChange(ocid, startDate, midDate, field, startValue, depth + 1)
+}
+
+export async function fetchCharacterTimeline(name: string): Promise<CharacterTimeline | null> {
+  const ocid = await getOcid(name)
+  if (!ocid) return null
+
+  // 2주 간격으로 체크포인트 생성 (6개월 = 13개 포인트)
+  const today = new Date(Date.now() + 9 * 3600000) // KST
+  const checkpoints: string[] = []
+  for (let weeks = 1; weeks <= 26; weeks += 2) {
+    const d = new Date(today)
+    d.setDate(d.getDate() - weeks)
+    checkpoints.push(d.toISOString().split("T")[0])
+  }
+  checkpoints.reverse() // 오래된 순
+
+  // 모든 체크포인트 병렬 조회
+  const snapshots = await Promise.all(
+    checkpoints.map(date =>
+      nexonFetch(`/maplestory/v1/character/basic?ocid=${ocid}&date=${date}`)
+        .then(r => r ? { date, name: r.character_name as string, guild: (r.character_guild_name as string) ?? "" } : null)
+        .catch(() => null),
+    ),
+  )
+
+  const valid = snapshots.filter(Boolean) as { date: string; name: string; guild: string }[]
+  if (valid.length < 2) return { events: [], checkedFrom: checkpoints[0] }
+
+  // 연속 스냅샷 비교 → 변경 감지 → 이진 탐색으로 정확한 날짜 확인
+  const changeJobs: Promise<TimelineEvent | null>[] = []
+
+  for (let i = 1; i < valid.length; i++) {
+    const prev = valid[i - 1]
+    const curr = valid[i]
+
+    if (prev.name !== curr.name) {
+      changeJobs.push(
+        binarySearchChange(ocid, prev.date, curr.date, "character_name", prev.name)
+          .then(date => ({ type: "nickname" as const, date, from: prev.name, to: curr.name }))
+      )
+    }
+    if (prev.guild !== curr.guild) {
+      changeJobs.push(
+        binarySearchChange(ocid, prev.date, curr.date, "character_guild_name", prev.guild)
+          .then(date => ({ type: "guild" as const, date, from: prev.guild || "없음", to: curr.guild || "없음" }))
+      )
+    }
+  }
+
+  const results = await Promise.all(changeJobs)
+  const events = results
+    .filter(Boolean)
+    .sort((a, b) => b!.date.localeCompare(a!.date)) as TimelineEvent[]
+
+  return { events, checkedFrom: valid[0].date }
 }
 
 // 하위 호환 — /api/maple/character 라우트용

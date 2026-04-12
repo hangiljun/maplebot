@@ -3,33 +3,36 @@ import { useState, useCallback, useMemo, useRef } from "react"
 import {
   type CharacterBasic, type UnionInfo, type StatItem,
   type EquipmentItem, type AbilityInfo, type SymbolItem,
-  type HexaCore, type HexaStat, type CodiInfo,
+  type HexaCore, type HexaStat, type CodiInfo, type CharacterTimeline,
   MAIN_STATS, BATTLE_STATS, DETAIL_STATS, COMBAT_POWER_STAT,
 } from "@/lib/maple"
-import EquipmentTab from "./tabs/EquipmentTab"
-import AbilityTab   from "./tabs/AbilityTab"
-import UnionTab     from "./tabs/UnionTab"
-import SymbolTab    from "./tabs/SymbolTab"
-import HexaTab      from "./tabs/HexaTab"
-import CodiTab      from "./tabs/CodiTab"
+import EquipmentTab        from "./tabs/EquipmentTab"
+import AbilityTab          from "./tabs/AbilityTab"
+import UnionTab            from "./tabs/UnionTab"
+import SymbolTab           from "./tabs/SymbolTab"
+import HexaTab             from "./tabs/HexaTab"
+import CodiTab             from "./tabs/CodiTab"
+import CharacterHistoryTab from "./tabs/CharacterHistoryTab"
 
 type TabCache = {
-  equipment?: EquipmentItem[]
-  ability?:   AbilityInfo | null
-  symbols?:   SymbolItem[]
-  hexaCores?: HexaCore[]
-  hexaStats?: HexaStat[]
-  codi?:      CodiInfo | null
+  equipment?:   EquipmentItem[]
+  ability?:     AbilityInfo | null
+  symbols?:     SymbolItem[]
+  hexaCores?:   HexaCore[]
+  hexaStats?:   HexaStat[]
+  codi?:        CodiInfo | null
+  charhistory?: CharacterTimeline
 }
 
 const TABS = [
-  { key: "stat",      label: "기본 정보",  lazy: false },
-  { key: "equipment", label: "장비",       lazy: true  },
-  { key: "ability",   label: "어빌리티",   lazy: true  },
-  { key: "union",     label: "유니온",     lazy: false },
-  { key: "symbol",    label: "심볼",       lazy: true  },
-  { key: "hexa",      label: "헥사",       lazy: true  },
-  { key: "codi",      label: "코디",       lazy: true  },
+  { key: "stat",        label: "기본 정보",  lazy: false },
+  { key: "equipment",   label: "장비",       lazy: true  },
+  { key: "ability",     label: "어빌리티",   lazy: true  },
+  { key: "union",       label: "유니온",     lazy: false },
+  { key: "symbol",      label: "심볼",       lazy: true  },
+  { key: "hexa",        label: "헥사",       lazy: true  },
+  { key: "codi",        label: "코디",       lazy: true  },
+  { key: "charhistory", label: "캐릭터 역사", lazy: true  },
 ]
 
 function pickStats(stats: StatItem[], keys: string[]) {
@@ -165,6 +168,14 @@ export default function CharacterTabs({
 
         {activeTab === "codi" && (
           isLoading ? <TabLoading /> : <CodiTab codi={tabCache.codi ?? null} />
+        )}
+
+        {activeTab === "charhistory" && (
+          isLoading
+            ? <TabLoading />
+            : tabCache.charhistory
+              ? <CharacterHistoryTab timeline={tabCache.charhistory} />
+              : <TabLoading />
         )}
       </div>
     </div>

@@ -147,6 +147,20 @@ export interface CharacterHistory {
   levelHistory: HistoryPoint[]
 }
 
+export type TimelineEventType = "nickname" | "guild"
+
+export interface TimelineEvent {
+  type: TimelineEventType
+  date: string   // YYYY-MM-DD
+  from: string
+  to: string
+}
+
+export interface CharacterTimeline {
+  events: TimelineEvent[]
+  checkedFrom: string   // 조회 시작 날짜
+}
+
 export const MAIN_STATS   = ["STR", "DEX", "INT", "LUK"]
 export const BATTLE_STATS = ["HP", "MP", "공격력", "마력"]
 export const DETAIL_STATS = ["보스 몬스터 데미지", "방어율 무시", "크리티컬 확률", "크리티컬 데미지", "방어력"]
