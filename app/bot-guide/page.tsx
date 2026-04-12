@@ -31,6 +31,7 @@ export default function BotGuidePage() {
   }, [])
 
   const scrollTo = (id: string) => {
+    setActive(id)
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" })
     setMobileOpen(false)
   }
