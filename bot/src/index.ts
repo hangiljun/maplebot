@@ -41,6 +41,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
       const level = parseInt(rest[0], 10)
       const query = rest.slice(1).join(":")
       await linkCommand.handleLinkLevelButton(interaction, level, query)
+    } else if (action === "uniongrade") {
+      const grade = rest[0] as "B" | "A" | "S" | "SS" | "SSS"
+      const query = rest.slice(1).join(":")
+      await unionCommand.handleUnionGradeButton(interaction, grade, query)
     }
   }
 })
