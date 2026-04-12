@@ -50,7 +50,7 @@ export const LINK_DATA: LinkCharacter[] = [
       "약점 파악 확률 29%, 중첩당 데미지 4%, 방어율 무시 4% 증가",
       "약점 파악 확률 31%, 중첩당 데미지 5%, 방어율 무시 5% 증가",
     ],
-    category: "공격력",
+    category: "데미지",
   },
   {
     name: "모험가(궁수)", skillName: "어드벤쳐러 큐리어스", maxLevel: 9,
@@ -65,7 +65,7 @@ export const LINK_DATA: LinkCharacter[] = [
       "몬스터 컬렉션 등록 확률 45%, 크리티컬 확률 13% 증가 / 모험가 궁수 패시브: 데미지 4%",
       "몬스터 컬렉션 등록 확률 50%, 크리티컬 확률 15% 증가 / 모험가 궁수 패시브: 데미지 6%",
     ],
-    category: "공격력",
+    category: "데미지",
   },
   {
     name: "모험가(도적)", skillName: "시프 커닝", maxLevel: 9,
@@ -80,7 +80,7 @@ export const LINK_DATA: LinkCharacter[] = [
       "데미지 24% 증가",
       "데미지 27% 증가",
     ],
-    category: "공격력",
+    category: "데미지",
   },
   {
     name: "모험가(해적)", skillName: "파이렛 블레스", maxLevel: 9,
@@ -95,7 +95,7 @@ export const LINK_DATA: LinkCharacter[] = [
       "올스탯 90, 최대 HP·MP 1575, 피격 데미지 19% 감소 / 모험가 해적 패시브: 올스탯 110",
       "올스탯 100, 최대 HP·MP 1750, 피격 데미지 21% 감소 / 모험가 해적 패시브: 올스탯 130",
     ],
-    category: "공격력",
+    category: "데미지",
   },
   {
     name: "데몬 어벤져", skillName: "와일드 레이지", maxLevel: 3,
@@ -104,7 +104,7 @@ export const LINK_DATA: LinkCharacter[] = [
       "데미지 10% 증가",
       "데미지 15% 증가",
     ],
-    category: "공격력",
+    category: "데미지",
   },
   {
     name: "데몬 슬레이어", skillName: "데몬스 퓨리", maxLevel: 3,
@@ -113,7 +113,7 @@ export const LINK_DATA: LinkCharacter[] = [
       "보스 몬스터 공격 시 데미지 15% 증가",
       "보스 몬스터 공격 시 데미지 20% 증가",
     ],
-    category: "공격력",
+    category: "데미지",
   },
   {
     name: "루미너스", skillName: "퍼미에이트", maxLevel: 3,
@@ -122,7 +122,7 @@ export const LINK_DATA: LinkCharacter[] = [
       "방어율 무시 15% 추가",
       "방어율 무시 20% 추가 / 루미너스 패시브: 데미지 4% 증가",
     ],
-    category: "공격력",
+    category: "데미지",
   },
   {
     name: "팬텀", skillName: "데들리 인스팅트", maxLevel: 3,
@@ -131,7 +131,7 @@ export const LINK_DATA: LinkCharacter[] = [
       "크리티컬 확률 15% 증가",
       "크리티컬 확률 20% 증가 / 팬텀 패시브: 데미지 5% 증가",
     ],
-    category: "공격력",
+    category: "데미지",
   },
   {
     name: "키네시스", skillName: "판단", maxLevel: 3,
@@ -140,7 +140,7 @@ export const LINK_DATA: LinkCharacter[] = [
       "크리티컬 데미지 4% 증가",
       "크리티컬 데미지 6% 증가",
     ],
-    category: "공격력",
+    category: "데미지",
   },
   {
     name: "엔젤릭버스터", skillName: "소울 컨트렉트", maxLevel: 3,
@@ -149,7 +149,7 @@ export const LINK_DATA: LinkCharacter[] = [
       "10초 동안 스킬 데미지 45% 증가, 재사용 대기시간 60초 (자신 사용 시 90%)",
       "10초 동안 스킬 데미지 60% 증가, 재사용 대기시간 60초 (자신 사용 시 120%)",
     ],
-    category: "공격력",
+    category: "데미지",
   },
   {
     name: "제로", skillName: "륀느의 축복", maxLevel: 6,
@@ -161,7 +161,7 @@ export const LINK_DATA: LinkCharacter[] = [
       "받는 데미지 15% 감소, 방어율 10% 무시",
       "받는 데미지 20% 감소, 방어율 15% 무시 / 제로 패시브: 데미지 4% 증가",
     ],
-    category: "공격력",
+    category: "데미지",
   },
   {
     name: "제논", skillName: "하이브리드 로직", maxLevel: 3,
@@ -170,7 +170,7 @@ export const LINK_DATA: LinkCharacter[] = [
       "모든 능력치 10% 증가",
       "모든 능력치 15% 증가",
     ],
-    category: "공격력",
+    category: "데미지",
   },
   {
     name: "카데나", skillName: "인텐시브 인썰트", maxLevel: 3,
@@ -179,7 +179,7 @@ export const LINK_DATA: LinkCharacter[] = [
       "각각 데미지 6% 증가",
       "각각 데미지 9% 증가",
     ],
-    category: "공격력",
+    category: "데미지",
   },
   {
     name: "일리움", skillName: "전투의 흐름", maxLevel: 3,
@@ -188,7 +188,7 @@ export const LINK_DATA: LinkCharacter[] = [
       "각 중첩당 데미지 3% 증가",
       "각 중첩당 데미지 4% 증가",
     ],
-    category: "공격력",
+    category: "데미지",
   },
   {
     name: "아크", skillName: "무아", maxLevel: 3,
@@ -197,7 +197,7 @@ export const LINK_DATA: LinkCharacter[] = [
       "발동 시 데미지 1%, 각 중첩당 데미지 2% 증가",
       "발동 시 데미지 1%, 각 중첩당 데미지 3% 증가",
     ],
-    category: "공격력",
+    category: "데미지",
   },
   {
     name: "호영", skillName: "자신감", maxLevel: 3,
@@ -206,7 +206,7 @@ export const LINK_DATA: LinkCharacter[] = [
       "방어율 무시 10% 추가, HP 100% 몬스터 공격 시 데미지 14% 증가",
       "방어율 무시 15% 추가, HP 100% 몬스터 공격 시 데미지 19% 증가 / 호영 패시브: 데미지 4%",
     ],
-    category: "공격력",
+    category: "데미지",
   },
   {
     name: "아델", skillName: "노블레스", maxLevel: 3,
@@ -215,7 +215,7 @@ export const LINK_DATA: LinkCharacter[] = [
       "파티원 1명당 데미지 2% 증가 (최대 8%), 보스 몬스터 공격 시 데미지 4% 증가",
       "파티원 1명당 데미지 3% 증가 (최대 12%), 보스 몬스터 공격 시 데미지 6% 증가",
     ],
-    category: "공격력",
+    category: "데미지",
   },
   {
     name: "카인", skillName: "프라이어 프리퍼레이션", maxLevel: 3,
@@ -224,7 +224,7 @@ export const LINK_DATA: LinkCharacter[] = [
       "20초 동안 데미지 17% 증가 (재발동 40초)",
       "20초 동안 데미지 25% 증가 (재발동 40초)",
     ],
-    category: "공격력",
+    category: "데미지",
   },
   {
     name: "라라", skillName: "자연의 벗", maxLevel: 3,
@@ -233,7 +233,7 @@ export const LINK_DATA: LinkCharacter[] = [
       "데미지 5% 증가, 일반 몬스터 공격 시 데미지 11% 증가",
       "데미지 7% 증가, 일반 몬스터 공격 시 데미지 15% 증가",
     ],
-    category: "공격력",
+    category: "데미지",
   },
   {
     name: "칼리", skillName: "이네이트 기프트", maxLevel: 3,
@@ -242,7 +242,7 @@ export const LINK_DATA: LinkCharacter[] = [
       "데미지 5% 증가, HP/MP 2% 회복",
       "데미지 7% 증가, HP/MP 3% 회복",
     ],
-    category: "공격력",
+    category: "데미지",
   },
 
   // ── 기타 ─────────────────────────────────────────────────

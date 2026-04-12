@@ -1,7 +1,11 @@
 import {
   SlashCommandBuilder,
   ChatInputCommandInteraction,
+  ButtonInteraction,
   EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
 } from "discord.js"
 import { LINK_DATA } from "../data/link"
 
@@ -10,9 +14,74 @@ export const data = new SlashCommandBuilder()
   .setDescription("링크 스킬을 검색합니다 (직업명 또는 효과 키워드)")
   .addStringOption(opt =>
     opt.setName("검색어")
-       .setDescription("직업명(예: 메르세데스) 또는 효과 키워드(예: 경험치, 공격력)")
+       .setDescription("직업명(예: 메르세데스) 또는 효과 키워드(예: 경험치, 데미지)")
        .setRequired(true)
   )
+
+function buildSearchResult(query: string, level: number) {
+  const lq = query.toLowerCase()
+  const matches = LINK_DATA.filter(c =>
+    c.name.toLowerCase().includes(lq) ||
+    c.skillName.toLowerCase().includes(lq) ||
+    c.category.toLowerCase().includes(lq) ||
+    c.effects.some(e => e.toLowerCase().includes(lq))
+  )
+  return { matches }
+}
+
+function buildSearchEmbed(query: string, level: number) {
+  const { matches } = buildSearchResult(query, level)
+
+  if (matches.length === 0) {
+    return {
+      embeds: [
+        new EmbedBuilder()
+          .setColor(0xef4444)
+          .setDescription(`❌ **"${query}"** 에 해당하는 링크 스킬을 찾을 수 없어요.`),
+      ],
+      components: [] as ActionRowBuilder<ButtonBuilder>[],
+    }
+  }
+
+  const shown = matches.slice(0, 15)
+  const lines = shown.map(c => {
+    const idx = Math.min(level - 1, c.effects.length - 1)
+    const effect = c.effects[idx]
+    const actualLv = idx + 1
+    const lvNote = actualLv < level ? ` *(최대 Lv.${actualLv})*` : ""
+    return `**${c.name}** - ${c.skillName}${lvNote}\n → ${effect}`
+  })
+
+  const embed = new EmbedBuilder()
+    .setColor(0x22c55e)
+    .setTitle(`🔗 링크 스킬 검색 — "${query}" (${matches.length}개) · Lv.${level}`)
+    .setDescription(lines.join("\n\n"))
+    .setFooter({
+      text: matches.length > 15
+        ? "상위 15개만 표시됩니다 · 메이플봇"
+        : "메이플봇 · 링크 스킬 정보",
+    })
+
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`linklv:1:${query}`)
+      .setLabel("Lv.1")
+      .setStyle(level === 1 ? ButtonStyle.Primary : ButtonStyle.Secondary)
+      .setDisabled(level === 1),
+    new ButtonBuilder()
+      .setCustomId(`linklv:2:${query}`)
+      .setLabel("Lv.2")
+      .setStyle(level === 2 ? ButtonStyle.Primary : ButtonStyle.Secondary)
+      .setDisabled(level === 2),
+    new ButtonBuilder()
+      .setCustomId(`linklv:3:${query}`)
+      .setLabel("Lv.3")
+      .setStyle(level === 3 ? ButtonStyle.Primary : ButtonStyle.Secondary)
+      .setDisabled(level === 3),
+  )
+
+  return { embeds: [embed], components: [row] }
+}
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   const query = interaction.options.getString("검색어", true).trim()
@@ -20,7 +89,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const lq = query.toLowerCase()
 
-  // 1) 직업명 완전 일치 → 레벨별 효과 상세 표시
+  // 직업명 완전 일치 → 레벨별 효과 전체 표시 (버튼 없음)
   const exact = LINK_DATA.find(c => c.name === query || c.name.toLowerCase() === lq)
   if (exact) {
     const effectLines = exact.effects
@@ -29,7 +98,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     const embed = new EmbedBuilder()
       .setColor(0x22c55e)
-      .setTitle(`🔗 ${exact.name} — ${exact.skillName}`)
+      .setTitle(`🔗 ${exact.name} - ${exact.skillName}`)
       .setDescription(effectLines || "효과 정보 없음")
       .addFields(
         { name: "카테고리", value: exact.category, inline: true },
@@ -41,29 +110,16 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return
   }
 
-  // 2) 키워드 검색 → 매칭 목록
-  const matches = LINK_DATA.filter(c =>
-    c.name.toLowerCase().includes(lq) ||
-    c.skillName.toLowerCase().includes(lq) ||
-    c.category.toLowerCase().includes(lq) ||
-    c.effects.some(e => e.toLowerCase().includes(lq))
-  )
-
-  if (matches.length === 0) {
-    await interaction.editReply(`❌ **"${query}"** 에 해당하는 링크 스킬을 찾을 수 없어요.`)
-    return
+  // 키워드 검색 → 레벨 선택 버튼 포함 목록 (기본 Lv.3)
+  const result = buildSearchEmbed(query, 3)
+  if (result.components.length === 0) {
+    await interaction.editReply({ embeds: result.embeds })
+  } else {
+    await interaction.editReply({ embeds: result.embeds, components: result.components })
   }
+}
 
-  const shown = matches.slice(0, 25)
-  const lines = shown.map(c =>
-    `**${c.name}** (${c.skillName}) — ${c.effects[c.effects.length - 1]}`
-  )
-
-  const embed = new EmbedBuilder()
-    .setColor(0x22c55e)
-    .setTitle(`🔗 링크 스킬 검색 결과 — "${query}" (${matches.length}개)`)
-    .setDescription(lines.join("\n"))
-    .setFooter({ text: matches.length > 25 ? "상위 25개만 표시됩니다 · 메이플봇" : "메이플봇 · 링크 스킬 정보" })
-
-  await interaction.editReply({ embeds: [embed] })
+export async function handleLinkLevelButton(interaction: ButtonInteraction, level: number, query: string) {
+  const result = buildSearchEmbed(query, level)
+  await interaction.update({ embeds: result.embeds, components: result.components })
 }
