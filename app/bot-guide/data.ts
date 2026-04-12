@@ -1,4 +1,4 @@
-import { Zap, Terminal, Layers, Lock, Shield, TrendingUp, Star, Sparkles } from "lucide-react"
+import { Zap, Terminal, Layers, Lock, Shield, TrendingUp, Star, Sparkles, Clock } from "lucide-react"
 export { DISCORD_URL } from "@/lib/constants"
 export const M = { red: "#e84040", orange: "#f5832e", gold: "#fbbf24" }
 
@@ -48,5 +48,12 @@ export const FEATURES: FeatureItem[] = [
     desc: "캐릭터가 착용 중인 캐시 아이템(외형 아이템)과 헤어·성형·피부 등 현재 외형 정보를 조회합니다.",
     tags: ["캐시 아이템", "헤어 / 성형 / 피부"],
     preview: ["머리 장식  (착용 중인 캐시 아이템)", "헤어      (현재 헤어 스타일)", "피부      (현재 피부 색상)"],
+  },
+  {
+    Icon: Clock, label: "캐릭터 역사", color: "#f472b6",
+    colorBg: "rgba(244,114,182,0.1)", colorBorder: "rgba(244,114,182,0.22)",
+    desc: "최근 6개월 내 닉네임 변경·길드 가입 및 탈퇴 이력을 날짜와 함께 조회합니다. Nexon OpenAPI 날짜별 조회를 이진 탐색으로 분석합니다.",
+    tags: ["닉네임 변경", "길드 변경", "6개월 이력"],
+    preview: ["🏷️ 닉네임 변경  2025.03.12  구닉 → 렌캔디", "🏰 길드 변경    2025.01.08  없음 → 라아", "※ Nexon OpenAPI 출시(2023.12) 이후 기록만 조회 가능"],
   },
 ]

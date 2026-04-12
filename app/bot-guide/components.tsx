@@ -133,7 +133,7 @@ export function DiscordEmbed() {
             </div>
             {/* ④ 버튼 영역 */}
             <div className="flex flex-wrap gap-2 px-4 py-3" style={{ background: "rgba(0,0,0,0.15)", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-              {["장비 보기","레벨 변동","헥사","코디"].map(b => (
+              {["장비 보기","레벨 변동","헥사","코디","캐릭터 역사"].map(b => (
                 <span key={b} style={{ background: "#4e5058", color: "rgba(255,255,255,0.88)", fontSize: "13px", fontWeight: 500, padding: "6px 14px", borderRadius: "3px", cursor: "pointer" }}>{b}</span>
               ))}
             </div>
