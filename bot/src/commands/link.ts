@@ -65,17 +65,17 @@ function buildSearchEmbed(query: string, level: number) {
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId(`linklv:1:${query}`)
-      .setLabel("Lv.1")
+      .setLabel("Lv.1 (70)")
       .setStyle(level === 1 ? ButtonStyle.Primary : ButtonStyle.Secondary)
       .setDisabled(level === 1),
     new ButtonBuilder()
       .setCustomId(`linklv:2:${query}`)
-      .setLabel("Lv.2")
+      .setLabel("Lv.2 (120)")
       .setStyle(level === 2 ? ButtonStyle.Primary : ButtonStyle.Secondary)
       .setDisabled(level === 2),
     new ButtonBuilder()
       .setCustomId(`linklv:3:${query}`)
-      .setLabel("Lv.3")
+      .setLabel("Lv.3 (285)")
       .setStyle(level === 3 ? ButtonStyle.Primary : ButtonStyle.Secondary)
       .setDisabled(level === 3),
   )
