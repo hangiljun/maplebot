@@ -38,9 +38,8 @@ const GRADE_BORDER: Record<string, string> = {
   "레어":     "border-[#3B82F6]",
 }
 
-// 툴팁 고정 크기 (fixed 계산용)
-const TIPW    = 304
-const TIPH_MAX = 540
+// 툴팁 너비 고정, 높이는 자연스럽게 (스크롤 없이 전체 표시)
+const TIPW = 304
 
 type TipState = { item: EquipmentItem; x: number; y: number } | null
 
@@ -101,7 +100,13 @@ export default function EquipmentTab({ items }: { items: EquipmentItem[] }) {
     const x = toLeft
       ? Math.max(8, rect.left - TIPW - 8)
       : Math.min(rect.right + 8, window.innerWidth - TIPW - 8)
-    const y = Math.max(8, Math.min(rect.top, window.innerHeight - TIPH_MAX - 8))
+    // 뷰포트 하단 초과 시 슬롯 아래가 아닌 위로 붙임 (최소 8px 여백)
+    const viewH   = window.innerHeight
+    const estH    = Math.min(viewH * 0.92, 820)   // 추정 최대 높이
+    const fromTop = rect.top
+    const y       = fromTop + estH > viewH - 8
+      ? Math.max(8, viewH - estH - 8)  // 위쪽으로 올려서 맞춤
+      : fromTop
     setTip({ item, x, y })
   }, [])
 
@@ -152,10 +157,8 @@ export default function EquipmentTab({ items }: { items: EquipmentItem[] }) {
             left:          tip.x,
             top:           tip.y,
             width:         TIPW,
-            maxHeight:     TIPH_MAX,
-            overflowY:     "auto",
             zIndex:        9999,
-            pointerEvents: "auto",   // 스크롤·클릭 이벤트 수신 가능
+            pointerEvents: "auto",
           }}
           onMouseEnter={handleTipEnter}
           onMouseLeave={handleTipLeave}>
