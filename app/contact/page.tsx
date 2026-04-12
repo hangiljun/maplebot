@@ -1,6 +1,8 @@
 import { Request } from "./types"
 import ContactClient from "./ContactClient"
 
+export const dynamic = "force-dynamic"
+
 const COLLECTION = "feature-requests"
 
 async function getRequests(): Promise<Request[]> {
