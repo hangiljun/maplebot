@@ -3,7 +3,7 @@ import Link from "next/link"
 import { useState, useEffect } from "react"
 import { ChevronDown, ExternalLink, Zap, Terminal, Layers, Lock, ArrowRight, CheckCircle2, AlertTriangle } from "lucide-react"
 import { DISCORD_URL, M, SECTIONS, FEATURES } from "./data"
-import { CopyButton, SectionHeading, DiscordCommandDemo, DiscordEmbed, FeatureCard, InfoIcon } from "./components"
+import { CopyButton, SectionHeading, DiscordEmbed, FeatureCard, InfoIcon } from "./components"
 
 export default function BotGuidePage() {
   const [active, setActive]         = useState("start")
@@ -30,9 +30,9 @@ export default function BotGuidePage() {
       <div className="section-container">
         <div className="flex">
 
-          {/* 사이드바 */}
-          <aside className="hidden md:flex flex-col shrink-0" style={{ width: "200px" }}>
-            <div className="sticky py-10 pr-6" style={{ top: "56px" }}>
+          {/* 사이드바 — self-start + sticky로 스크롤 시에도 화면에 고정 */}
+          <aside className="hidden md:block shrink-0 self-start" style={{ width: "200px", position: "sticky", top: "56px" }}>
+            <div className="py-10 pr-6">
               <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text-muted)", marginBottom: "10px", paddingLeft: "10px" }}>목차</p>
               <nav className="space-y-0.5">
                 {SECTIONS.map(sec => {
@@ -189,10 +189,6 @@ export default function BotGuidePage() {
                       <p style={{ fontSize: "0.95rem", color: "var(--text-muted)", lineHeight: 1.7 }}>조회 결과는 서버 부하 방지를 위해 최대 1시간 캐싱됩니다.</p>
                     </div>
                   </div>
-                </div>
-                <div>
-                  <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text-muted)", marginBottom: "10px" }}>명령어 입력 예시</p>
-                  <DiscordCommandDemo />
                 </div>
                 <div>
                   <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text-muted)", marginBottom: "10px" }}>실제 응답 예시</p>

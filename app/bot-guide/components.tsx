@@ -29,12 +29,14 @@ export function SectionHeading({ num, Icon, title, sub }: {
   return (
     <div className="flex items-start gap-4 mb-8">
       <div className="flex items-center justify-center shrink-0"
-        style={{ width: "40px", height: "40px", borderRadius: "8px", background: "rgba(245,131,46,0.1)", border: "1px solid rgba(245,131,46,0.2)" }}>
-        <Icon size={18} style={{ color: M.orange }} />
+        style={{ width: "44px", height: "44px", borderRadius: "8px", background: "rgba(245,131,46,0.1)", border: "1px solid rgba(245,131,46,0.2)" }}>
+        <Icon size={20} style={{ color: M.orange }} />
       </div>
       <div>
-        <p className="font-bold uppercase" style={{ fontSize: "11px", color: M.orange, letterSpacing: "0.1em", marginBottom: "4px" }}>{num}</p>
-        <h2 className="font-black" style={{ fontSize: "1.75rem", color: "var(--text)", letterSpacing: "-0.02em", lineHeight: 1.2 }}>{title}</h2>
+        <div className="flex items-baseline gap-3">
+          <span className="font-black" style={{ fontSize: "1.75rem", color: M.orange, letterSpacing: "-0.01em", lineHeight: 1.2 }}>{num}</span>
+          <h2 className="font-black" style={{ fontSize: "1.75rem", color: "var(--text)", letterSpacing: "-0.02em", lineHeight: 1.2 }}>{title}</h2>
+        </div>
         {sub && <p style={{ fontSize: "1rem", color: "var(--text-muted)", lineHeight: 1.7, marginTop: "6px" }}>{sub}</p>}
       </div>
     </div>
@@ -73,7 +75,7 @@ export function DiscordCommandDemo() {
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline gap-2 flex-wrap">
                 <code style={{ fontSize: "15px", fontWeight: 700, color: "#fff", fontFamily: "monospace" }}>/정보</code>
-                <span style={{ fontSize: "14px", color: "rgba(255,255,255,0.4)" }}>캐릭터명: <span style={{ color: "rgba(255,255,255,0.65)" }}>가을이조하</span></span>
+                <span style={{ fontSize: "14px", color: "rgba(255,255,255,0.4)" }}>캐릭터명: <span style={{ color: "rgba(255,255,255,0.65)" }}>메이플봇</span></span>
               </div>
               <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.28)", lineHeight: 1.4, marginTop: "2px" }}>캐릭터 기본 정보를 조회합니다</p>
             </div>
@@ -85,7 +87,7 @@ export function DiscordCommandDemo() {
       <div className="px-4 pb-4 pt-2">
         <div className="flex items-center gap-2 px-4 py-3" style={{ background: "#383a40", borderRadius: "6px" }}>
           <code style={{ fontSize: "15px", fontWeight: 700, color: "#fff", fontFamily: "monospace" }}>/정보</code>
-          <span style={{ fontSize: "15px", color: "rgba(255,255,255,0.85)" }}>가을이조하</span>
+          <span style={{ fontSize: "15px", color: "rgba(255,255,255,0.85)" }}>메이플봇</span>
           <span style={{ display: "inline-block", width: "2px", height: "16px", background: "rgba(255,255,255,0.75)", borderRadius: "1px" }} />
         </div>
       </div>
@@ -109,7 +111,7 @@ export function DiscordEmbed() {
           <div style={{ background: "#2b2d31", borderLeft: "4px solid #5865f2", borderRadius: "4px", overflow: "hidden", maxWidth: "420px" }}>
             <div className="px-4 py-3.5">
               {/* ① 캐릭터명 */}
-              <p style={{ fontWeight: 700, color: "#fff", fontSize: "15px", marginBottom: "12px" }}>가을이조하</p>
+              <p style={{ fontWeight: 700, color: "#fff", fontSize: "15px", marginBottom: "12px" }}>메이플봇</p>
               {/* ② 필드 그리드 */}
               <div className="grid grid-cols-2 gap-x-8 gap-y-2.5" style={{ marginBottom: "12px" }}>
                 {[
@@ -117,7 +119,7 @@ export function DiscordEmbed() {
                   ["서버",   "리부트"],
                   ["레벨",   "280"],
                   ["전투력", "12,345,678"],
-                  ["유니온", "레전드 · Lv.9,000"],
+                  ["유니온", "그랜드마스터 · Lv.9,000"],
                   ["인기도", "1,234"],
                 ].map(([k, v]) => (
                   <div key={k}>
