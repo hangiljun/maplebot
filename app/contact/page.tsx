@@ -17,13 +17,14 @@ async function getRequests(): Promise<Request[]> {
     return snapshot.docs.map(doc => {
       const d = doc.data()
       return {
-        id:          doc.id,
-        title:       d.title,
-        description: d.description ?? null,
-        nickname:    d.nickname || "익명",
-        priority:    d.priority ?? "medium",
-        status:      d.status   ?? "reviewing",
-        createdAt:   d.createdAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
+        id:           doc.id,
+        title:        d.title,
+        description:  d.description ?? null,
+        nickname:     d.nickname || "익명",
+        priority:     d.priority ?? "medium",
+        status:       d.status   ?? "reviewing",
+        createdAt:    d.createdAt?.toDate?.()?.toISOString() ?? new Date().toISOString(),
+        adminComment: d.adminComment ?? null,
       } as Request
     })
   } catch {
