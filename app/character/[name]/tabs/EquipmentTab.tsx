@@ -45,11 +45,10 @@ type TipState = { item: EquipmentItem; x: number; y: number } | null
 
 // ── 슬롯 셀 ──────────────────────────────────────────────
 // 툴팁을 직접 렌더링하지 않고, 마우스 진입/이탈만 부모에 알림
-function SlotCell({ item, col, onClick, onEnter, onLeave }: {
+function SlotCell({ item, onClick, onEnter, onLeave }: {
   item: EquipmentItem | undefined
-  col: number
   onClick: (item: EquipmentItem) => void
-  onEnter: (rect: DOMRect, item: EquipmentItem, col: number) => void
+  onEnter: (rect: DOMRect, item: EquipmentItem) => void
   onLeave: () => void
 }) {
   const grade     = item?.potential_option_grade ?? null
@@ -59,7 +58,7 @@ function SlotCell({ item, col, onClick, onEnter, onLeave }: {
   return (
     <div
       className="relative flex items-center justify-center"
-      onMouseEnter={e => item && onEnter(e.currentTarget.getBoundingClientRect(), item, col)}
+      onMouseEnter={e => item && onEnter(e.currentTarget.getBoundingClientRect(), item)}
       onMouseLeave={onLeave}>
       <div
         onClick={() => item && onClick(item)}
@@ -89,24 +88,41 @@ export default function EquipmentTab({ items }: { items: EquipmentItem[] }) {
   const [tip,       setTip]      = useState<TipState>(null)
   const [mounted,   setMounted]  = useState(false)
   const closeTimer               = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const gridRef                  = useRef<HTMLDivElement>(null)
   const itemMap = useMemo(() => new Map(items.map(it => [it.item_equipment_slot, it])), [items])
 
   // 포털은 클라이언트 마운트 후에만 사용 가능
   useEffect(() => { setMounted(true) }, [])
 
-  const handleEnter = useCallback((rect: DOMRect, item: EquipmentItem, col: number) => {
+  const handleEnter = useCallback((rect: DOMRect, item: EquipmentItem) => {
     if (closeTimer.current) clearTimeout(closeTimer.current)
-    const toLeft = col >= 4
-    const x = toLeft
-      ? Math.max(8, rect.left - TIPW - 8)
-      : Math.min(rect.right + 8, window.innerWidth - TIPW - 8)
-    // 뷰포트 하단 초과 시 슬롯 아래가 아닌 위로 붙임 (최소 8px 여백)
-    const viewH   = window.innerHeight
-    const estH    = Math.min(viewH * 0.92, 820)   // 추정 최대 높이
-    const fromTop = rect.top
-    const y       = fromTop + estH > viewH - 8
-      ? Math.max(8, viewH - estH - 8)  // 위쪽으로 올려서 맞춤
-      : fromTop
+
+    const viewW = window.innerWidth
+    const viewH = window.innerHeight
+    const gap   = 12  // 그리드와 툴팁 사이 여백
+
+    // ── X: 그리드 전체 기준으로 바깥에 배치 (슬롯 간 겹침 없음) ──
+    const gridRect   = gridRef.current?.getBoundingClientRect()
+    const rightSpace = gridRect ? viewW - gridRect.right - gap : 0
+    const leftSpace  = gridRect ? gridRect.left - gap : 0
+    let x: number
+    if (rightSpace >= TIPW) {
+      // 그리드 오른쪽 바깥
+      x = (gridRect!.right + gap)
+    } else if (leftSpace >= TIPW) {
+      // 그리드 왼쪽 바깥
+      x = gridRect!.left - TIPW - gap
+    } else {
+      // 여백 없으면 뷰포트 중앙 근처 (fallback)
+      x = Math.max(8, Math.min(rect.right + gap, viewW - TIPW - 8))
+    }
+
+    // ── Y: 슬롯 기준, 뷰포트 아래 넘으면 위로 올림 ──
+    const estH = Math.min(viewH * 0.92, 820)
+    const y    = rect.top + estH > viewH - 8
+      ? Math.max(8, viewH - estH - 8)
+      : rect.top
+
     setTip({ item, x, y })
   }, [])
 
@@ -131,12 +147,11 @@ export default function EquipmentTab({ items }: { items: EquipmentItem[] }) {
     <>
       {/* 장비 그리드 */}
       <div className="flex justify-center">
-        <div className="grid gap-1.5" style={{ gridTemplateColumns: "repeat(5, 52px)", gridTemplateRows: "repeat(6, 52px)" }}>
+        <div ref={gridRef} className="grid gap-1.5" style={{ gridTemplateColumns: "repeat(5, 52px)", gridTemplateRows: "repeat(6, 52px)" }}>
           {SLOT_LAYOUT.map(({ slot, col, row }) => (
             <div key={slot} style={{ gridColumn: col, gridRow: row }}>
               <SlotCell
                 item={itemMap.get(slot)}
-                col={col}
                 onClick={setSelected}
                 onEnter={handleEnter}
                 onLeave={handleLeave}
