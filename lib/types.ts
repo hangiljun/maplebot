@@ -137,6 +137,27 @@ export interface TabSymbol    { symbols: SymbolItem[] }
 export interface TabHexa      { hexaCores: HexaCore[]; hexaStats: HexaStat[] }
 export interface TabCodi      { codi: CodiInfo | null }
 
+export interface BattlePracticeSkill {
+  skill_name: string
+  damage: number
+  damage_percent: string
+  dps: number
+  use_count: number
+  max_damage: number
+}
+
+export interface BattlePracticeResult {
+  register_date: string
+  total_play_time: number
+  total_damage: number
+  total_dps: number
+  end_type: string
+  like_count: number
+  skill_statistic: BattlePracticeSkill[]
+}
+
+export interface TabBattlePractice { battlepractice: BattlePracticeResult | null }
+
 export interface HistoryPoint {
   date: string
   value: number

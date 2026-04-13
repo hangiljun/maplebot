@@ -3,7 +3,7 @@ import { fetchTabData, fetchCharacterTimeline } from "@/lib/maple"
 
 export const dynamic = "force-dynamic"
 
-const VALID_TABS = new Set(["equipment", "ability", "symbol", "hexa", "codi", "charhistory"])
+const VALID_TABS = new Set(["equipment", "ability", "symbol", "hexa", "codi", "charhistory", "battlepractice"])
 
 export async function GET(req: NextRequest) {
   const name = req.nextUrl.searchParams.get("name")?.trim()

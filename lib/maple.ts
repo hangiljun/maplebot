@@ -158,6 +158,30 @@ export async function fetchTabData(name: string, tab: string): Promise<Record<st
         } : null,
       }
     }
+    case "battlepractice": {
+      const replayData = await nexonFetch(`/maplestory/v1/battle-practice/replay-id?${q}`)
+      if (!replayData?.replay_id) return { battlepractice: null }
+      const result = await nexonFetch(`/maplestory/v1/battle-practice/result?replay_id=${replayData.replay_id}`)
+      if (!result) return { battlepractice: null }
+      return {
+        battlepractice: {
+          register_date:   replayData.register_date ?? "",
+          total_play_time: result.total_play_time ?? 0,
+          total_damage:    result.total_damage ?? 0,
+          total_dps:       result.total_dps ?? 0,
+          end_type:        result.end_type ?? "",
+          like_count:      result.like_count ?? 0,
+          skill_statistic: (result.skill_statistic ?? []).map((s: any) => ({
+            skill_name:     s.skill_name ?? "",
+            damage:         s.damage ?? 0,
+            damage_percent: s.damage_percent ?? "0",
+            dps:            s.dps ?? 0,
+            use_count:      s.use_count ?? 0,
+            max_damage:     s.max_damage ?? 0,
+          })),
+        },
+      }
+    }
     default:
       return null
   }
