@@ -394,10 +394,10 @@ export interface DojangRankEntry {
   timeSeconds: number
 }
 
-export async function fetchDojangRanking(difficulty: 1 | 2, worldName?: string, limit = 20): Promise<DojangRankEntry[] | null> {
-  // 랭킹은 전날 KST 기준
+export async function fetchDojangRanking(difficulty: 1 | 2, worldName?: string): Promise<DojangRankEntry[] | null> {
+  // 랭킹은 전날 KST 기준 (limit 파라미터는 API에서 무시됨 — 항상 200개 반환)
   const yesterday = kstDateString(1)
-  let path = `/maplestory/v1/ranking/dojang?date=${yesterday}&difficulty=${difficulty}&limit=${limit}`
+  let path = `/maplestory/v1/ranking/dojang?date=${yesterday}&difficulty=${difficulty}`
   if (worldName) path += `&world_name=${encodeURIComponent(worldName)}`
 
   const data = await nexonFetch(path)

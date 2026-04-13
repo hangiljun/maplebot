@@ -27,8 +27,21 @@ export const data = new SlashCommandBuilder()
       )
       .addStringOption(opt =>
         opt.setName("월드")
-           .setDescription("특정 월드만 조회 (예: 스카니아)")
+           .setDescription("특정 월드만 조회 (미선택 시 전체)")
            .setRequired(false)
+           .addChoices(
+             { name: "스카니아", value: "스카니아" },
+             { name: "베라",     value: "베라" },
+             { name: "루나",     value: "루나" },
+             { name: "크로아",   value: "크로아" },
+             { name: "유니온",   value: "유니온" },
+             { name: "엘리시움", value: "엘리시움" },
+             { name: "에오스",   value: "에오스" },
+             { name: "레드",     value: "레드" },
+             { name: "이노시스", value: "이노시스" },
+             { name: "오로라",   value: "오로라" },
+             { name: "핼리오스", value: "핼리오스" },
+           )
       )
   )
 
