@@ -9,6 +9,52 @@ import {
 } from "discord.js"
 import { LINK_DATA } from "../data/link"
 
+// ── 우선순위 ────────────────────────────────────────────────
+const LINK_PRIORITY_NAMES = [
+  "메르세데스", "에반", "아란", "호영", "데몬 어벤져",
+  "라라", "팬텀", "일리움", "아크", "키네시스",
+]
+
+function buildLinkPriorityEmbed(level: number) {
+  const chars = LINK_PRIORITY_NAMES
+    .map(name => LINK_DATA.find(c => c.name === name))
+    .filter((c): c is (typeof LINK_DATA)[number] => !!c)
+
+  const lines = chars.map((c, i) => {
+    const idx = Math.min(level - 1, c.effects.length - 1)
+    const effect = c.effects[idx]
+    const actualLv = idx + 1
+    const lvNote = actualLv < level ? ` *(최대 Lv.${actualLv})*` : ""
+    return `**${i + 1}위. ${c.name}** - ${c.skillName}${lvNote}\n → ${effect}`
+  })
+
+  const embed = new EmbedBuilder()
+    .setColor(0x22c55e)
+    .setTitle(`🔗 링크 스킬 육성 우선순위 TOP 10 · Lv.${level}`)
+    .setDescription(lines.join("\n\n"))
+    .setFooter(null)
+
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+      .setCustomId("linklv:1:우선순위")
+      .setLabel("Lv.1 (70)")
+      .setStyle(level === 1 ? ButtonStyle.Primary : ButtonStyle.Secondary)
+      .setDisabled(level === 1),
+    new ButtonBuilder()
+      .setCustomId("linklv:2:우선순위")
+      .setLabel("Lv.2 (120)")
+      .setStyle(level === 2 ? ButtonStyle.Primary : ButtonStyle.Secondary)
+      .setDisabled(level === 2),
+    new ButtonBuilder()
+      .setCustomId("linklv:3:우선순위")
+      .setLabel("Lv.3 (285)")
+      .setStyle(level === 3 ? ButtonStyle.Primary : ButtonStyle.Secondary)
+      .setDisabled(level === 3),
+  )
+
+  return { embeds: [embed], components: [row] }
+}
+
 export const data = new SlashCommandBuilder()
   .setName("링크")
   .setDescription("링크 스킬을 검색합니다 (직업명 또는 효과 키워드)")
@@ -96,6 +142,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const lq = query.toLowerCase()
 
+  // 우선순위
+  if (query === "우선순위") {
+    const result = buildLinkPriorityEmbed(3)
+    await interaction.editReply({ embeds: result.embeds, components: result.components })
+    return
+  }
+
   // 직업명 완전 일치 → 레벨별 효과 전체 표시 (버튼 없음)
   const exact = LINK_DATA.find(c => c.name === query || c.name.toLowerCase() === lq)
   if (exact) {
@@ -127,6 +180,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 }
 
 export async function handleLinkLevelButton(interaction: ButtonInteraction, level: number, query: string) {
-  const result = buildSearchEmbed(query, level)
+  const result = query === "우선순위"
+    ? buildLinkPriorityEmbed(level)
+    : buildSearchEmbed(query, level)
   await interaction.update({ embeds: result.embeds, components: result.components })
 }

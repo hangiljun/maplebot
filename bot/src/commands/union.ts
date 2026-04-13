@@ -50,6 +50,30 @@ function gradeRows(grade: Grade, query: string): ActionRowBuilder<ButtonBuilder>
   )]
 }
 
+// ── 우선순위 ────────────────────────────────────────────────
+const UNION_PRIORITY_NAMES = [
+  "은월", "제로", "신궁", "나이트로드", "블래스터",
+  "데몬 어벤져", "와일드헌터", "메카닉", "팬텀", "메르세데스",
+]
+
+function buildUnionPriorityEmbed(grade: Grade) {
+  const chars = UNION_PRIORITY_NAMES
+    .map(name => UNION_DATA.find(c => c.name === name))
+    .filter((c): c is (typeof UNION_DATA)[number] => !!c)
+
+  const lines = chars.map((c, i) =>
+    `**${i + 1}위. ${c.name}** - ${c.effect}\n → ${c.grades[grade]}`
+  )
+
+  const embed = new EmbedBuilder()
+    .setColor(GRADE_COLOR[grade])
+    .setTitle(`🏆 유니온 공격대 육성 우선순위 TOP 10 · ${grade}등급 (Lv.${GRADE_LEVEL[grade]}+)`)
+    .setDescription(lines.join("\n\n"))
+    .setFooter(null)
+
+  return { embeds: [embed], components: gradeRows(grade, "우선순위") }
+}
+
 // ── 임베드 빌더 ────────────────────────────────────────────
 /** 직업군 선택 → 세부 직업 버튼 */
 function buildGroupEmbed(group: string) {
@@ -190,6 +214,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const lq = query.toLowerCase()
 
+  // 0) 우선순위
+  if (query === "우선순위") {
+    const result = buildUnionPriorityEmbed("SSS")
+    await interaction.editReply({ embeds: result.embeds, components: result.components })
+    return
+  }
+
   // 1) 직업군 키워드 (모험가, 시그너스 …)
   if (GROUP_KEYWORDS.has(query)) {
     const result = buildGroupEmbed(query)
@@ -235,6 +266,8 @@ export async function handleCharButton(interaction: ButtonInteraction, name: str
 
 /** uniongrade:{grade}:{query} */
 export async function handleUnionGradeButton(interaction: ButtonInteraction, grade: Grade, query: string) {
-  const result = buildSearchEmbed(query, grade)
+  const result = query === "우선순위"
+    ? buildUnionPriorityEmbed(grade)
+    : buildSearchEmbed(query, grade)
   await interaction.update({ embeds: result.embeds, components: result.components })
 }
