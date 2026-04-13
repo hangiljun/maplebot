@@ -52,8 +52,8 @@ function gradeRows(grade: Grade, query: string): ActionRowBuilder<ButtonBuilder>
 
 // ── 우선순위 ────────────────────────────────────────────────
 const UNION_PRIORITY_NAMES = [
-  "은월", "제로", "신궁", "나이트로드", "블래스터",
-  "데몬 어벤져", "와일드헌터", "메카닉", "팬텀", "메르세데스",
+  "메르세데스", "나이트로드", "신궁", "팬텀", "데몬 어벤져",
+  "은월", "에반", "키네시스", "아크", "일리움",
 ]
 
 function buildUnionPriorityEmbed(grade: Grade) {
