@@ -7,7 +7,7 @@ import {
   ActionRowBuilder,
   ButtonInteraction,
 } from "discord.js"
-import { fetchCharacterSummary, fetchEquipment, fetchLevelHistory, fetchHexa, fetchCodi, fetchCharacterTimeline, fetchDojang } from "../maple"
+import { fetchCharacterSummary, fetchEquipment, fetchLevelHistory, fetchHexa, fetchCodi, fetchCharacterTimeline, fetchBattlePractice } from "../maple"
 
 export const data = new SlashCommandBuilder()
   .setName("정보")
@@ -287,27 +287,52 @@ export async function handleHexaButton(interaction: ButtonInteraction, charName:
 export async function handleDojangButton(interaction: ButtonInteraction, charName: string) {
   await interaction.deferReply({ ephemeral: true })
   try {
-    const record = await fetchDojang(charName)
-    if (!record || record.floor === 0) {
-      await interaction.editReply(`❌ **${charName}**의 연무장 기록을 찾을 수 없어요.`)
+    const result = await fetchBattlePractice(charName)
+    if (!result) {
+      await interaction.editReply(`❌ **${charName}**의 연무장 기록을 찾을 수 없어요.\n리플레이를 등록한 캐릭터만 조회할 수 있습니다.`)
       return
     }
 
-    const m = Math.floor(record.timeSeconds / 60)
-    const s = record.timeSeconds % 60
+    const playTimeSec = Math.floor(result.totalPlayTimeMs / 1000)
+    const m = Math.floor(playTimeSec / 60)
+    const s = playTimeSec % 60
     const timeStr = m > 0 ? `${m}분 ${s}초` : `${s}초`
 
-    const dateStr = record.date
-      ? record.date.split("T")[0]
-      : "날짜 불명"
+    const END_TYPE: Record<string, string> = {
+      "1": "자동 종료", "2": "수동 종료", "3": "시간 초과", "9": "기타 종료",
+    }
+    const endLabel = END_TYPE[result.endType] ?? result.endType
+
+    const formatNum = (n: number) => {
+      if (n >= 100_000_000) return `${(n / 100_000_000).toFixed(2)}억`
+      if (n >= 10_000) return `${(n / 10_000).toFixed(1)}만`
+      return n.toLocaleString()
+    }
+
+    const dateStr = result.registerDate ? result.registerDate.split("T")[0] : "-"
+
+    // 상위 5개 스킬
+    const topSkills = [...result.skillStatistic]
+      .sort((a, b) => b.dps - a.dps)
+      .slice(0, 5)
+
+    const skillLines = topSkills.length
+      ? topSkills.map(sk =>
+          `**${sk.skillName}** (${sk.damagePercent}%)\n  DPS ${formatNum(sk.dps)} · 최대 ${formatNum(sk.maxDamage)} · ${sk.useCount}회`
+        ).join("\n")
+      : "스킬 데이터 없음"
 
     const embed = new EmbedBuilder()
       .setColor(0xf97316)
-      .setTitle(`🥊 ${charName} 연무장 최고 기록`)
+      .setTitle(`🥊 ${charName} 연무장 측정 결과`)
       .addFields(
-        { name: "최고 층수", value: `${record.floor}층`, inline: true },
-        { name: "클리어 시간", value: timeStr, inline: true },
+        { name: "총합 데미지", value: formatNum(result.totalDamage), inline: true },
+        { name: "평균 DPS", value: formatNum(result.totalDps), inline: true },
+        { name: "연무 시간", value: timeStr, inline: true },
+        { name: "종료 유형", value: endLabel, inline: true },
+        { name: "추천 수", value: `${result.likeCount}`, inline: true },
         { name: "기록 일시", value: dateStr, inline: true },
+        { name: "스킬별 DPS TOP 5", value: skillLines, inline: false },
       )
       .setFooter({ text: "메이플봇 · 연무장" })
 

@@ -337,12 +337,51 @@ export async function fetchLevelHistory(name: string): Promise<{ expHistory: { d
   return { expHistory, levelHistory }
 }
 
-export interface DojangRecord {
-  floor: number
-  timeSeconds: number
-  date: string
-  characterClass: string
-  worldName: string
+export interface BattlePracticeSkill {
+  skillName: string
+  damage: number
+  damagePercent: string
+  dps: number
+  useCount: number
+  maxDamage: number
+}
+
+export interface BattlePracticeResult {
+  registerDate: string
+  totalPlayTimeMs: number
+  totalDamage: number
+  totalDps: number
+  endType: string
+  likeCount: number
+  skillStatistic: BattlePracticeSkill[]
+}
+
+export async function fetchBattlePractice(name: string): Promise<BattlePracticeResult | null> {
+  const ocid = await getOcid(name)
+  if (!ocid) return null
+
+  const replayData = await nexonFetch(`/maplestory/v1/battle-practice/replay-id?ocid=${ocid}`)
+  if (!replayData?.replay_id) return null
+
+  const result = await nexonFetch(`/maplestory/v1/battle-practice/result?replay_id=${replayData.replay_id}`)
+  if (!result) return null
+
+  return {
+    registerDate:    replayData.register_date ?? "",
+    totalPlayTimeMs: result.total_play_time ?? 0,
+    totalDamage:     result.total_damage ?? 0,
+    totalDps:        result.total_dps ?? 0,
+    endType:         result.end_type ?? "",
+    likeCount:       result.like_count ?? 0,
+    skillStatistic:  (result.skill_statistic ?? []).map((s: any) => ({
+      skillName:     s.skill_name ?? "",
+      damage:        s.damage ?? 0,
+      damagePercent: s.damage_percent ?? "0",
+      dps:           s.dps ?? 0,
+      useCount:      s.use_count ?? 0,
+      maxDamage:     s.max_damage ?? 0,
+    })),
+  }
 }
 
 export interface DojangRankEntry {
@@ -353,22 +392,6 @@ export interface DojangRankEntry {
   level: number
   floor: number
   timeSeconds: number
-}
-
-export async function fetchDojang(name: string): Promise<DojangRecord | null> {
-  const ocid = await getOcid(name)
-  if (!ocid) return null
-
-  const data = await nexonFetch(`/maplestory/v1/character/dojang?ocid=${ocid}`)
-  if (!data) return null
-
-  return {
-    floor:          data.dojang_best_floor ?? 0,
-    timeSeconds:    data.dojang_best_time ?? 0,
-    date:           data.date_dojang_record ?? "",
-    characterClass: data.character_class ?? "",
-    worldName:      data.world_name ?? "",
-  }
 }
 
 export async function fetchDojangRanking(difficulty: 1 | 2, worldName?: string, limit = 20): Promise<DojangRankEntry[] | null> {
