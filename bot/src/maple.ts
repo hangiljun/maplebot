@@ -71,6 +71,22 @@ export interface EquipItem {
   potentials: string[]
   additionalPotentials: string[]
   icon: string
+  scrollUpgrade: number
+  scrollUpgradeableCount: number
+  cuttableCount: number
+  goldenHammer: boolean
+  soulName: string | null
+  soulOption: string | null
+  totalStats: Record<string, number>
+}
+
+const STAT_LABEL: Record<string, string> = {
+  str: "STR", dex: "DEX", int: "INT", luk: "LUK",
+  max_hp: "최대 HP", max_mp: "최대 MP",
+  attack_power: "공격력", magic_power: "마력",
+  armor: "방어력", all_stat: "올스탯%",
+  boss_damage: "보스 데미지%", ignore_monster_armor: "방어율 무시%",
+  damage: "데미지%", speed: "이동속도", jump: "점프력",
 }
 
 export async function fetchEquipment(name: string): Promise<EquipItem[] | null> {
@@ -81,24 +97,40 @@ export async function fetchEquipment(name: string): Promise<EquipItem[] | null> 
   const data = await nexonFetch(`/maplestory/v1/character/item-equipment?${q}`)
   if (!data?.item_equipment) return null
 
-  return data.item_equipment.map((item: any) => ({
-    slot:                item.item_equipment_slot ?? "",
-    name:                item.item_name ?? "",
-    starforce:           Number(item.starforce ?? 0),
-    potential:           item.potential_option_grade ?? "",
-    additionalPotential: item.additional_potential_option_grade ?? "",
-    potentials: [
-      item.potential_option_1,
-      item.potential_option_2,
-      item.potential_option_3,
-    ].filter(Boolean) as string[],
-    additionalPotentials: [
-      item.additional_potential_option_1,
-      item.additional_potential_option_2,
-      item.additional_potential_option_3,
-    ].filter(Boolean) as string[],
-    icon: item.item_icon ?? "",
-  }))
+  return data.item_equipment.map((item: any) => {
+    const total = item.item_total_option ?? {}
+    const totalStats: Record<string, number> = {}
+    for (const [k, label] of Object.entries(STAT_LABEL)) {
+      const v = Number(total[k] ?? 0)
+      if (v !== 0) totalStats[label] = v
+    }
+
+    return {
+      slot:                   item.item_equipment_slot ?? "",
+      name:                   item.item_name ?? "",
+      starforce:              Number(item.starforce ?? 0),
+      potential:              item.potential_option_grade ?? "",
+      additionalPotential:    item.additional_potential_option_grade ?? "",
+      potentials: [
+        item.potential_option_1,
+        item.potential_option_2,
+        item.potential_option_3,
+      ].filter(Boolean) as string[],
+      additionalPotentials: [
+        item.additional_potential_option_1,
+        item.additional_potential_option_2,
+        item.additional_potential_option_3,
+      ].filter(Boolean) as string[],
+      icon:                   item.item_icon ?? "",
+      scrollUpgrade:          Number(item.scroll_upgrade ?? 0),
+      scrollUpgradeableCount: Number(item.scroll_upgradeable_count ?? 0),
+      cuttableCount:          Number(item.cuttable_count ?? 0),
+      goldenHammer:           item.golden_hammer_flag === "적용",
+      soulName:               item.soul_name ?? null,
+      soulOption:             item.soul_option ?? null,
+      totalStats,
+    }
+  })
 }
 
 export async function fetchImageAsBase64(url: string): Promise<string> {

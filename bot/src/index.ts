@@ -24,6 +24,16 @@ client.on(Events.InteractionCreate, async (interaction) => {
     return
   }
 
+  if (interaction.isStringSelectMenu()) {
+    const [action, ...rest] = interaction.customId.split(":")
+    const charName = rest.join(":")
+    if (action === "equipdetail") {
+      const slot = interaction.values[0]
+      await infoCommand.handleEquipDetailSelect(interaction, charName, slot)
+    }
+    return
+  }
+
   if (interaction.isButton()) {
     const [action, ...rest] = interaction.customId.split(":")
     const charName = rest.join(":")

@@ -6,6 +6,9 @@ import {
   ButtonStyle,
   ActionRowBuilder,
   ButtonInteraction,
+  StringSelectMenuBuilder,
+  StringSelectMenuOptionBuilder,
+  StringSelectMenuInteraction,
 } from "discord.js"
 import { fetchCharacterSummary, fetchEquipment, fetchLevelHistory, fetchHexa, fetchCodi, fetchCharacterTimeline, fetchBattlePractice } from "../maple"
 
@@ -170,17 +173,115 @@ export async function handleEquipButton(interaction: ButtonInteraction, charName
         return embed
       })
 
+    // 아이템 선택 드롭다운 (최대 25개)
+    const selectOptions = ordered.slice(0, 25).map((item) =>
+      new StringSelectMenuOptionBuilder()
+        .setLabel((item.name || item.slot || "장비").slice(0, 100))
+        .setValue(item.slot.slice(0, 100))
+        .setDescription(`${item.slot}${item.starforce > 0 ? ` · ★${item.starforce}` : ""}${item.potential ? ` · ${item.potential}` : ""}`.slice(0, 100))
+    )
+
+    const select = new StringSelectMenuBuilder()
+      .setCustomId(`equipdetail:${charName}`)
+      .setPlaceholder("🔍 아이템을 선택하면 상세 정보를 확인할 수 있어요")
+      .addOptions(selectOptions)
+
+    const selectRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select)
+
     // 10개씩 나눠서 첫 번째는 editReply, 나머지는 followUp
     const first  = ordered.slice(0, 10)
     const second = ordered.slice(10, 20)
 
-    await interaction.editReply({ embeds: buildEmbeds(first) })
+    await interaction.editReply({ embeds: buildEmbeds(first), components: [selectRow] })
     if (second.length > 0) {
       await interaction.followUp({ embeds: buildEmbeds(second), ephemeral: true })
     }
   } catch (err) {
     console.error(err)
     await interaction.editReply("❌ 장비 정보 조회 중 오류가 발생했어요.")
+  }
+}
+
+export async function handleEquipDetailSelect(interaction: StringSelectMenuInteraction, charName: string, slot: string) {
+  await interaction.deferReply({ ephemeral: true })
+
+  try {
+    const items = await fetchEquipment(charName)
+    if (!items) {
+      await interaction.editReply("❌ 장비 정보를 불러올 수 없어요.")
+      return
+    }
+
+    const item = items.find((i) => i.slot === slot)
+    if (!item) {
+      await interaction.editReply("❌ 해당 아이템 정보를 찾을 수 없어요.")
+      return
+    }
+
+    const color = POTENTIAL_COLORS[item.potential] ?? 0x4b5563
+    const lines: string[] = []
+
+    // 강화
+    if (item.starforce > 0) {
+      const starStr = "★".repeat(Math.min(item.starforce, 25))
+      lines.push(`**${starStr}** (${item.starforce}성)`)
+    }
+    lines.push(`\`${item.slot}\``)
+    lines.push("")
+
+    // 총합 스탯
+    if (Object.keys(item.totalStats).length > 0) {
+      lines.push("**📊 스탯**")
+      lines.push(
+        Object.entries(item.totalStats)
+          .map(([k, v]) => `**${k}** +${v}`)
+          .join("  ·  ")
+      )
+      lines.push("")
+    }
+
+    // 스크롤 정보
+    const scrollParts: string[] = []
+    if (item.scrollUpgrade > 0)          scrollParts.push(`업그레이드 ${item.scrollUpgrade}회`)
+    if (item.scrollUpgradeableCount >= 0) scrollParts.push(`가능 ${item.scrollUpgradeableCount}회`)
+    if (item.cuttableCount > 0)           scrollParts.push(`가위 ${item.cuttableCount}회`)
+    if (item.goldenHammer)                scrollParts.push("황금망치 적용")
+    if (scrollParts.length > 0) {
+      lines.push(`🔧 ${scrollParts.join("  ·  ")}`)
+      lines.push("")
+    }
+
+    // 소울
+    if (item.soulName) {
+      lines.push(`**✨ 소울** ${item.soulName}`)
+      if (item.soulOption) lines.push(item.soulOption)
+      lines.push("")
+    }
+
+    // 잠재능력
+    if (item.potentials?.length > 0) {
+      lines.push(`**🟠 잠재능력** (${item.potential || "일반"})`)
+      item.potentials.forEach(p => lines.push(`■ ${p}`))
+      lines.push("")
+    }
+
+    // 에디셔널 잠재능력
+    if (item.additionalPotentials?.length > 0) {
+      lines.push(`**🟣 에디셔널 잠재능력** (${item.additionalPotential || "일반"})`)
+      item.additionalPotentials.forEach(p => lines.push(`■ ${p}`))
+    }
+
+    const embed = new EmbedBuilder()
+      .setColor(color)
+      .setTitle((item.name || item.slot).slice(0, 256))
+      .setDescription(lines.join("\n").slice(0, 4096) || "\u200b")
+
+    if (item.icon) embed.setThumbnail(item.icon)
+
+    await interaction.editReply({ embeds: [embed] })
+  } catch (err) {
+    console.error(err)
+    await interaction.editReply("❌ 아이템 상세 정보 조회 중 오류가 발생했어요.")
   }
 }
 
