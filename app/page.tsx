@@ -9,7 +9,7 @@ import { DISCORD_URL } from "@/lib/constants"
 const CMDS: { cmd: CmdKey; desc: string }[] = [
   { cmd: "/정보",    desc: "레벨, 직업, 전투력, 유니온 + 버튼" },
   { cmd: "/유니온",  desc: "등급, 레벨, 아티팩트 현황" },
-  { cmd: "/부캐조회", desc: "부캐릭터 일괄 조회 (예정)" },
+  { cmd: "/링크",    desc: "링크 스킬 키워드 검색 + 레벨 버튼 전환" },
 ]
 
 const FEATURES = [
@@ -22,10 +22,10 @@ const FEATURES = [
 ]
 
 const RECENT_UPDATES = [
-  { date: "2026.04.09", text: "UI 전면 리뉴얼 — 사용자 경험 개선을 위한 인터페이스 최적화" },
-  { date: "2026.04.09", text: "개인정보처리방침 신설, 봇 권한 안내 추가" },
-  { date: "2026.04.01", text: "헥사·코디 버튼 추가, API 이중화 적용" },
-  { date: "2026.03.25", text: "Nexon API 429 자동 폴백 및 ocid 캐싱" },
+  { date: "2026.04.13", text: "연무장 DPS 조회 추가 — /정보 🥊 버튼으로 총합 데미지·스킬 TOP 5 확인" },
+  { date: "2026.04.13", text: "/링크·/유니온 커맨드 추가, 장비 드롭다운 아이템 상세 조회" },
+  { date: "2026.04.13", text: "글로벌 커맨드 전환 — 모든 디스코드 서버에서 즉시 사용 가능" },
+  { date: "2026.04.09", text: "UI 전면 리뉴얼, 개인정보처리방침 신설" },
 ]
 
 export default function HomePage() {

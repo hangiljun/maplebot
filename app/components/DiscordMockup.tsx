@@ -1,4 +1,4 @@
-export type CmdKey = "/정보" | "/유니온" | "/부캐조회"
+export type CmdKey = "/정보" | "/유니온" | "/링크"
 
 const CMD_DATA: Record<CmdKey, {
   color: string
@@ -16,9 +16,9 @@ const CMD_DATA: Record<CmdKey, {
       { k: "전투력", v: "12억 4,320만" },
       { k: "유니온", v: "그마3 Lv.9,020" },
       { k: "인기도", v: "32,104" },
-      { k: "길드",   v: "Heroic" },
+      { k: "길드",   v: "메이플봇 길드" },
     ],
-    buttons: ["장비", "레벨변동", "헥사", "코디", "캐릭터 역사"],
+    buttons: ["장비", "레벨변동", "헥사", "코디", "캐릭터 역사", "🥊 연무장"],
   },
   "/유니온": {
     color: "#a855f7",
@@ -30,11 +30,17 @@ const CMD_DATA: Record<CmdKey, {
       { k: "포인트",     v: "4,250" },
     ],
   },
-  "/부캐조회": {
-    color: "#6b7280",
-    title: "준비 중",
-    fields: [],
-    upcoming: true,
+  "/링크": {
+    color: "#22c55e",
+    title: "링크 스킬 검색 결과",
+    subtitle: "검색어: 경험치",
+    fields: [
+      { k: "메르세데스",  v: "경험치 획득량 +15%" },
+      { k: "레인",        v: "경험치 획득량 +10%" },
+      { k: "은월",        v: "경험치 획득량 +10%" },
+      { k: "미하일",      v: "경험치 획득량 +10%" },
+    ],
+    buttons: ["Lv.1 (70)", "Lv.2 (120)", "Lv.3 (285)"],
   },
 }
 
