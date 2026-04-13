@@ -289,7 +289,7 @@ export async function handleDojangButton(interaction: ButtonInteraction, charNam
   try {
     const record = await fetchDojang(charName)
     if (!record || record.floor === 0) {
-      await interaction.editReply(`❌ **${charName}**의 무릉도장 기록을 찾을 수 없어요.`)
+      await interaction.editReply(`❌ **${charName}**의 연무장 기록을 찾을 수 없어요.`)
       return
     }
 
@@ -303,18 +303,18 @@ export async function handleDojangButton(interaction: ButtonInteraction, charNam
 
     const embed = new EmbedBuilder()
       .setColor(0xf97316)
-      .setTitle(`🥊 ${charName} 무릉도장 최고 기록`)
+      .setTitle(`🥊 ${charName} 연무장 최고 기록`)
       .addFields(
         { name: "최고 층수", value: `${record.floor}층`, inline: true },
         { name: "클리어 시간", value: timeStr, inline: true },
         { name: "기록 일시", value: dateStr, inline: true },
       )
-      .setFooter({ text: "메이플봇 · 무릉도장" })
+      .setFooter({ text: "메이플봇 · 연무장" })
 
     await interaction.editReply({ embeds: [embed] })
   } catch (err) {
     console.error(err)
-    await interaction.editReply("❌ 무릉도장 정보 조회 중 오류가 발생했어요.")
+    await interaction.editReply("❌ 연무장 정보 조회 중 오류가 발생했어요.")
   }
 }
 

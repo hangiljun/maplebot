@@ -11,11 +11,11 @@ import { fetchDojangRanking } from "../maple"
 
 export const data = new SlashCommandBuilder()
   .setName("연무장")
-  .setDescription("무릉도장 랭킹을 조회합니다")
+  .setDescription("연무장 랭킹을 조회합니다")
   .addSubcommand(sub =>
     sub
       .setName("랭킹")
-      .setDescription("무릉도장 랭킹을 조회합니다")
+      .setDescription("연무장 랭킹을 조회합니다")
       .addStringOption(opt =>
         opt.setName("난이도")
            .setDescription("일반 또는 통달")
@@ -67,9 +67,9 @@ function buildRankingEmbed(entries: Awaited<ReturnType<typeof fetchDojangRanking
   const embeds = chunks.map((chunk, i) =>
     new EmbedBuilder()
       .setColor(difficulty === 2 ? 0xf97316 : 0x22c55e)
-      .setTitle(i === 0 ? `🥊 무릉도장 랭킹 — ${diffLabel}${worldLabel} (TOP ${entries.length})` : "\u200b")
+      .setTitle(i === 0 ? `🥊 연무장 랭킹 — ${diffLabel}${worldLabel} (TOP ${entries.length})` : "\u200b")
       .setDescription(chunk)
-      .setFooter(i === chunks.length - 1 ? { text: "메이플봇 · 무릉도장 랭킹 (전일 기준)" } : null)
+      .setFooter(i === chunks.length - 1 ? { text: "메이플봇 · 연무장 랭킹 (전일 기준)" } : null)
   )
 
   const diffRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
