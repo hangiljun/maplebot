@@ -1,8 +1,9 @@
 import { Client, GatewayIntentBits, Events, ChatInputCommandInteraction } from "discord.js"
 import * as dotenv from "dotenv"
-import * as infoCommand  from "./commands/info"
-import * as unionCommand from "./commands/union"
-import * as linkCommand  from "./commands/link"
+import * as infoCommand   from "./commands/info"
+import * as unionCommand  from "./commands/union"
+import * as linkCommand   from "./commands/link"
+import * as dojangCommand from "./commands/dojang"
 
 dotenv.config()
 
@@ -20,6 +21,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
       await unionCommand.execute(interaction as ChatInputCommandInteraction)
     } else if (interaction.commandName === "링크") {
       await linkCommand.execute(interaction as ChatInputCommandInteraction)
+    } else if (interaction.commandName === "연무장") {
+      await dojangCommand.execute(interaction as ChatInputCommandInteraction)
     }
     return
   }
@@ -52,6 +55,13 @@ client.on(Events.InteractionCreate, async (interaction) => {
     } else if (action === "uchar") {
       const name = rest.join(":")
       await unionCommand.handleCharButton(interaction, name)
+    } else if (action === "dojang") {
+      const name = rest.join(":")
+      await infoCommand.handleDojangButton(interaction, name)
+    } else if (action === "dojangrank") {
+      const difficulty = (rest[0] === "2" ? 2 : 1) as 1 | 2
+      const worldName = rest.slice(1).join(":") || undefined
+      await dojangCommand.handleDojangRankButton(interaction, difficulty, worldName)
     }
   }
 })

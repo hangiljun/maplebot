@@ -7,7 +7,7 @@ import {
   ActionRowBuilder,
   ButtonInteraction,
 } from "discord.js"
-import { fetchCharacterSummary, fetchEquipment, fetchLevelHistory, fetchHexa, fetchCodi, fetchCharacterTimeline } from "../maple"
+import { fetchCharacterSummary, fetchEquipment, fetchLevelHistory, fetchHexa, fetchCodi, fetchCharacterTimeline, fetchDojang } from "../maple"
 
 export const data = new SlashCommandBuilder()
   .setName("정보")
@@ -90,9 +90,15 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       .setLabel("🕰️ 캐릭터 역사")
       .setStyle(ButtonStyle.Secondary)
 
-    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(equipBtn, levelBtn, hexaBtn, codiBtn, historyBtn)
+    const dojangBtn = new ButtonBuilder()
+      .setCustomId(`dojang:${char.name}`)
+      .setLabel("🥊 연무장")
+      .setStyle(ButtonStyle.Secondary)
 
-    await interaction.editReply({ embeds: [embed], components: [row] })
+    const row1 = new ActionRowBuilder<ButtonBuilder>().addComponents(equipBtn, levelBtn, hexaBtn, codiBtn, historyBtn)
+    const row2 = new ActionRowBuilder<ButtonBuilder>().addComponents(dojangBtn)
+
+    await interaction.editReply({ embeds: [embed], components: [row1, row2] })
   } catch (err) {
     console.error("[info] 오류:", err)
     await interaction.editReply("❌ 캐릭터 정보 조회 중 오류가 발생했어요.")
@@ -275,6 +281,40 @@ export async function handleHexaButton(interaction: ButtonInteraction, charName:
   } catch (err) {
     console.error(err)
     await interaction.editReply("❌ 헥사 정보 조회 중 오류가 발생했어요.")
+  }
+}
+
+export async function handleDojangButton(interaction: ButtonInteraction, charName: string) {
+  await interaction.deferReply({ ephemeral: true })
+  try {
+    const record = await fetchDojang(charName)
+    if (!record || record.floor === 0) {
+      await interaction.editReply(`❌ **${charName}**의 무릉도장 기록을 찾을 수 없어요.`)
+      return
+    }
+
+    const m = Math.floor(record.timeSeconds / 60)
+    const s = record.timeSeconds % 60
+    const timeStr = m > 0 ? `${m}분 ${s}초` : `${s}초`
+
+    const dateStr = record.date
+      ? record.date.split("T")[0]
+      : "날짜 불명"
+
+    const embed = new EmbedBuilder()
+      .setColor(0xf97316)
+      .setTitle(`🥊 ${charName} 무릉도장 최고 기록`)
+      .addFields(
+        { name: "최고 층수", value: `${record.floor}층`, inline: true },
+        { name: "클리어 시간", value: timeStr, inline: true },
+        { name: "기록 일시", value: dateStr, inline: true },
+      )
+      .setFooter({ text: "메이플봇 · 무릉도장" })
+
+    await interaction.editReply({ embeds: [embed] })
+  } catch (err) {
+    console.error(err)
+    await interaction.editReply("❌ 무릉도장 정보 조회 중 오류가 발생했어요.")
   }
 }
 

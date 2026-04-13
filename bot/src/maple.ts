@@ -337,6 +337,60 @@ export async function fetchLevelHistory(name: string): Promise<{ expHistory: { d
   return { expHistory, levelHistory }
 }
 
+export interface DojangRecord {
+  floor: number
+  timeSeconds: number
+  date: string
+  characterClass: string
+  worldName: string
+}
+
+export interface DojangRankEntry {
+  ranking: number
+  characterName: string
+  worldName: string
+  className: string
+  level: number
+  floor: number
+  timeSeconds: number
+}
+
+export async function fetchDojang(name: string): Promise<DojangRecord | null> {
+  const ocid = await getOcid(name)
+  if (!ocid) return null
+
+  const data = await nexonFetch(`/maplestory/v1/character/dojang?ocid=${ocid}`)
+  if (!data) return null
+
+  return {
+    floor:          data.dojang_best_floor ?? 0,
+    timeSeconds:    data.dojang_best_time ?? 0,
+    date:           data.date_dojang_record ?? "",
+    characterClass: data.character_class ?? "",
+    worldName:      data.world_name ?? "",
+  }
+}
+
+export async function fetchDojangRanking(difficulty: 1 | 2, worldName?: string, limit = 20): Promise<DojangRankEntry[] | null> {
+  // 랭킹은 전날 KST 기준
+  const yesterday = kstDateString(1)
+  let path = `/maplestory/v1/ranking/dojang?date=${yesterday}&difficulty=${difficulty}&limit=${limit}`
+  if (worldName) path += `&world_name=${encodeURIComponent(worldName)}`
+
+  const data = await nexonFetch(path)
+  if (!data?.ranking) return null
+
+  return data.ranking.map((r: any) => ({
+    ranking:       r.ranking,
+    characterName: r.character_name,
+    worldName:     r.world_name,
+    className:     r.sub_class_name || r.class_name,
+    level:         r.character_level,
+    floor:         r.dojang_floor,
+    timeSeconds:   r.dojang_time_record,
+  }))
+}
+
 export async function fetchCharacterSummary(name: string): Promise<CharacterSummary | null> {
   const ocid = await getOcid(name)
   if (!ocid) return null
