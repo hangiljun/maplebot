@@ -1,4 +1,4 @@
-import { Zap, Terminal, Layers, Lock, Shield, TrendingUp, Star, Sparkles, Clock } from "lucide-react"
+import { Zap, Terminal, Layers, Lock, Shield, TrendingUp, Star, Sparkles, Clock, Swords, Link2, Trophy } from "lucide-react"
 export { DISCORD_URL } from "@/lib/constants"
 export const M = { red: "#e84040", orange: "#f5832e", gold: "#fbbf24" }
 
@@ -24,9 +24,9 @@ export const FEATURES: FeatureItem[] = [
   {
     Icon: Shield, label: "장비 보기", color: "#60a5fa",
     colorBg: "rgba(59,130,246,0.1)", colorBorder: "rgba(59,130,246,0.22)",
-    desc: "캐릭터가 착용 중인 모든 장비를 확인합니다. 스타포스 강화 수치, 잠재능력, 에디셔널 잠재능력까지 상세하게 표시됩니다.",
-    tags: ["장비 목록", "잠재능력", "에디셔널 잠재", "스타포스"],
-    preview: ["노리개  빛나는 사욱 노리개", "잠재   몬스터 방무율 무시 +40% (레전드리)", "에디셔널  마력 +9% / 보스 데미지 +40% (유니크)"],
+    desc: "캐릭터가 착용 중인 모든 장비를 확인합니다. 스타포스, 잠재능력, 에디셔널 잠재능력이 표시되며, 하단 드롭다운으로 아이템을 선택하면 스탯·소울·스크롤 정보까지 상세하게 조회됩니다.",
+    tags: ["장비 목록", "잠재능력", "에디셔널 잠재", "스타포스", "아이템 상세"],
+    preview: ["노리개  빛나는 사욱 노리개  ★22", "잠재   방무율 무시 +40% (레전드리)", "▼ 아이템 선택 시 스탯·소울·스크롤 상세 표시"],
   },
   {
     Icon: TrendingUp, label: "레벨 변동", color: "#4ade80",
@@ -56,4 +56,24 @@ export const FEATURES: FeatureItem[] = [
     tags: ["닉네임 변경", "길드 변경", "6개월 이력"],
     preview: ["🏷️ 닉네임 변경  2025.03.12  구닉 → 렌캔디", "🏰 길드 변경    2025.01.08  없음 → 라아", "※ Nexon OpenAPI 출시(2023.12) 이후 기록만 조회 가능"],
   },
+  {
+    Icon: Swords, label: "연무장", color: "#f97316",
+    colorBg: "rgba(249,115,22,0.1)", colorBorder: "rgba(249,115,22,0.22)",
+    desc: "리플레이를 등록한 캐릭터의 연무장 DPS 측정 결과를 조회합니다. 총합 데미지·평균 DPS·연무 시간과 함께 스킬별 DPS TOP 5를 분석해 보여줍니다.",
+    tags: ["총합 데미지", "평균 DPS", "스킬 TOP 5", "리플레이 기록"],
+    preview: ["총합 데미지  125.43조  평균 DPS  8.92조", "1위 파이널 어택  32.1%  DPS 2.86조", "2위 레이징 블로우  18.4%  DPS 1.64조"],
+  },
+]
+
+export const LINK_FEATURES = [
+  { icon: "🔍", text: "직업명 완전 일치 → 전 레벨 효과 한눈에 표시" },
+  { icon: "🔑", text: "키워드 검색 → 조건에 맞는 모든 링크 스킬 목록" },
+  { icon: "🔢", text: "Lv.1(Lv.70) / Lv.2(Lv.120) / Lv.3(Lv.285) 버튼 전환" },
+]
+
+export const UNION_FEATURES = [
+  { icon: "🏆", text: "직업군 입력 (예: 모험가, 시그너스) → 세부 직업 버튼 탐색" },
+  { icon: "⚔️", text: "직업 계열 입력 (예: 전사, 마법사) → 해당 직업군 선택 후 탐색" },
+  { icon: "🔍", text: "직업명 완전 일치 → 전 등급(B~SSS) 효과 한눈에 표시" },
+  { icon: "🔑", text: "키워드 검색 → B / A / S / SS / SSS 등급 버튼 전환" },
 ]

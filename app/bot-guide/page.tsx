@@ -2,7 +2,7 @@
 import Link from "next/link"
 import { useState, useEffect, useRef } from "react"
 import { ChevronDown, ExternalLink, Zap, Terminal, Layers, Lock, ArrowRight, CheckCircle2, AlertTriangle } from "lucide-react"
-import { DISCORD_URL, M, SECTIONS, FEATURES } from "./data"
+import { DISCORD_URL, M, SECTIONS, FEATURES, LINK_FEATURES, UNION_FEATURES } from "./data"
 import { CopyButton, SectionHeading, DiscordEmbed, FeatureCard, InfoIcon } from "./components"
 
 export default function BotGuidePage() {
@@ -165,21 +165,23 @@ export default function BotGuidePage() {
 
             {/* 02 명령어 */}
             <section id="command" style={{ scrollMarginTop: "84px", marginBottom: "64px" }}>
-              <SectionHeading num="02" Icon={Terminal} title="명령어" sub="현재 슬래시(/) 명령어 1개가 지원됩니다." />
+              <SectionHeading num="02" Icon={Terminal} title="명령어" sub="슬래시(/) 명령어 3개가 지원됩니다." />
               <div className="space-y-5">
+
+                {/* /정보 */}
                 <div style={{ border: "1px solid var(--border)", borderRadius: "8px", overflow: "hidden" }}>
                   <div className="flex flex-wrap items-center gap-3 px-6 py-4" style={{ background: "rgba(255,255,255,0.018)", borderBottom: "1px solid var(--border)" }}>
-                    <span style={{ fontSize: "12px", fontWeight: 600, padding: "3px 10px", borderRadius: "4px", background: "rgba(59,130,246,0.12)", color: "var(--blue-light)", border: "1px solid rgba(59,130,246,0.22)" }}>슬래시 명령어</span>
+                    <span style={{ fontSize: "12px", fontWeight: 600, padding: "3px 10px", borderRadius: "4px", background: "rgba(245,158,11,0.12)", color: "#f59e0b", border: "1px solid rgba(245,158,11,0.3)" }}>캐릭터</span>
                     <span style={{ fontSize: "1rem", fontWeight: 600, color: "var(--text)" }}>캐릭터 기본 정보 조회</span>
                   </div>
                   <div className="px-6 py-6 space-y-6">
                     <p style={{ fontSize: "1.05rem", color: "var(--text-sub)", lineHeight: 1.85 }}>
-                      캐릭터 이름을 입력하면 기본 정보를 실시간으로 조회합니다. 슬래시(/)를 입력하면 자동완성 목록이 나타납니다.
+                      캐릭터 이름을 입력하면 기본 정보를 실시간으로 조회합니다. 결과 하단 버튼으로 장비, 헥사, 코디, 레벨 변동, 캐릭터 역사, 연무장 DPS까지 확인할 수 있습니다.
                     </p>
                     <div>
                       <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text-muted)", marginBottom: "10px" }}>명령어 구문</p>
                       <div className="flex items-center justify-between px-5 py-4"
-                        style={{ background: "rgba(0,0,0,0.32)", border: "1px solid rgba(255,255,255,0.07)", borderLeft: "3px solid var(--blue-light)", borderRadius: "6px" }}>
+                        style={{ background: "rgba(0,0,0,0.32)", border: "1px solid rgba(255,255,255,0.07)", borderLeft: "3px solid #f59e0b", borderRadius: "6px" }}>
                         <code style={{ fontSize: "1.2rem", color: "#e2e8f0", letterSpacing: "0.02em", fontFamily: "monospace" }}>/정보 [캐릭터명]</code>
                         <CopyButton text="/정보 " light />
                       </div>
@@ -190,7 +192,7 @@ export default function BotGuidePage() {
                         {["레벨 및 직업군", "전투력", "유니온 등급 / 레벨", "인기도", "서버 및 길드"].map(r => (
                           <div key={r} className="flex items-center gap-3 px-4 py-3"
                             style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "6px" }}>
-                            <CheckCircle2 size={14} className="shrink-0" style={{ color: "var(--blue-light)" }} />
+                            <CheckCircle2 size={14} className="shrink-0" style={{ color: "#f59e0b" }} />
                             <span style={{ fontSize: "1rem", color: "var(--text-sub)" }}>{r}</span>
                           </div>
                         ))}
@@ -202,28 +204,67 @@ export default function BotGuidePage() {
                   <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text-muted)", marginBottom: "10px" }}>실제 응답 예시</p>
                   <DiscordEmbed />
                 </div>
-                {/* 응답 임베드 항목 설명 */}
-                <div>
-                  <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text-muted)", marginBottom: "12px" }}>응답 카드 항목 설명</p>
-                  <div className="space-y-2">
-                    {[
-                      { field: "캐릭터명",  desc: "조회한 메이플스토리 캐릭터의 닉네임입니다." },
-                      { field: "직업",      desc: "캐릭터의 직업명입니다. (예: 패스파인더, 아크, 일리움)" },
-                      { field: "서버",      desc: "캐릭터가 속한 메이플스토리 월드입니다. (예: 리부트, 스카니아, 베라)" },
-                      { field: "레벨",      desc: "캐릭터의 현재 레벨입니다." },
-                      { field: "전투력",    desc: "캐릭터의 총 전투력 수치입니다. 장비·스탯·링크·유니온이 모두 반영됩니다." },
-                      { field: "유니온",    desc: "유니온 등급과 총 유니온 레벨입니다. (예: 레전드 · Lv.9,000)" },
-                      { field: "인기도",    desc: "다른 유저에게 받은 인기도 수치입니다." },
-                      { field: "캐릭터 역사", desc: "버튼 클릭 시 최근 6개월 내 닉네임 변경·길드 가입 및 탈퇴 이력을 날짜와 함께 조회합니다. 2023년 12월 이후 기록만 확인 가능합니다." },
-                    ].map(({ field, desc }) => (
-                      <div key={field} className="flex items-start gap-4 px-4 py-3"
-                        style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "6px" }}>
-                        <span className="shrink-0 font-bold" style={{ fontSize: "13px", color: "var(--blue-light)", minWidth: "56px" }}>{field}</span>
-                        <span style={{ fontSize: "13px", color: "var(--text-muted)", lineHeight: 1.6 }}>{desc}</span>
+
+                {/* /링크 */}
+                <div style={{ border: "1px solid var(--border)", borderRadius: "8px", overflow: "hidden" }}>
+                  <div className="flex flex-wrap items-center gap-3 px-6 py-4" style={{ background: "rgba(255,255,255,0.018)", borderBottom: "1px solid var(--border)" }}>
+                    <span style={{ fontSize: "12px", fontWeight: 600, padding: "3px 10px", borderRadius: "4px", background: "rgba(34,197,94,0.12)", color: "#22c55e", border: "1px solid rgba(34,197,94,0.3)" }}>링크 스킬</span>
+                    <span style={{ fontSize: "1rem", fontWeight: 600, color: "var(--text)" }}>링크 스킬 검색</span>
+                  </div>
+                  <div className="px-6 py-6 space-y-6">
+                    <p style={{ fontSize: "1.05rem", color: "var(--text-sub)", lineHeight: 1.85 }}>
+                      링크 스킬을 직업명 또는 효과 키워드로 검색합니다. 결과 하단 버튼으로 Lv.1(70) / Lv.2(120) / Lv.3(285) 효과를 전환할 수 있습니다.
+                    </p>
+                    <div>
+                      <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text-muted)", marginBottom: "10px" }}>명령어 구문</p>
+                      <div className="flex items-center justify-between px-5 py-4"
+                        style={{ background: "rgba(0,0,0,0.32)", border: "1px solid rgba(255,255,255,0.07)", borderLeft: "3px solid #22c55e", borderRadius: "6px" }}>
+                        <code style={{ fontSize: "1.2rem", color: "#e2e8f0", letterSpacing: "0.02em", fontFamily: "monospace" }}>/링크 [검색어]</code>
+                        <CopyButton text="/링크 " light />
                       </div>
-                    ))}
+                    </div>
+                    <div className="space-y-2">
+                      {LINK_FEATURES.map((f, i) => (
+                        <div key={i} className="flex items-center gap-3 px-4 py-3"
+                          style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "6px" }}>
+                          <span style={{ fontSize: "14px" }}>{f.icon}</span>
+                          <span style={{ fontSize: "1rem", color: "var(--text-sub)" }}>{f.text}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
+
+                {/* /유니온 */}
+                <div style={{ border: "1px solid var(--border)", borderRadius: "8px", overflow: "hidden" }}>
+                  <div className="flex flex-wrap items-center gap-3 px-6 py-4" style={{ background: "rgba(255,255,255,0.018)", borderBottom: "1px solid var(--border)" }}>
+                    <span style={{ fontSize: "12px", fontWeight: 600, padding: "3px 10px", borderRadius: "4px", background: "rgba(168,85,247,0.12)", color: "#a855f7", border: "1px solid rgba(168,85,247,0.3)" }}>유니온</span>
+                    <span style={{ fontSize: "1rem", fontWeight: 600, color: "var(--text)" }}>유니온 공격대원 효과 검색</span>
+                  </div>
+                  <div className="px-6 py-6 space-y-6">
+                    <p style={{ fontSize: "1.05rem", color: "var(--text-sub)", lineHeight: 1.85 }}>
+                      유니온 공격대원 효과를 검색합니다. 직업군·세부 직업 계층형 버튼 탐색 또는 키워드로 직접 검색할 수 있습니다.
+                    </p>
+                    <div>
+                      <p style={{ fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--text-muted)", marginBottom: "10px" }}>명령어 구문</p>
+                      <div className="flex items-center justify-between px-5 py-4"
+                        style={{ background: "rgba(0,0,0,0.32)", border: "1px solid rgba(255,255,255,0.07)", borderLeft: "3px solid #a855f7", borderRadius: "6px" }}>
+                        <code style={{ fontSize: "1.2rem", color: "#e2e8f0", letterSpacing: "0.02em", fontFamily: "monospace" }}>/유니온 [검색어]</code>
+                        <CopyButton text="/유니온 " light />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      {UNION_FEATURES.map((f, i) => (
+                        <div key={i} className="flex items-center gap-3 px-4 py-3"
+                          style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "6px" }}>
+                          <span style={{ fontSize: "14px" }}>{f.icon}</span>
+                          <span style={{ fontSize: "1rem", color: "var(--text-sub)" }}>{f.text}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
               </div>
             </section>
 
