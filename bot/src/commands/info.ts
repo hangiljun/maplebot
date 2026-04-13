@@ -439,7 +439,7 @@ export async function handleDojangButton(interaction: ButtonInteraction, charNam
         { name: "기록 일시", value: dateStr, inline: true },
         { name: "스킬별 DPS TOP 5", value: skillLines, inline: false },
       )
-      .setFooter({ text: "메이플봇 · 연무장" })
+      .setFooter(null)
 
     await interaction.editReply({ embeds: [embed] })
   } catch (err) {

@@ -66,7 +66,7 @@ function buildSearchEmbed(query: string, level: number) {
       .setColor(0x22c55e)
       .setTitle(i === 0 ? `🔗 링크 스킬 검색 — "${query}" (${matches.length}개) · Lv.${level}` : "\u200b")
       .setDescription(chunk)
-      .setFooter(i === chunks.length - 1 ? { text: "메이플봇 · 링크 스킬 정보" } : null)
+      .setFooter(null)
   )
 
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -111,7 +111,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         { name: "카테고리", value: exact.category, inline: true },
         { name: "최대 레벨", value: `Lv.${exact.maxLevel}`, inline: true },
       )
-      .setFooter({ text: "메이플봇 · 링크 스킬 정보" })
+      .setFooter(null)
 
     await interaction.editReply({ embeds: [embed] })
     return

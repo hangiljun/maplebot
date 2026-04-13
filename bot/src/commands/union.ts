@@ -66,7 +66,7 @@ function buildGroupEmbed(group: string) {
         .setColor(0xf59e0b)
         .setTitle(`🏆 ${group} 직업군`)
         .setDescription("세부 직업을 선택하세요.")
-        .setFooter({ text: "메이플봇 · 유니온" }),
+        .setFooter(null),
     ],
     components: makeRows(buttons),
   }
@@ -87,7 +87,7 @@ function buildSubclassEmbed(group: string, subclass: string) {
         .setColor(0xf59e0b)
         .setTitle(`🏆 ${group} · ${subclass}`)
         .setDescription("캐릭터를 선택하세요.")
-        .setFooter({ text: "메이플봇 · 유니온" }),
+        .setFooter(null),
     ],
     components: makeRows(buttons),
   }
@@ -111,7 +111,7 @@ function buildSubclassGroupEmbed(subclass: string) {
         .setColor(0xf59e0b)
         .setTitle(`🏆 ${subclass} 직업군 선택`)
         .setDescription("어느 직업군의 전사인지 선택하세요.")
-        .setFooter({ text: "메이플봇 · 유니온" }),
+        .setFooter(null),
     ],
     components: makeRows(buttons),
   }
@@ -138,7 +138,7 @@ function buildCharEmbed(name: string) {
         .setTitle(`🏆 ${char.name} 유니온 공격대원 효과`)
         .setDescription(`**${char.effect}**\n\n${gradeLines}`)
         .addFields({ name: "계열", value: char.category, inline: true })
-        .setFooter({ text: "메이플봇 · 유니온 공격대원 효과" }),
+        .setFooter(null),
     ],
     components: [] as ActionRowBuilder<ButtonBuilder>[],
   }
@@ -177,7 +177,7 @@ function buildSearchEmbed(query: string, grade: Grade) {
       .setColor(GRADE_COLOR[grade])
       .setTitle(i === 0 ? `🏆 유니온 검색 — "${query}" (${matches.length}개) · ${grade}등급 (Lv.${GRADE_LEVEL[grade]}+)` : "\u200b")
       .setDescription(chunk)
-      .setFooter(i === chunks.length - 1 ? { text: "메이플봇 · 유니온 공격대원 효과" } : null)
+      .setFooter(null)
   )
 
   return { embeds, components: gradeRows(grade, query) }
