@@ -92,7 +92,7 @@ function buildSearchEmbed(query: string, level: number) {
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   const query = interaction.options.getString("검색어", true).trim()
-  await interaction.deferReply({ ephemeral: true })
+  await interaction.deferReply()
 
   const lq = query.toLowerCase()
 
