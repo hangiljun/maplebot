@@ -189,12 +189,15 @@ export async function handleEquipButton(interaction: ButtonInteraction, charName
     const selectRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select)
 
     // 10개씩 나눠서 첫 번째는 editReply, 나머지는 followUp
+    // 드롭다운은 항상 마지막 메시지 하단에 표시
     const first  = ordered.slice(0, 10)
     const second = ordered.slice(10, 20)
 
-    await interaction.editReply({ embeds: buildEmbeds(first), components: [selectRow] })
     if (second.length > 0) {
-      await interaction.followUp({ embeds: buildEmbeds(second), ephemeral: true })
+      await interaction.editReply({ embeds: buildEmbeds(first) })
+      await interaction.followUp({ embeds: buildEmbeds(second), components: [selectRow], ephemeral: true })
+    } else {
+      await interaction.editReply({ embeds: buildEmbeds(first), components: [selectRow] })
     }
   } catch (err) {
     console.error(err)
