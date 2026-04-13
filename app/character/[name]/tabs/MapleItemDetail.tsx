@@ -171,12 +171,16 @@ function PotBlock({ label, grade, opts }: {
   return (
     <>
       <HLine />
-      {/* 헤더: ■ 잠재능력 : 레전드리 */}
+      {/* 헤더: ■ 잠재능력 : 레전드리 — 전체 등급 색상 */}
       <p style={{ fontSize: 11, fontWeight: 700, color, marginBottom: 3 }}>
         ■ {label} : <span style={{ fontWeight: 700 }}>{grade}</span>
       </p>
+      {/* 옵션 라인: ■ 는 등급 색상, 텍스트는 흰색 */}
       {lines.map((opt, i) => (
-        <p key={i} style={{ fontSize: 11, color, lineHeight: 1.6 }}>■ {opt}</p>
+        <p key={i} style={{ fontSize: 11, lineHeight: 1.6 }}>
+          <span style={{ color }}>■ </span>
+          <span style={{ color: "#ffffff" }}>{opt}</span>
+        </p>
       ))}
     </>
   )

@@ -384,35 +384,6 @@ export async function fetchBattlePractice(name: string): Promise<BattlePracticeR
   }
 }
 
-export interface DojangRankEntry {
-  ranking: number
-  characterName: string
-  worldName: string
-  className: string
-  level: number
-  floor: number
-  timeSeconds: number
-}
-
-export async function fetchDojangRanking(difficulty: 1 | 2, worldName?: string): Promise<DojangRankEntry[] | null> {
-  // 랭킹은 전날 KST 기준 (limit 파라미터는 API에서 무시됨 — 항상 200개 반환)
-  const yesterday = kstDateString(1)
-  let path = `/maplestory/v1/ranking/dojang?date=${yesterday}&difficulty=${difficulty}`
-  if (worldName) path += `&world_name=${encodeURIComponent(worldName)}`
-
-  const data = await nexonFetch(path)
-  if (!data?.ranking) return null
-
-  return data.ranking.map((r: any) => ({
-    ranking:       r.ranking,
-    characterName: r.character_name,
-    worldName:     r.world_name,
-    className:     r.sub_class_name || r.class_name,
-    level:         r.character_level,
-    floor:         r.dojang_floor,
-    timeSeconds:   r.dojang_time_record,
-  }))
-}
 
 export async function fetchCharacterSummary(name: string): Promise<CharacterSummary | null> {
   const ocid = await getOcid(name)
