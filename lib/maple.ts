@@ -234,29 +234,55 @@ export async function fetchHistory(name: string): Promise<CharacterHistory | nul
 
 // ── 캐릭터 역사: 과거 6개월 닉네임·길드 변경 이력 ──────────────
 
-/** 두 날짜 사이에서 field 값이 바뀐 정확한 날짜를 이진 탐색으로 찾음 */
-async function binarySearchChange(
+/** 두 날짜 사이의 모든 날을 병렬 스캔해 닉네임·길드 변경 이벤트를 한 번에 추출 */
+async function scanWindowForChanges(
   ocid: string,
-  startDate: string,
-  endDate: string,
-  field: "character_name" | "character_guild_name",
-  startValue: string,
-  depth = 0,
-): Promise<string> {
-  if (depth >= 8) return endDate
-  const s = new Date(startDate).getTime()
-  const e = new Date(endDate).getTime()
-  if ((e - s) / 86400000 <= 1) return endDate
+  prev: { date: string; name: string; guild: string },
+  curr: { date: string; name: string; guild: string },
+  keyOffset: number,
+): Promise<TimelineEvent[]> {
+  const s = new Date(prev.date).getTime()
+  const e = new Date(curr.date).getTime()
+  const dayMs = 86400000
 
-  const midDate = new Date(Math.floor((s + e) / 2)).toISOString().split("T")[0]
-  const r = await nexonFetch(
-    `/maplestory/v1/character/basic?ocid=${ocid}&date=${midDate}`,
-  ).catch(() => null)
+  const dates: string[] = []
+  for (let t = s + dayMs; t < e; t += dayMs)
+    dates.push(new Date(t).toISOString().split("T")[0])
 
-  const midValue = r?.[field] ?? startValue
-  return midValue === startValue
-    ? binarySearchChange(ocid, midDate, endDate, field, startValue, depth + 1)
-    : binarySearchChange(ocid, startDate, midDate, field, startValue, depth + 1)
+  if (dates.length === 0) {
+    const events: TimelineEvent[] = []
+    if (prev.name !== curr.name)
+      events.push({ type: "nickname", date: curr.date, from: prev.name, to: curr.name })
+    if (prev.guild !== curr.guild)
+      events.push({ type: "guild", date: curr.date, from: prev.guild || "없음", to: curr.guild || "없음" })
+    return events
+  }
+
+  // 모든 중간 날짜를 한 번에 병렬 호출 (닉네임·길드 동시 추출)
+  const snapshots = await Promise.all(
+    dates.map((date, i) =>
+      nexonFetch(`/maplestory/v1/character/basic?ocid=${ocid}&date=${date}`, (keyOffset + i) % 2)
+        .then(r => r ? {
+          date,
+          name: (r.character_name as string) ?? prev.name,
+          guild: (r.character_guild_name as string) ?? "",
+        } : null)
+        .catch(() => null)
+    )
+  )
+
+  const points = [prev, ...snapshots.filter(Boolean) as typeof prev[], curr]
+  const events: TimelineEvent[] = []
+
+  for (let i = 1; i < points.length; i++) {
+    const p = points[i - 1], c = points[i]
+    if (p.name !== c.name && (i === 1 || points[i - 2].name === p.name))
+      events.push({ type: "nickname", date: c.date, from: p.name, to: c.name })
+    if (p.guild !== c.guild && (i === 1 || points[i - 2].guild === p.guild))
+      events.push({ type: "guild", date: c.date, from: p.guild || "없음", to: c.guild || "없음" })
+  }
+
+  return events
 }
 
 const timelineCache = new Map<string, { data: CharacterTimeline; ts: number }>()
@@ -291,31 +317,16 @@ export async function fetchCharacterTimeline(name: string): Promise<CharacterTim
   const valid = snapshots.filter(Boolean) as { date: string; name: string; guild: string }[]
   if (valid.length < 2) return { events: [], checkedFrom: checkpoints[0] }
 
-  // 연속 스냅샷 비교 → 변경 감지 → 이진 탐색으로 정확한 날짜 확인
-  const changeJobs: Promise<TimelineEvent | null>[] = []
-
+  // 변경이 감지된 구간마다 병렬 스캔 (닉네임·길드 동시 처리)
+  const windowJobs: Promise<TimelineEvent[]>[] = []
   for (let i = 1; i < valid.length; i++) {
-    const prev = valid[i - 1]
-    const curr = valid[i]
-
-    if (prev.name !== curr.name) {
-      changeJobs.push(
-        binarySearchChange(ocid, prev.date, curr.date, "character_name", prev.name)
-          .then(date => ({ type: "nickname" as const, date, from: prev.name, to: curr.name }))
-      )
-    }
-    if (prev.guild !== curr.guild) {
-      changeJobs.push(
-        binarySearchChange(ocid, prev.date, curr.date, "character_guild_name", prev.guild)
-          .then(date => ({ type: "guild" as const, date, from: prev.guild || "없음", to: curr.guild || "없음" }))
-      )
-    }
+    const prev = valid[i - 1], curr = valid[i]
+    if (prev.name !== curr.name || prev.guild !== curr.guild)
+      windowJobs.push(scanWindowForChanges(ocid, prev, curr, i * 2))
   }
 
-  const results = await Promise.all(changeJobs)
-  const events = results
-    .filter(Boolean)
-    .sort((a, b) => b!.date.localeCompare(a!.date)) as TimelineEvent[]
+  const allEvents = (await Promise.all(windowJobs)).flat()
+  const events = allEvents.sort((a, b) => b.date.localeCompare(a.date))
 
   const result: CharacterTimeline = { events, checkedFrom: valid[0].date }
   timelineCache.set(name, { data: result, ts: Date.now() })
