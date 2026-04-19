@@ -259,19 +259,25 @@ async function binarySearchChange(
     : binarySearchChange(ocid, startDate, midDate, field, startValue, depth + 1)
 }
 
+const timelineCache = new Map<string, { data: CharacterTimeline; ts: number }>()
+const TIMELINE_TTL = 30 * 60 * 1000 // 30분
+
 export async function fetchCharacterTimeline(name: string): Promise<CharacterTimeline | null> {
+  const cached = timelineCache.get(name)
+  if (cached && Date.now() - cached.ts < TIMELINE_TTL) return cached.data
+
   const ocid = await getOcid(name)
   if (!ocid) return null
 
-  // 14일(2주) 간격으로 체크포인트 생성 (6개월 ≈ 182일 = 13개 포인트)
+  // 21일(3주) 간격으로 체크포인트 생성 (6개월 ≈ 182일 = 8개 포인트)
   const today = new Date(Date.now() + 9 * 3600000) // KST
   const checkpoints: string[] = []
-  for (let days = 14; days <= 182; days += 14) {
+  for (let days = 21; days <= 182; days += 21) {
     const d = new Date(today)
     d.setDate(d.getDate() - days)
     checkpoints.push(d.toISOString().split("T")[0])
   }
-  checkpoints.reverse() // 오래된 순 (182일 전 → 14일 전)
+  checkpoints.reverse() // 오래된 순 (182일 전 → 21일 전)
 
   // 모든 체크포인트 병렬 조회
   const snapshots = await Promise.all(
@@ -311,7 +317,9 @@ export async function fetchCharacterTimeline(name: string): Promise<CharacterTim
     .filter(Boolean)
     .sort((a, b) => b!.date.localeCompare(a!.date)) as TimelineEvent[]
 
-  return { events, checkedFrom: valid[0].date }
+  const result: CharacterTimeline = { events, checkedFrom: valid[0].date }
+  timelineCache.set(name, { data: result, ts: Date.now() })
+  return result
 }
 
 // 하위 호환 — /api/maple/character 라우트용
