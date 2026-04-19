@@ -286,7 +286,7 @@ async function scanWindowForChanges(
 }
 
 const timelineCache = new Map<string, { data: CharacterTimeline; ts: number }>()
-const TIMELINE_TTL = 30 * 60 * 1000 // 30분
+const TIMELINE_TTL = 2 * 60 * 60 * 1000 // 2시간
 
 export async function fetchCharacterTimeline(name: string): Promise<CharacterTimeline | null> {
   const cached = timelineCache.get(name)

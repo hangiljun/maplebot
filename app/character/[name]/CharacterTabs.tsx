@@ -1,5 +1,5 @@
 "use client"
-import { useState, useCallback, useMemo, useRef } from "react"
+import { useState, useCallback, useMemo, useRef, useEffect } from "react"
 import {
   type CharacterBasic, type UnionInfo, type StatItem,
   type EquipmentItem, type AbilityInfo, type SymbolItem,
@@ -105,6 +105,16 @@ export default function CharacterTabs({
     } finally {
       setLoading(null)
     }
+  }, [basic.character_name])
+
+  // 페이지 로드와 동시에 히스토리 백그라운드 prefetch
+  useEffect(() => {
+    const ctrl = new AbortController()
+    fetch(`/api/maple/tab?name=${encodeURIComponent(basic.character_name)}&tab=charhistory`, { signal: ctrl.signal })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setTabCache(prev => ({ ...prev, ...data })) })
+      .catch(() => {})
+    return () => ctrl.abort()
   }, [basic.character_name])
 
   const combatPower = useMemo(() => stats.find(s => s.stat_name === COMBAT_POWER_STAT), [stats])
