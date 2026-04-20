@@ -9,7 +9,6 @@ import {
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
   StringSelectMenuInteraction,
-  AttachmentBuilder,
 } from "discord.js"
 import { fetchCharacterSummary, fetchEquipment, fetchLevelHistory, fetchHexa, fetchCodi, fetchCharacterTimeline, fetchBattlePractice } from "../maple"
 
@@ -52,42 +51,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     const cp = formatPower(char.combatPower)
 
-    const unionStr = char.unionGrade && char.unionLevel
-      ? `${char.unionGrade} (Lv.${char.unionLevel.toLocaleString()})`
-      : ""
-
-    // 카드 이미지 생성 (POST → 바이트 수신 → 파일 첨부)
-    let cardAttachment: AttachmentBuilder | null = null
-    try {
-      const cardRes = await fetch(
-        `https://www.maplebot.co.kr/api/card/${encodeURIComponent(char.name)}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            level: char.level,
-            cls: char.characterClass,
-            world: char.world,
-            guild: char.guild || "",
-            cp: char.combatPower,
-            union: unionStr,
-            img: char.image || "",
-          }),
-        }
-      )
-      if (cardRes.ok) {
-        const buf = Buffer.from(await cardRes.arrayBuffer())
-        cardAttachment = new AttachmentBuilder(buf, { name: "card.png" })
-      } else {
-        console.error("[card] 카드 API 응답 오류:", cardRes.status, await cardRes.text().catch(() => ""))
-      }
-    } catch (err) {
-      console.error("[card] 카드 생성 오류:", err)
-    }
-
     const embed = new EmbedBuilder()
       .setColor(0xf59e0b)
       .setTitle(`${char.name}  LV${char.level}`)
+      .setThumbnail(char.image || null)
       .setDescription(
         [
           `• 월드 : ${char.world}`,
@@ -95,10 +62,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
           `• 길드 : ${char.guild || "없음"}`,
           `• 인기도 : ${char.popularity.toLocaleString()}`,
           `• 전투력 : ${cp}`,
-          unionStr ? `• 유니온 : ${unionStr}` : `• 유니온 : 정보 없음`,
+          char.unionGrade && char.unionLevel
+            ? `• 유니온 : ${char.unionGrade} (Lv.${char.unionLevel.toLocaleString()})`
+            : `• 유니온 : 정보 없음`,
         ].join("\n")
       )
-    if (cardAttachment) embed.setImage("attachment://card.png")
 
     const equipBtn = new ButtonBuilder()
       .setCustomId(`equip:${char.name}`)
@@ -133,11 +101,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const row1 = new ActionRowBuilder<ButtonBuilder>().addComponents(equipBtn, levelBtn, hexaBtn, codiBtn, historyBtn)
     const row2 = new ActionRowBuilder<ButtonBuilder>().addComponents(dojangBtn)
 
-    await interaction.editReply({
-      embeds: [embed],
-      components: [row1, row2],
-      ...(cardAttachment ? { files: [cardAttachment] } : {}),
-    })
+    await interaction.editReply({ embeds: [embed], components: [row1, row2] })
   } catch (err) {
     console.error("[info] 오류:", err)
     await interaction.editReply("❌ 캐릭터 정보 조회 중 오류가 발생했어요.")
