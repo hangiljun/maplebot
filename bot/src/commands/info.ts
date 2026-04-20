@@ -51,22 +51,22 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     const cp = formatPower(char.combatPower)
 
+    const unionStr = char.unionGrade && char.unionLevel
+      ? `${char.unionGrade} (Lv.${char.unionLevel.toLocaleString()})`
+      : ""
+
+    const cardUrl = `https://www.maplebot.co.kr/api/card/${encodeURIComponent(char.name)}` +
+      `?level=${char.level}` +
+      `&cls=${encodeURIComponent(char.characterClass)}` +
+      `&world=${encodeURIComponent(char.world)}` +
+      `&guild=${encodeURIComponent(char.guild || "")}` +
+      `&cp=${encodeURIComponent(char.combatPower)}` +
+      `&union=${encodeURIComponent(unionStr)}` +
+      (char.image ? `&img=${encodeURIComponent(char.image)}` : "")
+
     const embed = new EmbedBuilder()
       .setColor(0xf59e0b)
-      .setTitle(`${char.name}  LV${char.level}`)
-      .setThumbnail(char.image || null)
-      .setDescription(
-        [
-          `• 월드 : ${char.world}`,
-          `• 직업 : ${char.characterClass}`,
-          `• 길드 : ${char.guild || "없음"}`,
-          `• 인기도 : ${char.popularity.toLocaleString()}`,
-          `• 전투력 : ${cp}`,
-          char.unionGrade && char.unionLevel
-            ? `• 유니온 : ${char.unionGrade} (Lv.${char.unionLevel.toLocaleString()})`
-            : `• 유니온 : 정보 없음`,
-        ].join("\n")
-      )
+      .setImage(cardUrl)
 
     const equipBtn = new ButtonBuilder()
       .setCustomId(`equip:${char.name}`)
