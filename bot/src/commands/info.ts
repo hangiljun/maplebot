@@ -78,8 +78,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       if (cardRes.ok) {
         const buf = Buffer.from(await cardRes.arrayBuffer())
         cardAttachment = new AttachmentBuilder(buf, { name: "card.png" })
+      } else {
+        console.error("[card] 카드 API 응답 오류:", cardRes.status, await cardRes.text().catch(() => ""))
       }
-    } catch { /* 실패 시 텍스트 임베드로 폴백 */ }
+    } catch (err) {
+      console.error("[card] 카드 생성 오류:", err)
+    }
 
     const embed = new EmbedBuilder()
       .setColor(0xf59e0b)
