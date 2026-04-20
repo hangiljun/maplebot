@@ -138,10 +138,12 @@ export async function POST(
   const { name } = await params
   const decoded = decodeURIComponent(name)
   const body = await req.json()
-  const { level, cls, world, guild, cp, union, imageData } = body
-
-  const [font] = await Promise.all([loadFont()])
-  return renderCard(decoded, String(level), cls ?? "", world ?? "", guild ?? "", cp ?? "0", union ?? "", imageData ?? "", font)
+  const { level, cls, world, guild, cp, union, imageData, img } = body
+  const [font, charImg] = await Promise.all([
+    loadFont(),
+    imageData ? Promise.resolve(imageData as string) : (img ? toDataUrl(img as string) : Promise.resolve("")),
+  ])
+  return renderCard(decoded, String(level), cls ?? "", world ?? "", guild ?? "", cp ?? "0", union ?? "", charImg, font)
 }
 
 export async function GET(
