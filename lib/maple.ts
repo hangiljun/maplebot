@@ -6,8 +6,16 @@ import type {
 } from "./types"
 
 const BASE_URL = "https://open.api.nexon.com"
-const ocidCache = new Map<string, { ocid: string; ts: number }>()
-const OCID_TTL  = 60 * 60 * 1000
+
+const ocidCache    = new Map<string, { ocid: string; ts: number }>()
+const basicCache   = new Map<string, { data: BasicCharacterData; ts: number }>()
+const tabDataCache = new Map<string, { data: Record<string, unknown>; ts: number }>()
+const historyCache = new Map<string, { data: CharacterHistory; ts: number }>()
+
+const OCID_TTL    = 60 * 60 * 1000      // 1시간
+const BASIC_TTL   = 30 * 60 * 1000      // 30분
+const TAB_TTL     = 30 * 60 * 1000      // 30분
+const HISTORY_TTL = 60 * 60 * 1000      // 1시간
 
 function getApiKeys(): string[] {
   return [process.env.NEXON_API_KEY, process.env.NEXON_API_KEY_2].filter(Boolean) as string[]
@@ -90,6 +98,9 @@ function formatKoDate(dateStr: string): string {
 export async function fetchBasicCharacter(name: string): Promise<BasicCharacterData | null> {
   if (!name?.trim()) return null
 
+  const cached = basicCache.get(name)
+  if (cached && Date.now() - cached.ts < BASIC_TTL) return cached.data
+
   const ocid = await getOcid(name)
   if (!ocid) return null
 
@@ -103,50 +114,62 @@ export async function fetchBasicCharacter(name: string): Promise<BasicCharacterD
 
   if (!basicR) return null
 
-  return {
+  const data: BasicCharacterData = {
     basic:      mapBasic(basicR),
     stats:      statR?.final_stat ?? [],
     popularity: popularityR?.popularity ?? 0,
     union:      mapUnion(unionR),
   }
+  basicCache.set(name, { data, ts: Date.now() })
+  return data
 }
 
 // 탭별 데이터 조회 — 클릭 시 on-demand 로드
 export async function fetchTabData(name: string, tab: string): Promise<Record<string, unknown> | null> {
+  const cacheKey = `${name}:${tab}`
+  const cached = tabDataCache.get(cacheKey)
+  if (cached && Date.now() - cached.ts < TAB_TTL) return cached.data
+
   const ocid = await getOcid(name)
   if (!ocid) return null
 
   const q = `ocid=${ocid}`
 
+  let result: Record<string, unknown> | null = null
+
   switch (tab) {
     case "equipment": {
       const r = await nexonFetch(`/maplestory/v1/character/item-equipment?${q}`)
-      return { equipment: r?.item_equipment ?? [] }
+      result = { equipment: r?.item_equipment ?? [] }
+      break
     }
     case "ability": {
       const r = await nexonFetch(`/maplestory/v1/character/ability?${q}`)
-      return { ability: r ?? null }
+      result = { ability: r ?? null }
+      break
     }
     case "symbol": {
       const r = await nexonFetch(`/maplestory/v1/character/symbol-equipment?${q}`)
-      return { symbols: r?.symbol ?? [] }
+      result = { symbols: r?.symbol ?? [] }
+      break
     }
     case "hexa": {
       const [coreR, statR] = await Promise.all([
         nexonFetch(`/maplestory/v1/character/hexamatrix?${q}`),
         nexonFetch(`/maplestory/v1/character/hexamatrix-stat?${q}`),
       ])
-      return {
+      result = {
         hexaCores: (coreR?.character_hexa_core_equipment ?? []).map(({ hexa_core_name, hexa_core_level, hexa_core_type }: HexaCore) => ({ hexa_core_name, hexa_core_level, hexa_core_type })),
         hexaStats: (statR?.character_hexa_stat_core ?? []).map(({ slot_id, main_stat_name, sub_stat_name_1, sub_stat_name_2, main_stat_level, sub_stat_level_1, sub_stat_level_2 }: HexaStat) => ({ slot_id, main_stat_name, sub_stat_name_1, sub_stat_name_2, main_stat_level, sub_stat_level_1, sub_stat_level_2 })),
       }
+      break
     }
     case "codi": {
       const [codiR, beautyR] = await Promise.all([
         nexonFetch(`/maplestory/v1/character/cashitem-equipment?${q}`),
         nexonFetch(`/maplestory/v1/character/beauty-equipment?${q}`),
       ])
-      return {
+      result = {
         codi: codiR ? {
           gender: codiR.character_gender ?? "",
           hair:   beautyR?.character_hair?.hair_name ?? "",
@@ -157,21 +180,22 @@ export async function fetchTabData(name: string, tab: string): Promise<Record<st
           preset3: mapPreset(codiR.character_cashitem_equipment_preset_3),
         } : null,
       }
+      break
     }
     case "battlepractice": {
       const replayData = await nexonFetch(`/maplestory/v1/battle-practice/replay-id?${q}`)
       if (!replayData?.replay_id) return { battlepractice: null }
-      const result = await nexonFetch(`/maplestory/v1/battle-practice/result?replay_id=${replayData.replay_id}`)
-      if (!result) return { battlepractice: null }
-      return {
+      const r = await nexonFetch(`/maplestory/v1/battle-practice/result?replay_id=${replayData.replay_id}`)
+      if (!r) return { battlepractice: null }
+      result = {
         battlepractice: {
           register_date:   replayData.register_date ?? "",
-          total_play_time: result.total_play_time ?? 0,
-          total_damage:    result.total_damage ?? 0,
-          total_dps:       result.total_dps ?? 0,
-          end_type:        result.end_type ?? "",
-          like_count:      result.like_count ?? 0,
-          skill_statistic: (result.skill_statistic ?? []).map((s: any) => ({
+          total_play_time: r.total_play_time ?? 0,
+          total_damage:    r.total_damage ?? 0,
+          total_dps:       r.total_dps ?? 0,
+          end_type:        r.end_type ?? "",
+          like_count:      r.like_count ?? 0,
+          skill_statistic: (r.skill_statistic ?? []).map((s: any) => ({
             skill_name:     s.skill_name ?? "",
             damage:         s.damage ?? 0,
             damage_percent: s.damage_percent ?? "0",
@@ -181,13 +205,20 @@ export async function fetchTabData(name: string, tab: string): Promise<Record<st
           })),
         },
       }
+      break
     }
     default:
       return null
   }
+
+  if (result) tabDataCache.set(cacheKey, { data: result, ts: Date.now() })
+  return result
 }
 
 export async function fetchHistory(name: string): Promise<CharacterHistory | null> {
+  const cached = historyCache.get(name)
+  if (cached && Date.now() - cached.ts < HISTORY_TTL) return cached.data
+
   const ocid = await getOcid(name)
   if (!ocid) return null
 
@@ -229,7 +260,9 @@ export async function fetchHistory(name: string): Promise<CharacterHistory | nul
 
   const levelHistory: HistoryPoint[] = allLevels.filter((p, i) => i === 0 || p.value !== allLevels[i - 1].value)
 
-  return { expHistory, levelHistory }
+  const data: CharacterHistory = { expHistory, levelHistory }
+  historyCache.set(name, { data, ts: Date.now() })
+  return data
 }
 
 // ── 캐릭터 역사: 과거 6개월 닉네임·길드 변경 이력 ──────────────
@@ -342,18 +375,13 @@ export async function fetchCharacter(name: string): Promise<CharacterData | null
 
   const q = `ocid=${ocid}`
 
-  const [basicR, popularityR, statR, equipR, abilityR, unionR] = await Promise.all([
+  const [basicR, popularityR, statR, equipR, abilityR, unionR, symbolR, hexaCoreR, hexaStatR, codiR, beautyR] = await Promise.all([
     nexonFetch(`/maplestory/v1/character/basic?${q}`),
     nexonFetch(`/maplestory/v1/character/popularity?${q}`),
     nexonFetch(`/maplestory/v1/character/stat?${q}`),
     nexonFetch(`/maplestory/v1/character/item-equipment?${q}`),
     nexonFetch(`/maplestory/v1/character/ability?${q}`),
     nexonFetch(`/maplestory/v1/user/union?${q}`),
-  ])
-
-  if (!basicR) return null
-
-  const [symbolR, hexaCoreR, hexaStatR, codiR, beautyR] = await Promise.all([
     nexonFetch(`/maplestory/v1/character/symbol-equipment?${q}`),
     nexonFetch(`/maplestory/v1/character/hexamatrix?${q}`),
     nexonFetch(`/maplestory/v1/character/hexamatrix-stat?${q}`),
@@ -361,6 +389,7 @@ export async function fetchCharacter(name: string): Promise<CharacterData | null
     nexonFetch(`/maplestory/v1/character/beauty-equipment?${q}`),
   ])
 
+  if (!basicR) return null
   return {
     basic:      mapBasic(basicR),
     popularity: popularityR?.popularity ?? 0,

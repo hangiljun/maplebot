@@ -7,9 +7,15 @@ const API_KEYS = [
   process.env.NEXON_API_KEY_2,
 ].filter(Boolean) as string[]
 
-// ocid 캐시 (1시간)
-const ocidCache = new Map<string, { ocid: string; ts: number }>()
-const OCID_TTL  = 60 * 60 * 1000
+const ocidCache     = new Map<string, { ocid: string; ts: number }>()
+const summaryCache  = new Map<string, { data: CharacterSummary; ts: number }>()
+const levelCache    = new Map<string, { data: { expHistory: { date: string; value: number }[]; levelHistory: { date: string; value: number }[] }; ts: number }>()
+const timelineCache = new Map<string, { data: { events: TimelineEvent[]; checkedFrom: string }; ts: number }>()
+
+const OCID_TTL     = 60 * 60 * 1000       // 1시간
+const SUMMARY_TTL  = 30 * 60 * 1000       // 30분
+const LEVEL_TTL    = 30 * 60 * 1000       // 30분
+const TIMELINE_TTL = 2 * 60 * 60 * 1000   // 2시간
 
 async function getOcid(name: string): Promise<string | null> {
   const cached = ocidCache.get(name)
@@ -221,33 +227,61 @@ export interface TimelineEvent {
   to: string
 }
 
-async function binarySearchChange(
+async function scanWindowForChanges(
   ocid: string,
-  startDate: string,
-  endDate: string,
-  field: "character_name" | "character_guild_name",
-  startValue: string,
-  depth = 0,
-): Promise<string> {
-  if (depth >= 8) return endDate
-  const s = new Date(startDate).getTime()
-  const e = new Date(endDate).getTime()
-  if ((e - s) / 86400000 <= 1) return endDate
-  const midDate = new Date(Math.floor((s + e) / 2)).toISOString().split("T")[0]
-  const r = await nexonFetch(`/maplestory/v1/character/basic?ocid=${ocid}&date=${midDate}`).catch(() => null)
-  const midValue = r?.[field] ?? startValue
-  return midValue === startValue
-    ? binarySearchChange(ocid, midDate, endDate, field, startValue, depth + 1)
-    : binarySearchChange(ocid, startDate, midDate, field, startValue, depth + 1)
+  prev: { date: string; name: string; guild: string },
+  curr: { date: string; name: string; guild: string },
+  keyOffset: number,
+): Promise<TimelineEvent[]> {
+  const s = new Date(prev.date).getTime()
+  const e = new Date(curr.date).getTime()
+  const dayMs = 86400000
+
+  const dates: string[] = []
+  for (let t = s + dayMs; t < e; t += dayMs)
+    dates.push(new Date(t).toISOString().split("T")[0])
+
+  if (dates.length === 0) {
+    const events: TimelineEvent[] = []
+    if (prev.name !== curr.name)
+      events.push({ type: "nickname", date: curr.date, from: prev.name, to: curr.name })
+    if (prev.guild !== curr.guild)
+      events.push({ type: "guild", date: curr.date, from: prev.guild || "없음", to: curr.guild || "없음" })
+    return events
+  }
+
+  const snapshots = await Promise.all(
+    dates.map((date, i) =>
+      nexonFetch(`/maplestory/v1/character/basic?ocid=${ocid}&date=${date}`, (keyOffset + i) % 2)
+        .then((r: any) => r ? { date, name: (r.character_name as string) ?? prev.name, guild: (r.character_guild_name as string) ?? "" } : null)
+        .catch(() => null)
+    )
+  )
+
+  const points = [prev, ...snapshots.filter(Boolean) as typeof prev[], curr]
+  const events: TimelineEvent[] = []
+
+  for (let i = 1; i < points.length; i++) {
+    const p = points[i - 1], c = points[i]
+    if (p.name !== c.name && (i === 1 || points[i - 2].name === p.name))
+      events.push({ type: "nickname", date: c.date, from: p.name, to: c.name })
+    if (p.guild !== c.guild && (i === 1 || points[i - 2].guild === p.guild))
+      events.push({ type: "guild", date: c.date, from: p.guild || "없음", to: c.guild || "없음" })
+  }
+
+  return events
 }
 
 export async function fetchCharacterTimeline(name: string): Promise<{ events: TimelineEvent[]; checkedFrom: string } | null> {
+  const cached = timelineCache.get(name)
+  if (cached && Date.now() - cached.ts < TIMELINE_TTL) return cached.data
+
   const ocid = await getOcid(name)
   if (!ocid) return null
 
   const today = new Date(Date.now() + 9 * 3600000)
   const checkpoints: string[] = []
-  for (let days = 14; days <= 182; days += 14) {
+  for (let days = 21; days <= 182; days += 21) {
     const d = new Date(today)
     d.setDate(d.getDate() - days)
     checkpoints.push(d.toISOString().split("T")[0])
@@ -265,29 +299,19 @@ export async function fetchCharacterTimeline(name: string): Promise<{ events: Ti
   const valid = snapshots.filter(Boolean) as { date: string; name: string; guild: string }[]
   if (valid.length < 2) return { events: [], checkedFrom: checkpoints[0] }
 
-  const changeJobs: Promise<TimelineEvent | null>[] = []
+  const windowJobs: Promise<TimelineEvent[]>[] = []
   for (let i = 1; i < valid.length; i++) {
-    const prev = valid[i - 1]
-    const curr = valid[i]
-    if (prev.name !== curr.name) {
-      changeJobs.push(
-        binarySearchChange(ocid, prev.date, curr.date, "character_name", prev.name)
-          .then(date => ({ type: "nickname" as const, date, from: prev.name, to: curr.name }))
-      )
-    }
-    if (prev.guild !== curr.guild) {
-      changeJobs.push(
-        binarySearchChange(ocid, prev.date, curr.date, "character_guild_name", prev.guild)
-          .then(date => ({ type: "guild" as const, date, from: prev.guild || "없음", to: curr.guild || "없음" }))
-      )
-    }
+    const prev = valid[i - 1], curr = valid[i]
+    if (prev.name !== curr.name || prev.guild !== curr.guild)
+      windowJobs.push(scanWindowForChanges(ocid, prev, curr, i * 2))
   }
 
-  const results = await Promise.all(changeJobs)
-  const events = (results.filter(Boolean) as TimelineEvent[])
-    .sort((a, b) => b.date.localeCompare(a.date))
+  const allEvents = (await Promise.all(windowJobs)).flat()
+  const events = allEvents.sort((a, b) => b.date.localeCompare(a.date))
 
-  return { events, checkedFrom: valid[0].date }
+  const result = { events, checkedFrom: valid[0].date }
+  timelineCache.set(name, { data: result, ts: Date.now() })
+  return result
 }
 
 function kstDateString(daysAgo: number): string {
@@ -297,6 +321,9 @@ function kstDateString(daysAgo: number): string {
 }
 
 export async function fetchLevelHistory(name: string): Promise<{ expHistory: { date: string; value: number }[]; levelHistory: { date: string; value: number }[] } | null> {
+  const cached = levelCache.get(name)
+  if (cached && Date.now() - cached.ts < LEVEL_TTL) return cached.data
+
   const ocid = await getOcid(name)
   if (!ocid) return null
 
@@ -344,7 +371,9 @@ export async function fetchLevelHistory(name: string): Promise<{ expHistory: { d
     p.date === "오늘" || i === 0 || p.value !== arr[i - 1].value
   )
 
-  return { expHistory, levelHistory }
+  const result = { expHistory, levelHistory }
+  levelCache.set(name, { data: result, ts: Date.now() })
+  return result
 }
 
 export interface BattlePracticeSkill {
@@ -396,12 +425,13 @@ export async function fetchBattlePractice(name: string): Promise<BattlePracticeR
 
 
 export async function fetchCharacterSummary(name: string): Promise<CharacterSummary | null> {
+  const cached = summaryCache.get(name)
+  if (cached && Date.now() - cached.ts < SUMMARY_TTL) return cached.data
+
   const ocid = await getOcid(name)
   if (!ocid) return null
 
   const q = `ocid=${ocid}`
-
-  // 기본 정보 + 인기도 + 스탯 + 유니온 병렬 조회
   const [basic, popularityData, statData, unionData] = await Promise.all([
     nexonFetch(`/maplestory/v1/character/basic?${q}`),
     nexonFetch(`/maplestory/v1/character/popularity?${q}`),
@@ -415,7 +445,7 @@ export async function fetchCharacterSummary(name: string): Promise<CharacterSumm
     (s: { stat_name: string }) => s.stat_name === "전투력"
   )?.stat_value ?? "0"
 
-  return {
+  const result: CharacterSummary = {
     name:           basic.character_name,
     world:          basic.world_name,
     characterClass: basic.character_class,
@@ -429,4 +459,6 @@ export async function fetchCharacterSummary(name: string): Promise<CharacterSumm
     unionLevel:     unionData?.union_level ?? null,
     unionGrade:     unionData?.union_grade ?? null,
   }
+  summaryCache.set(name, { data: result, ts: Date.now() })
+  return result
 }
