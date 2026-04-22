@@ -162,10 +162,12 @@ export async function handleEquipButton(interaction: ButtonInteraction, charName
         if (sf) lines.push(`**${sf}**`)
 
         if (item.potentials?.length > 0) {
-          lines.push(`\n잠재  ${item.potentials.join(" · ")}`)
+          lines.push(`\n**잠재능력**${item.potential ? ` : ${item.potential}` : ""}`)
+          item.potentials.forEach(p => lines.push(`■ ${p}`))
         }
         if (item.additionalPotentials?.length > 0) {
-          lines.push(`에디  ${item.additionalPotentials.join(" · ")}`)
+          lines.push(`\n**에디셔널 잠재능력**${item.additionalPotential ? ` : ${item.additionalPotential}` : ""}`)
+          item.additionalPotentials.forEach(p => lines.push(`■ ${p}`))
         }
 
         const title       = (item.name || item.slot || "장비").slice(0, 256)
