@@ -33,12 +33,9 @@ async function nexonFetch(path: string, keyIndex = 0): Promise<any> {
     headers: { "x-nxopen-api-key": key },
   })
   if (!res.ok) {
-    if (res.status === 429 && keyIndex + 1 < API_KEYS.length) {
-      // 다음 키로 재시도
-      return nexonFetch(path, keyIndex + 1)
-    }
-    if (res.status === 429 && keyIndex + 1 >= API_KEYS.length) {
-      await new Promise((r) => setTimeout(r, 2000))
+    if (res.status === 429) {
+      if (keyIndex + 1 < API_KEYS.length) return nexonFetch(path, keyIndex + 1)
+      await new Promise(r => setTimeout(r, 2000))
       return nexonFetch(path, 0)
     }
     console.error(`❌ Nexon API 오류 [${res.status}] ${path}`)
@@ -131,25 +128,6 @@ export async function fetchEquipment(name: string): Promise<EquipItem[] | null> 
       totalStats,
     }
   })
-}
-
-export async function fetchImageAsBase64(url: string): Promise<string> {
-  if (!url) return ""
-  try {
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), 5000)
-    const res = await fetch(url, {
-      headers: { "x-nxopen-api-key": API_KEYS[0] },
-      signal: controller.signal,
-    })
-    clearTimeout(timer)
-    if (!res.ok) return ""
-    const mime = res.headers.get("content-type") ?? "image/png"
-    const buf = Buffer.from(await res.arrayBuffer())
-    return `data:${mime};base64,${buf.toString("base64")}`
-  } catch {
-    return ""
-  }
 }
 
 export interface HexaCore {

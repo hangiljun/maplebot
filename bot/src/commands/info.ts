@@ -23,6 +23,13 @@ export const data = new SlashCommandBuilder()
   )
 
 
+function formatNum(n: number): string {
+  if (n >= 1_000_000_000_000) return `${(n / 1_000_000_000_000).toFixed(2)}조`
+  if (n >= 100_000_000)       return `${(n / 100_000_000).toFixed(2)}억`
+  if (n >= 10_000)            return `${(n / 10_000).toFixed(1)}만`
+  return n.toLocaleString()
+}
+
 function formatPower(value: string | number): string {
   const num = Number(value)
   if (!num) return "0"
@@ -406,13 +413,6 @@ export async function handleDojangButton(interaction: ButtonInteraction, charNam
       "1": "자동 종료", "2": "수동 종료", "3": "시간 초과", "9": "기타 종료",
     }
     const endLabel = END_TYPE[result.endType] ?? result.endType
-
-    const formatNum = (n: number) => {
-      if (n >= 1_000_000_000_000) return `${(n / 1_000_000_000_000).toFixed(2)}조`
-      if (n >= 100_000_000) return `${(n / 100_000_000).toFixed(2)}억`
-      if (n >= 10_000) return `${(n / 10_000).toFixed(1)}만`
-      return n.toLocaleString()
-    }
 
     const dateStr = result.registerDate ? result.registerDate.split("T")[0] : "-"
 
