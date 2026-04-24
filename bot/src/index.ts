@@ -3,6 +3,7 @@ import * as dotenv from "dotenv"
 import * as infoCommand  from "./commands/info"
 import * as unionCommand from "./commands/union"
 import * as linkCommand  from "./commands/link"
+import { startEventPoller } from "./eventNotify"
 
 dotenv.config()
 
@@ -10,6 +11,7 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] })
 
 client.once(Events.ClientReady, (c) => {
   console.log(`✅ ${c.user.tag} 봇 온라인!`)
+  startEventPoller(client)
 })
 
 client.on(Events.InteractionCreate, async (interaction) => {
