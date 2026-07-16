@@ -27,10 +27,10 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      const stored = localStorage.getItem('bookmarkVisitHistory');
-      if (stored) {
-        setVisitHistory(JSON.parse(stored));
-      }
+      fetch('/api/bookmark-visits')
+        .then(res => res.json())
+        .then(data => setVisitHistory(data))
+        .catch(err => console.error('Failed to load visit history:', err));
     }
   }, [isAuthenticated]);
 
@@ -45,9 +45,15 @@ export default function AdminPage() {
   };
 
   const handleVisit = (id: string) => {
-    const updated = { ...visitHistory, [id]: new Date().toISOString() };
+    const timestamp = new Date().toISOString();
+    const updated = { ...visitHistory, [id]: timestamp };
     setVisitHistory(updated);
-    localStorage.setItem('bookmarkVisitHistory', JSON.stringify(updated));
+
+    fetch('/api/bookmark-visits', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bookmarkId: id })
+    }).catch(err => console.error('Failed to save visit:', err));
   };
 
   const formatLastVisited = (id: string) => {
