@@ -7,6 +7,7 @@ interface Bookmark {
   name: string;
   url: string;
   createdAt: string;
+  lastVisited?: string;
 }
 
 export default function AdminPage() {
@@ -63,6 +64,32 @@ export default function AdminPage() {
     const updated = bookmarks.filter(b => b.id !== id);
     setBookmarks(updated);
     localStorage.setItem('adminBookmarks', JSON.stringify(updated));
+  };
+
+  const handleVisit = (id: string) => {
+    const updated = bookmarks.map(b =>
+      b.id === id ? { ...b, lastVisited: new Date().toISOString() } : b
+    );
+    setBookmarks(updated);
+    localStorage.setItem('adminBookmarks', JSON.stringify(updated));
+  };
+
+  const formatLastVisited = (lastVisited?: string) => {
+    if (!lastVisited) return '방문 기록 없음';
+
+    const now = new Date();
+    const visited = new Date(lastVisited);
+    const diffMs = now.getTime() - visited.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return '방금 전';
+    if (diffMins < 60) return `${diffMins}분 전`;
+    if (diffHours < 24) return `${diffHours}시간 전`;
+    if (diffDays < 7) return `${diffDays}일 전`;
+
+    return visited.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
   };
 
   if (!isAuthenticated) {
@@ -317,11 +344,19 @@ export default function AdminPage() {
                         display: 'block',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap'
+                        whiteSpace: 'nowrap',
+                        marginBottom: '4px'
                       }}
                     >
                       {bookmark.url}
                     </a>
+                    <p style={{
+                      fontSize: '11px',
+                      color: bookmark.lastVisited ? '#10B981' : '#9CA3AF',
+                      margin: 0
+                    }}>
+                      🕒 {formatLastVisited(bookmark.lastVisited)}
+                    </p>
                   </div>
 
                   <div style={{ display: 'flex', gap: '6px' }}>
@@ -329,6 +364,7 @@ export default function AdminPage() {
                       href={bookmark.url}
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={() => handleVisit(bookmark.id)}
                       style={{
                         flex: 1,
                         padding: '8px',
