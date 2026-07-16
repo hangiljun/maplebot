@@ -161,27 +161,27 @@ export default function AdminPage() {
     <div style={{
       minHeight: '100vh',
       background: '#F3F4F6',
-      padding: '40px 20px'
+      padding: '20px'
     }}>
-      <main style={{ maxWidth: '1000px', margin: '0 auto' }}>
+      <main style={{ maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '32px'
+          marginBottom: '20px'
         }}>
-          <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#1F2937' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#1F2937' }}>
             📚 즐겨찾기 관리
           </h1>
           <button
             onClick={() => setIsAuthenticated(false)}
             style={{
-              padding: '10px 20px',
+              padding: '8px 16px',
               background: '#EF4444',
               color: 'white',
               border: 'none',
-              borderRadius: '8px',
-              fontSize: '14px',
+              borderRadius: '6px',
+              fontSize: '13px',
               fontWeight: '600',
               cursor: 'pointer'
             }}
@@ -192,111 +192,117 @@ export default function AdminPage() {
 
         <div style={{
           background: '#FFFFFF',
-          padding: '32px',
-          borderRadius: '12px',
+          padding: '20px',
+          borderRadius: '8px',
           boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-          marginBottom: '32px'
+          marginBottom: '20px'
         }}>
-          <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '24px', color: '#1F2937' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px', color: '#1F2937' }}>
             새 북마크 추가
           </h2>
 
           <form onSubmit={handleAddBookmark}>
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>
-                사이트 이름
-              </label>
-              <input
-                type="text"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                placeholder="예: Google"
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '2px solid #E5E7EB',
-                  borderRadius: '8px',
-                  fontSize: '16px',
-                  outline: 'none'
-                }}
-              />
-            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '12px', alignItems: 'end' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px', color: '#374151' }}>
+                  사이트 이름
+                </label>
+                <input
+                  type="text"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="예: Google"
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '2px solid #E5E7EB',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    outline: 'none'
+                  }}
+                />
+              </div>
 
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', marginBottom: '8px', color: '#374151' }}>
-                웹 주소 (URL)
-              </label>
-              <input
-                type="url"
-                value={newUrl}
-                onChange={(e) => setNewUrl(e.target.value)}
-                placeholder="https://example.com"
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px', color: '#374151' }}>
+                  웹 주소 (URL)
+                </label>
+                <input
+                  type="url"
+                  value={newUrl}
+                  onChange={(e) => setNewUrl(e.target.value)}
+                  placeholder="https://example.com"
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '2px solid #E5E7EB',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    outline: 'none'
+                  }}
+                />
+              </div>
+
+              <button
+                type="submit"
                 style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '2px solid #E5E7EB',
-                  borderRadius: '8px',
-                  fontSize: '16px',
-                  outline: 'none'
+                  padding: '10px 24px',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
                 }}
-              />
+              >
+                추가
+              </button>
             </div>
 
             {error && (
-              <p style={{ color: '#EF4444', fontSize: '14px', marginBottom: '16px' }}>
+              <p style={{ color: '#EF4444', fontSize: '13px', marginTop: '12px' }}>
                 {error}
               </p>
             )}
-
-            <button
-              type="submit"
-              style={{
-                padding: '12px 32px',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '16px',
-                fontWeight: '600',
-                cursor: 'pointer'
-              }}
-            >
-              추가
-            </button>
           </form>
         </div>
 
         <div style={{
           background: '#FFFFFF',
-          padding: '32px',
-          borderRadius: '12px',
+          padding: '20px',
+          borderRadius: '8px',
           boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
         }}>
-          <h2 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '24px', color: '#1F2937' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px', color: '#1F2937' }}>
             저장된 북마크 ({bookmarks.length})
           </h2>
 
           {bookmarks.length === 0 ? (
-            <p style={{ color: '#9CA3AF', textAlign: 'center', padding: '40px 20px' }}>
+            <p style={{ color: '#9CA3AF', textAlign: 'center', padding: '30px 20px' }}>
               저장된 북마크가 없습니다.
             </p>
           ) : (
-            <div style={{ display: 'grid', gap: '16px' }}>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: '12px'
+            }}>
               {bookmarks.map((bookmark) => (
                 <div
                   key={bookmark.id}
                   style={{
                     display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '16px',
+                    flexDirection: 'column',
+                    padding: '12px',
                     border: '1px solid #E5E7EB',
                     borderRadius: '8px',
                     transition: 'all 0.2s'
                   }}
                 >
-                  <div style={{ flex: 1 }}>
-                    <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '4px', color: '#1F2937' }}>
+                  <div style={{ marginBottom: '10px' }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '4px', color: '#1F2937' }}>
                       {bookmark.name}
                     </h3>
                     <a
@@ -305,30 +311,36 @@ export default function AdminPage() {
                       rel="noopener noreferrer"
                       style={{
                         color: '#667eea',
-                        fontSize: '14px',
+                        fontSize: '12px',
                         textDecoration: 'none',
-                        wordBreak: 'break-all'
+                        wordBreak: 'break-all',
+                        display: 'block',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
                       }}
                     >
                       {bookmark.url}
                     </a>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '8px', marginLeft: '16px' }}>
+                  <div style={{ display: 'flex', gap: '6px' }}>
                     <a
                       href={bookmark.url}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
-                        padding: '8px 16px',
+                        flex: 1,
+                        padding: '8px',
                         background: '#10B981',
                         color: 'white',
                         border: 'none',
                         borderRadius: '6px',
-                        fontSize: '14px',
+                        fontSize: '13px',
                         fontWeight: '600',
                         textDecoration: 'none',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        textAlign: 'center'
                       }}
                     >
                       방문
@@ -336,12 +348,13 @@ export default function AdminPage() {
                     <button
                       onClick={() => handleDelete(bookmark.id)}
                       style={{
-                        padding: '8px 16px',
+                        flex: 1,
+                        padding: '8px',
                         background: '#EF4444',
                         color: 'white',
                         border: 'none',
                         borderRadius: '6px',
-                        fontSize: '14px',
+                        fontSize: '13px',
                         fontWeight: '600',
                         cursor: 'pointer'
                       }}
@@ -355,8 +368,8 @@ export default function AdminPage() {
           )}
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: '32px' }}>
-          <a href="/" style={{ color: '#667eea', textDecoration: 'none', fontWeight: '600' }}>
+        <div style={{ textAlign: 'center', marginTop: '20px' }}>
+          <a href="/" style={{ color: '#667eea', textDecoration: 'none', fontWeight: '600', fontSize: '14px' }}>
             ← 홈으로 돌아가기
           </a>
         </div>
