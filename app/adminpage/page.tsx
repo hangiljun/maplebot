@@ -11,9 +11,12 @@ interface Bookmark {
 
 // 여기에 북마크를 추가/수정/삭제하세요
 const BOOKMARKS: Omit<Bookmark, 'lastVisited'>[] = [
-  { id: '1', name: '메이플아이템', url: 'https://www.maplestoryitem.com' },
-  { id: '2', name: '메이플샤요', url: 'https://maplesayo.com/' },
-  { id: '3', name: '한글메이플검사', url: 'https://www.메이플검사.com' },
+  { id: '1', name: '메이플 허브', url: 'https://www.maplehub.co.kr' },
+  { id: '2', name: '한글메이플 급처', url: 'https://www.메이플급처.com' },
+  { id: '3', name: '메이플 사요', url: 'https://maplesayo.com' },
+  { id: '4', name: '메이플스토리 아이템', url: 'https://www.maplestoryitem.com' },
+  { id: '5', name: '메이플 아이템', url: 'https://mapleitem.co.kr/' },
+  { id: '6', name: '메이플디스코드', url: 'https://www.maplediscord.com' },
 ];
 
 export default function AdminPage() {
