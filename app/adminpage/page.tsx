@@ -6,23 +6,27 @@ interface Bookmark {
   id: string;
   name: string;
   url: string;
-  createdAt: string;
   lastVisited?: string;
 }
+
+// 여기에 북마크를 추가/수정/삭제하세요
+const BOOKMARKS: Omit<Bookmark, 'lastVisited'>[] = [
+  { id: '1', name: '메이플아이템', url: 'https://www.maplestoryitem.com' },
+  { id: '2', name: '메이플샤요', url: 'https://maplesayo.com/' },
+  { id: '3', name: '한글메이플검사', url: 'https://www.메이플검사.com' },
+];
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
-  const [newName, setNewName] = useState('');
-  const [newUrl, setNewUrl] = useState('');
+  const [visitHistory, setVisitHistory] = useState<Record<string, string>>({});
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (isAuthenticated) {
-      const stored = localStorage.getItem('adminBookmarks');
+      const stored = localStorage.getItem('bookmarkVisitHistory');
       if (stored) {
-        setBookmarks(JSON.parse(stored));
+        setVisitHistory(JSON.parse(stored));
       }
     }
   }, [isAuthenticated]);
@@ -37,44 +41,14 @@ export default function AdminPage() {
     }
   };
 
-  const handleAddBookmark = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newName.trim() || !newUrl.trim()) {
-      setError('사이트 이름과 URL을 모두 입력해주세요.');
-      return;
-    }
-
-    const bookmark: Bookmark = {
-      id: Date.now().toString(),
-      name: newName.trim(),
-      url: newUrl.trim(),
-      createdAt: new Date().toISOString(),
-    };
-
-    const updated = [...bookmarks, bookmark];
-    setBookmarks(updated);
-    localStorage.setItem('adminBookmarks', JSON.stringify(updated));
-
-    setNewName('');
-    setNewUrl('');
-    setError('');
-  };
-
-  const handleDelete = (id: string) => {
-    const updated = bookmarks.filter(b => b.id !== id);
-    setBookmarks(updated);
-    localStorage.setItem('adminBookmarks', JSON.stringify(updated));
-  };
-
   const handleVisit = (id: string) => {
-    const updated = bookmarks.map(b =>
-      b.id === id ? { ...b, lastVisited: new Date().toISOString() } : b
-    );
-    setBookmarks(updated);
-    localStorage.setItem('adminBookmarks', JSON.stringify(updated));
+    const updated = { ...visitHistory, [id]: new Date().toISOString() };
+    setVisitHistory(updated);
+    localStorage.setItem('bookmarkVisitHistory', JSON.stringify(updated));
   };
 
-  const formatLastVisited = (lastVisited?: string) => {
+  const formatLastVisited = (id: string) => {
+    const lastVisited = visitHistory[id];
     if (!lastVisited) return '방문 기록 없음';
 
     const now = new Date();
@@ -197,9 +171,14 @@ export default function AdminPage() {
           alignItems: 'center',
           marginBottom: '20px'
         }}>
-          <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#1F2937' }}>
-            📚 즐겨찾기 관리
-          </h1>
+          <div>
+            <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#1F2937', marginBottom: '4px' }}>
+              📚 즐겨찾기
+            </h1>
+            <p style={{ fontSize: '13px', color: '#6B7280', margin: 0 }}>
+              북마크 추가/삭제는 코드를 직접 수정하세요
+            </p>
+          </div>
           <button
             onClick={() => setIsAuthenticated(false)}
             style={{
@@ -221,187 +200,83 @@ export default function AdminPage() {
           background: '#FFFFFF',
           padding: '20px',
           borderRadius: '8px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-          marginBottom: '20px'
-        }}>
-          <h2 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px', color: '#1F2937' }}>
-            새 북마크 추가
-          </h2>
-
-          <form onSubmit={handleAddBookmark}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '12px', alignItems: 'end' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px', color: '#374151' }}>
-                  사이트 이름
-                </label>
-                <input
-                  type="text"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  placeholder="예: Google"
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '2px solid #E5E7EB',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    outline: 'none'
-                  }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', marginBottom: '6px', color: '#374151' }}>
-                  웹 주소 (URL)
-                </label>
-                <input
-                  type="url"
-                  value={newUrl}
-                  onChange={(e) => setNewUrl(e.target.value)}
-                  placeholder="https://example.com"
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '2px solid #E5E7EB',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    outline: 'none'
-                  }}
-                />
-              </div>
-
-              <button
-                type="submit"
-                style={{
-                  padding: '10px 24px',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                추가
-              </button>
-            </div>
-
-            {error && (
-              <p style={{ color: '#EF4444', fontSize: '13px', marginTop: '12px' }}>
-                {error}
-              </p>
-            )}
-          </form>
-        </div>
-
-        <div style={{
-          background: '#FFFFFF',
-          padding: '20px',
-          borderRadius: '8px',
           boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
         }}>
           <h2 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px', color: '#1F2937' }}>
-            저장된 북마크 ({bookmarks.length})
+            전체 북마크 ({BOOKMARKS.length})
           </h2>
 
-          {bookmarks.length === 0 ? (
-            <p style={{ color: '#9CA3AF', textAlign: 'center', padding: '30px 20px' }}>
-              저장된 북마크가 없습니다.
-            </p>
-          ) : (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '12px'
-            }}>
-              {bookmarks.map((bookmark) => (
-                <div
-                  key={bookmark.id}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '12px'
+          }}>
+            {BOOKMARKS.map((bookmark) => (
+              <div
+                key={bookmark.id}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  padding: '12px',
+                  border: '1px solid #E5E7EB',
+                  borderRadius: '8px',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <div style={{ marginBottom: '10px' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '4px', color: '#1F2937' }}>
+                    {bookmark.name}
+                  </h3>
+                  <a
+                    href={bookmark.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      color: '#667eea',
+                      fontSize: '12px',
+                      textDecoration: 'none',
+                      wordBreak: 'break-all',
+                      display: 'block',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      marginBottom: '4px'
+                    }}
+                  >
+                    {bookmark.url}
+                  </a>
+                  <p style={{
+                    fontSize: '11px',
+                    color: visitHistory[bookmark.id] ? '#10B981' : '#9CA3AF',
+                    margin: 0
+                  }}>
+                    🕒 {formatLastVisited(bookmark.id)}
+                  </p>
+                </div>
+
+                <a
+                  href={bookmark.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => handleVisit(bookmark.id)}
                   style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    padding: '12px',
-                    border: '1px solid #E5E7EB',
-                    borderRadius: '8px',
-                    transition: 'all 0.2s'
+                    padding: '8px',
+                    background: '#10B981',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    textDecoration: 'none',
+                    cursor: 'pointer',
+                    textAlign: 'center'
                   }}
                 >
-                  <div style={{ marginBottom: '10px' }}>
-                    <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '4px', color: '#1F2937' }}>
-                      {bookmark.name}
-                    </h3>
-                    <a
-                      href={bookmark.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        color: '#667eea',
-                        fontSize: '12px',
-                        textDecoration: 'none',
-                        wordBreak: 'break-all',
-                        display: 'block',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        marginBottom: '4px'
-                      }}
-                    >
-                      {bookmark.url}
-                    </a>
-                    <p style={{
-                      fontSize: '11px',
-                      color: bookmark.lastVisited ? '#10B981' : '#9CA3AF',
-                      margin: 0
-                    }}>
-                      🕒 {formatLastVisited(bookmark.lastVisited)}
-                    </p>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '6px' }}>
-                    <a
-                      href={bookmark.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => handleVisit(bookmark.id)}
-                      style={{
-                        flex: 1,
-                        padding: '8px',
-                        background: '#10B981',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontSize: '13px',
-                        fontWeight: '600',
-                        textDecoration: 'none',
-                        cursor: 'pointer',
-                        textAlign: 'center'
-                      }}
-                    >
-                      방문
-                    </a>
-                    <button
-                      onClick={() => handleDelete(bookmark.id)}
-                      style={{
-                        flex: 1,
-                        padding: '8px',
-                        background: '#EF4444',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontSize: '13px',
-                        fontWeight: '600',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      삭제
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                  방문
+                </a>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div style={{ textAlign: 'center', marginTop: '20px' }}>
