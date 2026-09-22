@@ -72,7 +72,7 @@ export default function AdminPage() {
   const [copied, setCopied] = useState(false);
 
   const [formData, setFormData] = useState<PromptFormData>({
-    siteUrl: '',
+    siteUrl: '선택하세요',
     adminUrl: '',
     category: '',
     codeLocation: '',
@@ -172,7 +172,7 @@ export default function AdminPage() {
 
 ## 1. 사이트 및 작업 정보
 
-* 사이트 주소: ${formData.siteUrl || '[입력]'}
+* 사이트 주소: ${formData.siteUrl === '선택하세요' ? '[입력]' : formData.siteUrl}
 * 관리자 페이지 주소: ${formData.adminUrl || '[입력]'}
 * 게시판/카테고리: ${formData.category || '[입력]'}
 * 코드 위치: ${formData.codeLocation || '[입력]'}
@@ -710,7 +710,20 @@ B. 검토 후 바로 게시
                   1. 사이트 및 작업 정보
                 </h3>
                 <div style={{ display: 'grid', gap: '12px' }}>
-                  <InputField label="사이트 주소" value={formData.siteUrl} onChange={(v) => updateFormData('siteUrl', v)} />
+                  <SelectField
+                    label="사이트 주소"
+                    value={formData.siteUrl}
+                    onChange={(v) => updateFormData('siteUrl', v)}
+                    options={[
+                      '선택하세요',
+                      'https://www.maplehub.co.kr',
+                      'https://www.메이플급처.com',
+                      'https://maplesayo.com',
+                      'https://www.maplestoryitem.com',
+                      'https://mapleitem.co.kr/',
+                      'https://www.maplediscord.com'
+                    ]}
+                  />
                   <InputField label="관리자 페이지 주소" value={formData.adminUrl} onChange={(v) => updateFormData('adminUrl', v)} />
                   <InputField label="게시판/카테고리" value={formData.category} onChange={(v) => updateFormData('category', v)} />
                   <InputField label="코드 위치 (파일 경로)" value={formData.codeLocation} onChange={(v) => updateFormData('codeLocation', v)} placeholder="예: /app/notice/page.tsx" />
