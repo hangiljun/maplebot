@@ -13,6 +13,7 @@ interface PromptFormData {
   siteUrl: string;
   adminUrl: string;
   category: string;
+  codeLocation: string;
   siteType: string;
   targetAudience: string;
   postCount: string;
@@ -73,6 +74,7 @@ export default function AdminPage() {
     siteUrl: '',
     adminUrl: '',
     category: '',
+    codeLocation: '',
     siteType: '메이플스토리 정보 제공',
     targetAudience: '메이플스토리 초보자',
     postCount: '1개',
@@ -171,6 +173,7 @@ export default function AdminPage() {
 * 사이트 주소: ${formData.siteUrl || '[입력]'}
 * 관리자 페이지 주소: ${formData.adminUrl || '[입력]'}
 * 게시판/카테고리: ${formData.category || '[입력]'}
+* 코드 위치: ${formData.codeLocation || '[입력]'}
 * 사이트 성격: ${formData.siteType}
 * 주요 독자: ${formData.targetAudience}
 * 작성할 게시물 수: ${formData.postCount}
@@ -708,6 +711,7 @@ B. 검토 후 바로 게시
                   <InputField label="사이트 주소" value={formData.siteUrl} onChange={(v) => updateFormData('siteUrl', v)} />
                   <InputField label="관리자 페이지 주소" value={formData.adminUrl} onChange={(v) => updateFormData('adminUrl', v)} />
                   <InputField label="게시판/카테고리" value={formData.category} onChange={(v) => updateFormData('category', v)} />
+                  <InputField label="코드 위치 (파일 경로)" value={formData.codeLocation} onChange={(v) => updateFormData('codeLocation', v)} placeholder="예: /app/notice/page.tsx" />
                   <SelectField
                     label="사이트 성격"
                     value={formData.siteType}
@@ -902,7 +906,7 @@ interface InputFieldProps {
 function InputField({ label, value, onChange, placeholder }: InputFieldProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-      <label style={{ fontSize: '13px', fontWeight: '600', color: '#374151' }}>
+      <label style={{ fontSize: '13px', fontWeight: '600', color: '#111827' }}>
         {label}
       </label>
       <input
@@ -915,6 +919,8 @@ function InputField({ label, value, onChange, placeholder }: InputFieldProps) {
           border: '1px solid #E5E7EB',
           borderRadius: '6px',
           fontSize: '14px',
+          color: '#111827',
+          fontWeight: '500',
           outline: 'none',
           transition: 'border-color 0.2s'
         }}
@@ -935,7 +941,7 @@ interface SelectFieldProps {
 function SelectField({ label, value, onChange, options }: SelectFieldProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-      <label style={{ fontSize: '13px', fontWeight: '600', color: '#374151' }}>
+      <label style={{ fontSize: '13px', fontWeight: '600', color: '#111827' }}>
         {label}
       </label>
       <select
@@ -946,6 +952,8 @@ function SelectField({ label, value, onChange, options }: SelectFieldProps) {
           border: '1px solid #E5E7EB',
           borderRadius: '6px',
           fontSize: '14px',
+          color: '#111827',
+          fontWeight: '500',
           outline: 'none',
           transition: 'border-color 0.2s',
           cursor: 'pointer',
