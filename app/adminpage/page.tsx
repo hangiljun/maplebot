@@ -43,6 +43,7 @@ interface PromptFormData {
   coreKeyword: string;
   subKeyword: string;
   tagCount: string;
+  thumbnailEnabled: boolean;
   thumbnailSize: string;
   thumbnailRatio: string;
   thumbnailFormat: string;
@@ -104,6 +105,7 @@ export default function AdminPage() {
     coreKeyword: '',
     subKeyword: '',
     tagCount: '15개',
+    thumbnailEnabled: true,
     thumbnailSize: '579 × 579px',
     thumbnailRatio: '정사각형',
     thumbnailFormat: 'PNG',
@@ -322,7 +324,7 @@ export default function AdminPage() {
 * 연도, 날짜, 패치 버전은 필요한 경우에만 정확하게 넣으세요.
 * 태그는 실제 본문과 관련된 단어로 작성하세요.
 * 사이트에 검색 설명 입력란이 있으면 글의 핵심을 요약한 설명도 작성하세요.
-
+${formData.thumbnailEnabled ? `
 ## 9. 썸네일 제작
 
 글의 핵심 내용을 한눈에 이해할 수 있는 썸네일 1개를 제작하세요.
@@ -345,7 +347,7 @@ export default function AdminPage() {
 * 공식 공지나 공식 제작물로 오해하게 만드는 표현은 피하세요.
 * 다른 사이트의 썸네일을 그대로 가져오지 마세요.
 * 제작 후 한글 오탈자, 글자 깨짐, 잘림과 최종 파일 크기를 확인하세요.
-
+` : ''}
 ## 10. 등록 전 검토
 
 관리자 페이지에 등록하기 전에 다음 항목을 확인하고 발견한 오류를 수정하세요.
@@ -427,7 +429,7 @@ B. 검토 후 바로 게시
     });
   };
 
-  const updateFormData = (field: keyof PromptFormData, value: string) => {
+  const updateFormData = (field: keyof PromptFormData, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -831,10 +833,41 @@ B. 검토 후 바로 게시
 
               {/* 9. 썸네일 제작 */}
               <div>
-                <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: '#1F2937' }}>
-                  9. 썸네일 제작
-                </h3>
-                <div style={{ display: 'grid', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                  <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#1F2937', margin: 0 }}>
+                    9. 썸네일 제작
+                  </h3>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                    <span style={{ fontSize: '13px', fontWeight: '600', color: formData.thumbnailEnabled ? '#10B981' : '#6B7280' }}>
+                      {formData.thumbnailEnabled ? 'ON' : 'OFF'}
+                    </span>
+                    <div
+                      onClick={() => updateFormData('thumbnailEnabled', !formData.thumbnailEnabled)}
+                      style={{
+                        width: '48px',
+                        height: '24px',
+                        borderRadius: '12px',
+                        background: formData.thumbnailEnabled ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)' : '#D1D5DB',
+                        position: 'relative',
+                        transition: 'background 0.3s',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <div style={{
+                        width: '20px',
+                        height: '20px',
+                        borderRadius: '50%',
+                        background: 'white',
+                        position: 'absolute',
+                        top: '2px',
+                        left: formData.thumbnailEnabled ? '26px' : '2px',
+                        transition: 'left 0.3s',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                      }} />
+                    </div>
+                  </label>
+                </div>
+                <div style={{ display: 'grid', gap: '12px', opacity: formData.thumbnailEnabled ? 1 : 0.5, pointerEvents: formData.thumbnailEnabled ? 'auto' : 'none' }}>
                   <InputField label="최종 크기" value={formData.thumbnailSize} onChange={(v) => updateFormData('thumbnailSize', v)} />
                   <InputField label="비율" value={formData.thumbnailRatio} onChange={(v) => updateFormData('thumbnailRatio', v)} />
                   <SelectField
