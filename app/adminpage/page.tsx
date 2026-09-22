@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 type ChoiceKey = 'site' | 'category' | 'audience' | 'scope' | 'publish' | 'type' | 'topic' | 'purpose' | 'action' | 'tone' | 'length' | 'tags';
 type Choices = Record<ChoiceKey, string>;
-type Extras = { adminUrl: string; codeLocation: string; include: string; exclude: string; link: string; keyword: string; notes: string };
+type Extras = { adminUrl: string; codeLocation: string; include: string; exclude: string; link: string; referenceUrl: string; keyword: string; notes: string };
 
 const CUSTOM = '직접 작성';
 const sites = [
@@ -32,7 +32,7 @@ const initialChoices: Choices = {
   topic: '최신 정보를 조사해 주제 선정', purpose: '정확한 정보 전달', action: '없음',
   tone: '친근한 존댓말', length: '1,500~2,000자', tags: '관련 태그 5개 이내',
 };
-const initialExtras: Extras = { adminUrl: '', codeLocation: '', include: '', exclude: '', link: '', keyword: '', notes: '' };
+const initialExtras: Extras = { adminUrl: '', codeLocation: '', include: '', exclude: '', link: '', referenceUrl: '', keyword: '', notes: '' };
 
 const options: Record<ChoiceKey, string[]> = {
   site: sites,
@@ -73,6 +73,9 @@ function makePrompt(choices: Choices, custom: Record<ChoiceKey, string>, extras:
   const get = (key: ChoiceKey) => (choices[key] === CUSTOM ? custom[key].trim() : choices[key]);
   const site = get('site');
   const scope = get('scope');
+  const contentType = get('type');
+  const topic = get('topic');
+  const eventRelated = contentType.includes('이벤트') || topic.includes('이벤트');
   const uploads = scope.includes('관리자 페이지') || scope.includes('등록') || scope.includes('게시');
   const publish = scope.includes('공개 게시') ? '검토 후 바로 게시' : get('publish');
   const lines = [
@@ -102,14 +105,27 @@ function makePrompt(choices: Choices, custom: Record<ChoiceKey, string>, extras:
   if (extras.link.trim()) lines.push('', '## 넣을 링크', extras.link.trim());
   if (extras.exclude.trim()) lines.push('', '## 제외할 내용', extras.exclude.trim());
   if (extras.notes.trim()) lines.push('', '## 추가 요청', extras.notes.trim());
+  lines.push('', '## 참고 자료',
+    `- 먼저 선택한 사이트(${site || '[사이트 주소]'})의 기존 게시물과 실제 제공 기능을 확인하세요.`,
+    '- 메이플스토리 공식 공지사항: https://maplestory.nexon.com/News/Notice/All',
+  );
+  if (eventRelated) lines.push('- 메이플스토리 공식 진행 중 이벤트: https://maplestory.nexon.com/News/Event/Ongoing');
+  if (contentType.includes('패치') || topic.includes('업데이트') || topic.includes('패치')) lines.push('- 메이플스토리 공식 업데이트: https://maplestory.nexon.com/News/Update');
+  if (contentType.includes('가이드') || contentType.includes('공략')) lines.push('- 메이플스토리 공식 게임 가이드: https://maplestory.nexon.com/Guide/N23GameInformation');
+  if (extras.referenceUrl.trim()) lines.push(`- 추가 참고 자료: ${extras.referenceUrl.trim()}`);
   lines.push('', '## 작성 기준',
-    '- 현재 확인할 수 있는 자료와 기존 게시물을 살펴보고 사실을 확인하세요.',
-    '- 이벤트·패치 내용은 공식 공지를 우선 사용하고, 공지일과 실제 적용일을 구분하세요.',
+    '- 작업하는 날의 한국 시간을 기준으로 공식 자료의 최신 수정 내용까지 확인하세요.',
+    '- 공식 자료의 내용과 사이트의 기존 게시물을 대조하고, 출처의 제목과 원문 링크를 글 끝에 남기세요.',
+    '- 공지 게시일과 실제 적용일을 구분하세요.',
     '- 테스트월드 정보를 정식 서버에 확정된 내용처럼 쓰지 마세요.',
     '- 확인되지 않은 수치·후기·보장 표현을 만들지 마세요.',
+    '- 선택한 사이트의 기능이나 혜택은 실제 페이지에서 확인한 것만 소개하세요.',
     '- 제목, 핵심 요약, 소제목이 있는 본문, 필요한 출처 순서로 작성하세요.',
     '- 정보가 부족하면 분량을 채우기 위해 같은 내용을 반복하지 마세요.',
   );
+  if (eventRelated) lines.push('- 이벤트 글에는 참여 대상, 참여 기간, 참여 방법, 주요 보상, 주의 사항을 확인해 넣고 참여 기간과 보상 수령 기간을 구분하세요.');
+  if (contentType.includes('가이드') && eventRelated) lines.push('- 이번 글은 이벤트 소식 나열보다 독자가 따라 할 수 있는 참여 가이드에 초점을 맞추세요.');
+  if (get('action') === '사이트 기능 이용') lines.push('- 사이트 기능 이용 안내는 글의 주제와 직접 관련된 실제 기능이 확인된 경우에만 넣으세요.');
   if (get('topic') === '최신 정보를 조사해 주제 선정') lines.push('- 현재 시점의 공식 자료와 기존 글을 확인해 중복되지 않는 주제를 고르세요.');
   if (uploads) lines.push('', '## 관리자 페이지 등록',
     '- 로그인 상태와 권한을 확인하고, 제목·본문·카테고리·태그를 입력하세요.',
@@ -205,7 +221,7 @@ export default function AdminPage() {
           </div></section>
           <section className="section"><h3>2. 글의 방향</h3><div className="fields">{(['type','topic','purpose','action'] as ChoiceKey[]).map(key => <ChoiceField key={key} id={key} label={labels[key]} value={choices[key]} customValue={custom[key]} onChoice={value => updateChoice(key,value)} onCustom={value => updateCustom(key,value)} />)}</div></section>
           <section className="section"><h3>3. 작성 스타일</h3><div className="fields">{(['tone','length','tags'] as ChoiceKey[]).map(key => <ChoiceField key={key} id={key} label={labels[key]} value={choices[key]} customValue={custom[key]} onChoice={value => updateChoice(key,value)} onCustom={value => updateCustom(key,value)} />)}<div className="field"><label htmlFor="keyword">핵심 키워드</label><input id="keyword" value={extras.keyword} onChange={event => updateExtra('keyword',event.target.value)} placeholder="없으면 AI가 주제에 맞게 선정" /></div></div></section>
-          <section className="section"><h3>4. 필요한 내용만 추가</h3><p className="hint">선택지에 없는 요청만 적어 주세요. 비워두면 프롬프트에서 빠집니다.</p><div className="fields" style={{marginTop:14}}><div className="field wide"><label htmlFor="include">반드시 포함할 내용</label><textarea id="include" value={extras.include} onChange={event => updateExtra('include',event.target.value)} /></div><div className="field wide"><label htmlFor="exclude">제외할 내용</label><textarea id="exclude" value={extras.exclude} onChange={event => updateExtra('exclude',event.target.value)} /></div><div className="field wide"><label htmlFor="link">넣을 링크</label><input id="link" value={extras.link} onChange={event => updateExtra('link',event.target.value)} /></div><div className="field wide"><label htmlFor="notes">추가 요청</label><textarea id="notes" value={extras.notes} onChange={event => updateExtra('notes',event.target.value)} /></div></div></section>
+          <section className="section"><h3>4. 필요한 내용만 추가</h3><p className="hint">선택지에 없는 요청만 적어 주세요. 비워두면 프롬프트에서 빠집니다.</p><div className="fields" style={{marginTop:14}}><div className="field wide"><label htmlFor="include">반드시 포함할 내용</label><textarea id="include" value={extras.include} onChange={event => updateExtra('include',event.target.value)} /></div><div className="field wide"><label htmlFor="exclude">제외할 내용</label><textarea id="exclude" value={extras.exclude} onChange={event => updateExtra('exclude',event.target.value)} /></div><div className="field wide"><label htmlFor="referenceUrl">추가 참고 자료 URL</label><input id="referenceUrl" value={extras.referenceUrl} onChange={event => updateExtra('referenceUrl',event.target.value)} placeholder="공식 공지나 직접 확인할 자료가 있다면 입력" /></div><div className="field wide"><label htmlFor="link">본문에 넣을 링크</label><input id="link" value={extras.link} onChange={event => updateExtra('link',event.target.value)} /></div><div className="field wide"><label htmlFor="notes">추가 요청</label><textarea id="notes" value={extras.notes} onChange={event => updateExtra('notes',event.target.value)} /></div></div></section>
         </div>
         <aside className="card preview"><h2>완성된 프롬프트</h2><p>선택을 바꾸면 내용이 바로 갱신됩니다.</p><pre>{prompt}</pre><button className="copy" type="button" onClick={copyPrompt}>{copied ? '복사 완료' : '프롬프트 복사하기'}</button>{copyError && <div className="error" role="alert">{copyError}</div>}</aside>
       </div>}
