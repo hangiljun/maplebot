@@ -14,7 +14,7 @@ const sites = [
   'https://www.maplestoryitem.com',
   'https://mapleitem.co.kr/',
   'https://www.maplediscord.com',
-  'http://maplesam.co.kr/',
+  'https://maplesam.co.kr/',
 ];
 const bookmarks = [
   { name: '메이플 허브', url: sites[0] },
@@ -213,3 +213,4 @@ export default function AdminPage() {
     </main>}
   </div>;
 }
+
