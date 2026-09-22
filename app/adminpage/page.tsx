@@ -19,6 +19,7 @@ interface PromptFormData {
   postCount: string;
   workScope: string;
   publishMethod: string;
+  contentType: string;
   specificTopic: string;
   purpose: string;
   readerGain: string;
@@ -61,6 +62,7 @@ const BOOKMARKS: Omit<Bookmark, 'lastVisited'>[] = [
   { id: '4', name: '메이플스토리 아이템', url: 'https://www.maplestoryitem.com' },
   { id: '5', name: '메이플 아이템', url: 'https://mapleitem.co.kr/' },
   { id: '6', name: '메이플디스코드', url: 'https://www.maplediscord.com' },
+  { id: '7', name: '메이플샘', url: 'https://maplesam.co.kr/' },
 ];
 
 export default function AdminPage() {
@@ -81,6 +83,7 @@ export default function AdminPage() {
     postCount: '1개',
     workScope: '글 작성만',
     publishMethod: 'A. 최종 게시 전 확인받기',
+    contentType: '일반 정보',
     specificTopic: '',
     purpose: '',
     readerGain: '',
@@ -166,9 +169,266 @@ export default function AdminPage() {
   };
 
   const generatePrompt = () => {
-    return `# 웹사이트 콘텐츠 조사·작성·썸네일 제작·업로드 요청
+    // 제목 생성
+    let title = '웹사이트 콘텐츠';
+    if (formData.workScope === '글 작성만') {
+      title = formData.thumbnailEnabled ? '웹사이트 콘텐츠 작성 및 썸네일 제작 요청' : '웹사이트 콘텐츠 작성 요청';
+    } else if (formData.workScope === '글과 썸네일 제작') {
+      title = '웹사이트 콘텐츠 작성 및 썸네일 제작 요청';
+    } else if (formData.workScope === '관리자 페이지 등록까지') {
+      title = formData.thumbnailEnabled
+        ? '웹사이트 콘텐츠 조사·작성·썸네일 제작·업로드 요청'
+        : '웹사이트 콘텐츠 조사·작성·업로드 요청';
+    }
 
-내가 운영하는 웹사이트에 게시할 콘텐츠를 조사하고 작성한 뒤, 썸네일까지 제작하여 관리자 페이지에 등록해 주세요. 아래 조건을 작업 기준으로 사용하세요.
+    // 필수 내용 목록 생성
+    const mustIncludeItems = [
+      formData.mustInclude1,
+      formData.mustInclude2,
+      formData.mustInclude3
+    ].filter(item => item && item.trim());
+
+    // 제외할 내용 목록 생성
+    const excludeItems = [
+      formData.exclude1,
+      formData.exclude2,
+      formData.exclude3
+    ].filter(item => item && item.trim());
+
+    let sectionNumber = 1;
+    let prompt = `# ${title}\n\n`;
+
+    // 1. 사이트 및 작업 정보
+    prompt += `## ${sectionNumber++}. 사이트 및 작업 정보\n\n`;
+
+    if (formData.siteUrl && formData.siteUrl !== '선택하세요') {
+      prompt += `* 사이트 주소: ${formData.siteUrl}\n`;
+    }
+    if (formData.workScope === '관리자 페이지 등록까지') {
+      if (formData.adminUrl) {
+        prompt += `* 관리자 페이지 주소: ${formData.adminUrl}\n`;
+      }
+      if (formData.codeLocation && !formData.codeLocation.startsWith('http')) {
+        prompt += `* 코드 위치: ${formData.codeLocation}\n`;
+      }
+    }
+    if (formData.category) {
+      prompt += `* 게시판/카테고리: ${formData.category}\n`;
+    }
+    prompt += `* 주요 독자: ${formData.targetAudience}\n`;
+    prompt += `* 작업 범위: ${formData.workScope}\n`;
+
+    if (formData.workScope === '관리자 페이지 등록까지') {
+      prompt += `* 게시 방식: ${formData.publishMethod}\n`;
+    }
+
+    prompt += `\n`;
+
+    // 2. 글 주제와 목적
+    prompt += `## ${sectionNumber++}. 글 주제와 목적\n\n`;
+    prompt += `* 글 유형: ${formData.contentType}\n`;
+    if (formData.specificTopic) {
+      prompt += `* 주제: ${formData.specificTopic}\n`;
+    }
+    if (formData.purpose) {
+      prompt += `* 목적: ${formData.purpose}\n`;
+    }
+    if (formData.readerGain) {
+      prompt += `* 독자가 얻을 정보: ${formData.readerGain}\n`;
+    }
+    if (formData.readerAction && formData.readerAction !== '없음') {
+      prompt += `* 독자에게 유도할 행동: ${formData.readerAction}\n`;
+    }
+    prompt += `\n`;
+
+    // 3. 반드시 포함할 내용
+    const hasIncludeContent = mustIncludeItems.length > 0
+      || (formData.requiredPhrase && formData.requiredPhrase !== '없음')
+      || (formData.serviceInfo && formData.serviceInfo !== '없음')
+      || (formData.links && formData.links !== '없음')
+      || (formData.contactMethod && formData.contactMethod !== '없음');
+
+    if (hasIncludeContent) {
+      prompt += `## ${sectionNumber++}. 반드시 포함할 내용\n\n`;
+
+      if (mustIncludeItems.length > 0) {
+        prompt += `본문에 자연스럽게 포함할 내용:\n`;
+        mustIncludeItems.forEach(item => {
+          prompt += `* ${item}\n`;
+        });
+        prompt += `\n`;
+      }
+
+      if (formData.requiredPhrase && formData.requiredPhrase !== '없음') {
+        prompt += `* 반드시 사용할 문구: ${formData.requiredPhrase}\n`;
+      }
+      if (formData.serviceInfo && formData.serviceInfo !== '없음') {
+        prompt += `* 안내할 서비스나 기능: ${formData.serviceInfo}\n`;
+      }
+      if (formData.links && formData.links !== '없음') {
+        prompt += `* 삽입할 링크: ${formData.links}\n`;
+      }
+      if (formData.contactMethod && formData.contactMethod !== '없음') {
+        prompt += `* 문의 방법: ${formData.contactMethod}\n`;
+      }
+      prompt += `\n`;
+    }
+
+    // 4. 제외할 내용
+    const hasExcludeContent = excludeItems.length > 0
+      || (formData.excludeCompany && formData.excludeCompany !== '없음')
+      || (formData.excludeNumbers && formData.excludeNumbers !== '없음')
+      || (formData.excludeWords && formData.excludeWords !== '없음');
+
+    if (hasExcludeContent) {
+      prompt += `## ${sectionNumber++}. 제외할 내용\n\n`;
+
+      if (excludeItems.length > 0) {
+        prompt += `작성하지 말아야 할 내용:\n`;
+        excludeItems.forEach(item => {
+          prompt += `* ${item}\n`;
+        });
+        prompt += `\n`;
+      }
+
+      if (formData.excludeCompany && formData.excludeCompany !== '없음') {
+        prompt += `* 언급하지 않을 업체/사이트: ${formData.excludeCompany}\n`;
+      }
+      if (formData.excludeNumbers && formData.excludeNumbers !== '없음') {
+        prompt += `* 제외할 가격/수치: ${formData.excludeNumbers}\n`;
+      }
+      if (formData.excludeWords && formData.excludeWords !== '없음') {
+        prompt += `* 사용하지 않을 단어/표현: ${formData.excludeWords}\n`;
+      }
+
+      prompt += `\n공통 제외 사항:\n`;
+      prompt += `* 확인되지 않은 소문, 거래 실적, 이용 후기, 회원 수\n`;
+      prompt += `* "무조건 안전", "최고가 보장" 같은 근거 없는 단정\n`;
+      prompt += `* 다른 사이트의 문장이나 이미지 무단 복사\n`;
+      prompt += `* 같은 내용의 불필요한 반복\n`;
+      prompt += `\n`;
+    }
+
+    // 5. 문체·분량·키워드
+    prompt += `## ${sectionNumber++}. 문체·분량·키워드\n\n`;
+    prompt += `* 말투: ${formData.tone}\n`;
+    prompt += `* 분량: 약 ${formData.wordCount}자 (내용이 부족하면 억지로 늘리지 말 것)\n`;
+    if (formData.emoji !== '사용하지 않음') {
+      prompt += `* 이모지: ${formData.emoji}\n`;
+    }
+    if (formData.coreKeyword) {
+      prompt += `* 핵심 키워드: ${formData.coreKeyword}\n`;
+    }
+    if (formData.subKeyword) {
+      prompt += `* 보조 키워드: ${formData.subKeyword}\n`;
+    }
+    prompt += `* 태그: ${formData.tagCount} (본문과 관련된 것만)\n`;
+    prompt += `\n`;
+
+    // 6. 글 유형별 작성 지시
+    prompt += `## ${sectionNumber++}. 작성 지시\n\n`;
+
+    if (formData.contentType === '이벤트·패치') {
+      prompt += `공식 메이플스토리 홈페이지, 공식 업데이트 공지를 우선 사용하세요.\n\n`;
+      prompt += `* 공지 게시일과 실제 적용일을 구분하세요.\n`;
+      prompt += `* 이벤트는 참여 대상, 기간, 참여 방법, 주요 보상을 명확히 작성하세요.\n`;
+      prompt += `* 패치는 적용 날짜와 정식 서버·테스트월드 여부를 표시하세요.\n`;
+      prompt += `* 테스트월드 내용을 정식 서버 확정으로 작성하지 마세요.\n`;
+      prompt += `* 확인할 수 없는 날짜, 수치, 패치 버전은 추측하지 마세요.\n`;
+    } else if (formData.contentType === '홍보·참여 안내') {
+      prompt += `* 참여 목적과 제공 정보를 명확히 전달하세요.\n`;
+      prompt += `* 참여 방법과 링크를 정확하게 안내하세요.\n`;
+      prompt += `* 확인되지 않은 회원 수, 후기, '공식' 여부를 지어내지 마세요.\n`;
+      prompt += `* 과도한 태그나 키워드 반복을 피하세요.\n`;
+    } else {
+      prompt += `* 주제와 관련된 사실을 확인하고 정확하게 작성하세요.\n`;
+      prompt += `* 독자가 이해하기 쉽게 설명하세요.\n`;
+      prompt += `* 참고한 주요 출처를 본문 하단에 남기세요.\n`;
+    }
+
+    prompt += `\n기본 구성:\n`;
+    prompt += `1. 명확한 제목\n`;
+    prompt += `2. 핵심 요약 2-3줄\n`;
+    prompt += `3. 소제목으로 구분한 본문\n`;
+    prompt += `4. 독자가 확인하거나 해야 할 사항\n`;
+    prompt += `\n`;
+
+    if (formData.workScope === '관리자 페이지 등록까지') {
+      prompt += `기존 게시물 중복 확인:\n`;
+      prompt += `* 제목뿐 아니라 주요 내용과 범위가 겹치는지 확인하세요.\n`;
+      prompt += `* 같은 주제를 표현만 바꿔 새 글로 만들지 마세요.\n`;
+      prompt += `\n`;
+    }
+
+    // 7. 썸네일 제작 (토글 ON인 경우)
+    if (formData.thumbnailEnabled) {
+      prompt += `## ${sectionNumber++}. 썸네일 제작\n\n`;
+      prompt += `글의 핵심 내용을 한눈에 보여주는 썸네일 1개를 제작하세요.\n\n`;
+
+      if (formData.thumbnailSize) prompt += `* 크기: ${formData.thumbnailSize}\n`;
+      if (formData.thumbnailFormat) prompt += `* 형식: ${formData.thumbnailFormat}\n`;
+      if (formData.thumbnailStyle) prompt += `* 분위기: ${formData.thumbnailStyle}\n`;
+      if (formData.thumbnailColor) prompt += `* 주요 색상: ${formData.thumbnailColor}\n`;
+      if (formData.thumbnailText) prompt += `* 필수 문구: ${formData.thumbnailText}\n`;
+
+      prompt += `\n제작 시 주의사항:\n`;
+      prompt += `* 작은 화면에서도 글자가 잘 보이게 하세요.\n`;
+      prompt += `* 메이플스토리 관련 글임을 직관적으로 드러내세요.\n`;
+      prompt += `* 공식 제작물로 오해받을 표현은 피하세요.\n`;
+      prompt += `\n`;
+    }
+
+    // 8. 관리자 페이지 등록 (작업 범위에 따라)
+    if (formData.workScope === '관리자 페이지 등록까지') {
+      prompt += `## ${sectionNumber++}. 관리자 페이지 등록\n\n`;
+      if (formData.adminUrl) {
+        prompt += `관리자 페이지 주소: ${formData.adminUrl}\n\n`;
+      }
+      prompt += `등록할 내용:\n`;
+      prompt += `* 제목, 본문, 카테고리, 태그\n`;
+      if (formData.thumbnailEnabled) {
+        prompt += `* 썸네일 이미지\n`;
+      }
+      prompt += `\n확인 사항:\n`;
+      prompt += `* 소제목, 굵은 글씨, 표, 목록이 정상 표시되는지\n`;
+      if (formData.thumbnailEnabled) {
+        prompt += `* 이미지가 정상 업로드되고 표시되는지\n`;
+      }
+      prompt += `* 미리보기로 모바일 화면 확인\n`;
+      prompt += `\n`;
+
+      // 게시 방식
+      if (formData.publishMethod.startsWith('A')) {
+        prompt += `**게시 방식**: 초안 저장 후 확인받기\n`;
+        prompt += `* 공개 게시 버튼은 누르지 마세요.\n`;
+        prompt += `* 검토할 글과 초안/미리보기 링크를 제시하세요.\n`;
+      } else {
+        prompt += `**게시 방식**: 검토 후 바로 게시\n`;
+        prompt += `* 문제가 없으면 공개 게시하세요.\n`;
+        prompt += `* 게시 후 실제 페이지를 열어 확인하세요.\n`;
+        prompt += `* 게시물 주소를 알려주세요.\n`;
+      }
+      prompt += `\n`;
+    }
+
+    // 9. 완료 보고
+    prompt += `## ${sectionNumber++}. 완료 보고\n\n`;
+    prompt += `작업이 끝나면 간단히 보고하세요:\n`;
+    prompt += `* 작성한 글 제목\n`;
+    if (formData.contentType === '이벤트·패치') {
+      prompt += `* 사용한 주요 출처\n`;
+    }
+    if (formData.thumbnailEnabled) {
+      prompt += `* 썸네일 문구\n`;
+    }
+    if (formData.workScope === '관리자 페이지 등록까지') {
+      prompt += `* 게시 상태 (초안 저장 / 공개 게시 완료)\n`;
+      prompt += `* 게시물 주소 (있는 경우)\n`;
+    }
+
+    prompt += `\n확인하지 못한 정보가 있다면 보고에 표시하고, 실제로 수행하지 않은 단계는 완료했다고 말하지 마세요.`;
+
+    return prompt;
 
 ## 1. 사이트 및 작업 정보
 
@@ -721,7 +981,8 @@ B. 검토 후 바로 게시
                       'https://maplesayo.com',
                       'https://www.maplestoryitem.com',
                       'https://mapleitem.co.kr/',
-                      'https://www.maplediscord.com'
+                      'https://www.maplediscord.com',
+                      'https://maplesam.co.kr/'
                     ]}
                   />
                   <InputField label="관리자 페이지 주소" value={formData.adminUrl} onChange={(v) => updateFormData('adminUrl', v)} />
@@ -761,6 +1022,12 @@ B. 검토 후 바로 게시
                   2. 글 주제와 목적
                 </h3>
                 <div style={{ display: 'grid', gap: '12px' }}>
+                  <SelectField
+                    label="글 유형"
+                    value={formData.contentType}
+                    onChange={(v) => updateFormData('contentType', v)}
+                    options={['일반 정보', '이벤트·패치', '홍보·참여 안내']}
+                  />
                   <InputField label="이번 글의 구체적인 주제" value={formData.specificTopic} onChange={(v) => updateFormData('specificTopic', v)} placeholder="직접 입력 / 최신 정보를 조사해 선정" />
                   <InputField label="글의 목적" value={formData.purpose} onChange={(v) => updateFormData('purpose', v)} placeholder="정보 전달 / 검색 유입 / 사이트 이용 안내 / 문의 유도 등" />
                   <InputField label="독자가 글을 읽고 얻어야 할 정보" value={formData.readerGain} onChange={(v) => updateFormData('readerGain', v)} />
@@ -804,10 +1071,10 @@ B. 검토 후 바로 게시
                 </div>
               </div>
 
-              {/* 7. 글의 말투·분량·구성 */}
+              {/* 5. 문체·분량·키워드 */}
               <div style={{ borderBottom: '2px solid #F3F4F6', paddingBottom: '20px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: '#1F2937' }}>
-                  7. 글의 말투·분량·구성
+                  5. 문체·분량·키워드
                 </h3>
                 <div style={{ display: 'grid', gap: '12px' }}>
                   <SelectField
@@ -823,32 +1090,17 @@ B. 검토 후 바로 게시
                     onChange={(v) => updateFormData('emoji', v)}
                     options={['사용하지 않음', '필요한 곳에 소량 사용']}
                   />
-                  <SelectField
-                    label="홍보 강도"
-                    value={formData.promotionLevel}
-                    onChange={(v) => updateFormData('promotionLevel', v)}
-                    options={['없음', '마지막에 한 문장', '본문에 자연스럽게 포함']}
-                  />
-                </div>
-              </div>
-
-              {/* 8. 검색 유입 및 태그 */}
-              <div style={{ borderBottom: '2px solid #F3F4F6', paddingBottom: '20px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: '#1F2937' }}>
-                  8. 검색 유입 및 태그
-                </h3>
-                <div style={{ display: 'grid', gap: '12px' }}>
                   <InputField label="핵심 키워드" value={formData.coreKeyword} onChange={(v) => updateFormData('coreKeyword', v)} placeholder="직접 입력 / 주제에 맞게 선정" />
                   <InputField label="보조 키워드" value={formData.subKeyword} onChange={(v) => updateFormData('subKeyword', v)} placeholder="직접 입력 / 주제에 맞게 선정" />
                   <InputField label="태그 개수" value={formData.tagCount} onChange={(v) => updateFormData('tagCount', v)} />
                 </div>
               </div>
 
-              {/* 9. 썸네일 제작 */}
+              {/* 6. 썸네일 제작 */}
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
                   <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#1F2937', margin: 0 }}>
-                    9. 썸네일 제작
+                    6. 썸네일 제작
                   </h3>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <span style={{ fontSize: '13px', fontWeight: '600', color: formData.thumbnailEnabled ? '#10B981' : '#6B7280' }}>
