@@ -45,13 +45,7 @@ interface PromptFormData {
   subKeyword: string;
   tagCount: string;
   thumbnailEnabled: boolean;
-  thumbnailSize: string;
-  thumbnailRatio: string;
-  thumbnailFormat: string;
-  thumbnailStyle: string;
-  thumbnailColor: string;
-  thumbnailText: string;
-  thumbnailExclude: string;
+  thumbnailPath: string;
 }
 
 // 여기에 북마크를 추가/수정/삭제하세요
@@ -109,13 +103,7 @@ export default function AdminPage() {
     subKeyword: '',
     tagCount: '15개',
     thumbnailEnabled: true,
-    thumbnailSize: '579 × 579px',
-    thumbnailRatio: '정사각형',
-    thumbnailFormat: 'PNG',
-    thumbnailStyle: '깔끔함',
-    thumbnailColor: '',
-    thumbnailText: '',
-    thumbnailExclude: '없음',
+    thumbnailPath: '',
   });
 
   useEffect(() => {
@@ -172,12 +160,12 @@ export default function AdminPage() {
     // 제목 생성
     let title = '웹사이트 콘텐츠';
     if (formData.workScope === '글 작성만') {
-      title = formData.thumbnailEnabled ? '웹사이트 콘텐츠 작성 및 썸네일 제작 요청' : '웹사이트 콘텐츠 작성 요청';
+      title = formData.thumbnailEnabled ? '웹사이트 콘텐츠 및 썸네일 작성 요청' : '웹사이트 콘텐츠 작성 요청';
     } else if (formData.workScope === '글과 썸네일 제작') {
-      title = '웹사이트 콘텐츠 작성 및 썸네일 제작 요청';
+      title = '웹사이트 콘텐츠 및 썸네일 작성 요청';
     } else if (formData.workScope === '관리자 페이지 등록까지') {
       title = formData.thumbnailEnabled
-        ? '웹사이트 콘텐츠 조사·작성·썸네일 제작·업로드 요청'
+        ? '웹사이트 콘텐츠 조사·작성·업로드 요청'
         : '웹사이트 콘텐츠 조사·작성·업로드 요청';
     }
 
@@ -360,21 +348,11 @@ export default function AdminPage() {
       prompt += `\n`;
     }
 
-    // 7. 썸네일 제작 (토글 ON인 경우)
-    if (formData.thumbnailEnabled) {
-      prompt += `## ${sectionNumber++}. 썸네일 제작\n\n`;
-      prompt += `글의 핵심 내용을 한눈에 보여주는 썸네일 1개를 제작하세요.\n\n`;
-
-      if (formData.thumbnailSize) prompt += `* 크기: ${formData.thumbnailSize}\n`;
-      if (formData.thumbnailFormat) prompt += `* 형식: ${formData.thumbnailFormat}\n`;
-      if (formData.thumbnailStyle) prompt += `* 분위기: ${formData.thumbnailStyle}\n`;
-      if (formData.thumbnailColor) prompt += `* 주요 색상: ${formData.thumbnailColor}\n`;
-      if (formData.thumbnailText) prompt += `* 필수 문구: ${formData.thumbnailText}\n`;
-
-      prompt += `\n제작 시 주의사항:\n`;
-      prompt += `* 작은 화면에서도 글자가 잘 보이게 하세요.\n`;
-      prompt += `* 메이플스토리 관련 글임을 직관적으로 드러내세요.\n`;
-      prompt += `* 공식 제작물로 오해받을 표현은 피하세요.\n`;
+    // 7. 썸네일 (토글 ON인 경우)
+    if (formData.thumbnailEnabled && formData.thumbnailPath) {
+      prompt += `## ${sectionNumber++}. 썸네일\n\n`;
+      prompt += `* 썸네일 이미지 경로: ${formData.thumbnailPath}\n`;
+      prompt += `* 위 경로의 썸네일 이미지를 사용하세요.\n`;
       prompt += `\n`;
     }
 
@@ -419,7 +397,7 @@ export default function AdminPage() {
       prompt += `* 사용한 주요 출처\n`;
     }
     if (formData.thumbnailEnabled) {
-      prompt += `* 썸네일 문구\n`;
+      prompt += `* 썸네일 이미지 경로\n`;
     }
     if (formData.workScope === '관리자 페이지 등록까지') {
       prompt += `* 게시 상태 (초안 저장 / 공개 게시 완료)\n`;
@@ -1133,23 +1111,12 @@ B. 검토 후 바로 게시
                   </label>
                 </div>
                 <div style={{ display: 'grid', gap: '12px', opacity: formData.thumbnailEnabled ? 1 : 0.5, pointerEvents: formData.thumbnailEnabled ? 'auto' : 'none' }}>
-                  <InputField label="최종 크기" value={formData.thumbnailSize} onChange={(v) => updateFormData('thumbnailSize', v)} />
-                  <InputField label="비율" value={formData.thumbnailRatio} onChange={(v) => updateFormData('thumbnailRatio', v)} />
-                  <SelectField
-                    label="파일 형식"
-                    value={formData.thumbnailFormat}
-                    onChange={(v) => updateFormData('thumbnailFormat', v)}
-                    options={['PNG', 'JPG', '사이트에 맞게 선택']}
+                  <InputField
+                    label="썸네일 이미지 경로"
+                    value={formData.thumbnailPath}
+                    onChange={(v) => updateFormData('thumbnailPath', v)}
+                    placeholder="예: /images/thumbnail.png 또는 https://example.com/image.jpg"
                   />
-                  <SelectField
-                    label="디자인 분위기"
-                    value={formData.thumbnailStyle}
-                    onChange={(v) => updateFormData('thumbnailStyle', v)}
-                    options={['깔끔함', '밝고 귀여움', '기존 사이트 분위기에 맞춤']}
-                  />
-                  <InputField label="주요 색상" value={formData.thumbnailColor} onChange={(v) => updateFormData('thumbnailColor', v)} placeholder="입력 / 사이트에 맞게 선택" />
-                  <InputField label="필수 문구" value={formData.thumbnailText} onChange={(v) => updateFormData('thumbnailText', v)} placeholder="입력 / 본문에 맞게 선정" />
-                  <InputField label="제외할 요소" value={formData.thumbnailExclude} onChange={(v) => updateFormData('thumbnailExclude', v)} />
                 </div>
               </div>
 
