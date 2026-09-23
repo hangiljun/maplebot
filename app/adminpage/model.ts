@@ -38,8 +38,8 @@ export const options: Record<ChoiceKey, string[]> = {
   audience: ['메이플스토리 이용자', '초보자', '복귀 유저', '기존 유저', '아이템 거래 이용자'],
   scope: ['글 작성만', '관리자 페이지에 초안 등록까지', '관리자 페이지에 공개 게시까지'],
   publish: ['초안 저장 후 확인받기', '검토 후 바로 게시'],
-  type: ['일반 정보', '이벤트 안내', '업데이트·패치', '가이드·공략', '홍보·참여 안내'],
-  topic: ['최신 정보를 조사해 주제 선정', '진행 중인 이벤트', '최근 업데이트·패치', '초보자·복귀 유저 가이드', '아이템·메소 관련 정보'],
+  type: ['일반 정보', '이벤트 안내', '업데이트·패치', '가이드·공략', '커뮤니티·트렌드', '홍보·참여 안내'],
+  topic: ['최신 정보를 조사해 주제 선정', '진행 중인 이벤트', '최근 업데이트·패치', '커뮤니티 반응·게임 트렌드', '초보자·복귀 유저 가이드', '아이템·메소 관련 정보'],
   purpose: ['정확한 정보 전달', '검색 유입', '사이트 이용 안내', '이벤트 참여 안내', '문의 유도'],
   action: ['없음', '관련 글 보기', '사이트 기능 이용', '디스코드 참여', '문의하기'],
   tone: ['친근한 존댓말', '담백한 정보 전달', '공식 안내문'],
@@ -58,7 +58,12 @@ export function makePrompt(choices: Choices, custom: Record<ChoiceKey, string>, 
   const scope = get('scope');
   const contentType = get('type');
   const topic = get('topic');
+  const researchText = [contentType, topic, get('purpose'), extras.keyword, extras.include, extras.notes].join(' ');
   const eventRelated = contentType.includes('이벤트') || topic.includes('이벤트');
+  const updateRelated = contentType.includes('패치') || topic.includes('업데이트') || topic.includes('패치');
+  const guideRelated = contentType.includes('가이드') || contentType.includes('공략') || topic.includes('가이드');
+  const communityRelated = /커뮤니티|트렌드|동향|유저\s*반응|여론|화제|인벤/.test(researchText);
+  const siteRelated = contentType.includes('홍보') || get('purpose') === '사이트 이용 안내' || get('action') === '사이트 기능 이용';
   const uploads = scope.includes('관리자 페이지') || scope.includes('등록') || scope.includes('게시');
   const publish = scope === '관리자 페이지에 공개 게시까지' ? '검토 후 바로 게시' : '초안 저장 후 확인받기';
   const thumbnailSize = thumbnail.size === CUSTOM ? thumbnail.sizeCustom.trim() : thumbnail.size;
@@ -89,14 +94,18 @@ export function makePrompt(choices: Choices, custom: Record<ChoiceKey, string>, 
   if (extras.link.trim()) lines.push('', '## 넣을 링크', extras.link.trim());
   if (extras.exclude.trim()) lines.push('', '## 제외할 내용', extras.exclude.trim());
   if (extras.notes.trim()) lines.push('', '## 추가 요청', extras.notes.trim());
-  lines.push('', '## 참고 자료',
-    `- 먼저 선택한 사이트(${site || '[사이트 주소]'})의 기존 게시물과 실제 제공 기능을 확인하세요.`,
-    '- 메이플스토리 공식 공지사항: https://maplestory.nexon.com/News/Notice/All',
-  );
-  if (eventRelated) lines.push('- 메이플스토리 공식 진행 중 이벤트: https://maplestory.nexon.com/News/Event/Ongoing');
-  if (contentType.includes('패치') || topic.includes('업데이트') || topic.includes('패치')) lines.push('- 메이플스토리 공식 업데이트: https://maplestory.nexon.com/News/Update');
-  if (contentType.includes('가이드') || contentType.includes('공략')) lines.push('- 메이플스토리 공식 게임 가이드: https://maplestory.nexon.com/Guide/N23GameInformation');
-  if (extras.referenceUrl.trim()) lines.push(`- 추가 참고 자료: ${extras.referenceUrl.trim()}`);
+  const references: string[] = [];
+  if (site) {
+    references.push(siteRelated
+      ? `- 선택한 사이트(${site})의 실제 기능과 기존 게시물을 확인하세요.`
+      : `- 선택한 사이트(${site})에서 주제가 겹치는 기존 게시물이 있는지 확인하세요. 기존 글은 중복 방지와 내부 링크 판단에만 활용하고 사실의 원출처로 간주하지 마세요.`);
+  }
+  if (eventRelated) references.push('- 이벤트 일정·참여 조건·보상 확인: 메이플스토리 공식 진행 중 이벤트 https://maplestory.nexon.com/News/Event/Ongoing');
+  if (updateRelated) references.push('- 패치 내용·적용일 확인: 메이플스토리 공식 업데이트 https://maplestory.nexon.com/News/Update');
+  if (guideRelated) references.push('- 게임 시스템·이용 방법 확인: 메이플스토리 공식 게임 가이드 https://maplestory.nexon.com/Guide/N23GameInformation');
+  if (communityRelated) references.push('- 커뮤니티 반응·최근 화제 확인: 메이플스토리 인벤 https://www.inven.co.kr/maple/ — 의견의 빈도와 서로 다른 관점을 살펴보되, 커뮤니티 게시물을 공식 사실의 근거로 사용하거나 일부 반응을 전체 이용자의 의견처럼 일반화하지 마세요.');
+  if (extras.referenceUrl.trim()) references.push(`- 사용자가 지정한 추가 참고 자료: ${extras.referenceUrl.trim()}`);
+  if (references.length) lines.push('', '## 주제에 맞는 참고 자료', ...references);
   lines.push('',
     "## 작성 기준",
     "",
@@ -112,7 +121,7 @@ export function makePrompt(choices: Choices, custom: Record<ChoiceKey, string>, 
     "",
     "### 3. 사실 확인과 투명한 출처",
     "- 작업하는 날의 한국 시간을 기준으로 정보의 유효성을 확인하세요. 공지 게시일, 실제 적용일, 적용 서버·버전과 대상 조건을 구분하고 테스트월드 내용을 정식 서버에 확정된 것처럼 쓰지 마세요.",
-    "- 공식 발표·원자료를 우선 확인하고 사이트의 기존 게시물과 대조하세요. 중요한 수치나 주장은 해당 설명 가까이에 근거를 연결하고, 글 끝에 실제 확인한 출처의 작성자 또는 기관명, 제목과 원문 링크를 정리하세요.",
+    "- 사실의 종류에 맞는 공식 발표·원자료를 우선 확인하고 사이트의 기존 게시물과 대조하세요. 중요한 수치나 주장은 해당 설명 가까이에 근거를 연결하고, 글 끝에 실제 확인한 출처의 작성자 또는 기관명, 제목과 원문 링크를 정리하세요.",
     "- 참고 페이지에 접근할 수 없거나 자료끼리 충돌하면 확인한 범위와 미확인 항목을 구분하세요. 핵심 결론을 검증할 수 없으면 단정하지 말고 추가 확인이 필요한 초안으로 표시하세요.",
     "- 선택한 사이트의 기능·혜택은 실제 페이지에서 확인한 것만 소개하세요. 확인되지 않은 거래 실적·최저가·성과·수익·보장 표현을 만들지 마세요.",
     "- 원고료·협찬·제휴 수수료 등 경제적 이해관계가 확인되면 독자가 쉽게 알아볼 수 있도록 글 앞부분이나 관련 내용 가까이에 구체적으로 표시하세요. 내돈내산·협찬 없음도 확인된 경우에만 쓰고, 관계가 불명확하면 작성자 확인 항목으로 남기세요.",
@@ -137,6 +146,7 @@ export function makePrompt(choices: Choices, custom: Record<ChoiceKey, string>, 
   if (contentType.includes('가이드') && eventRelated) lines.push('- 이번 글은 이벤트 소식 나열보다 독자가 따라 할 수 있는 참여 가이드에 초점을 맞추세요.');
   if (contentType.includes('가이드')) lines.push('- 가이드는 준비 조건, 순서대로 따라 할 단계, 흔히 하는 실수, 완료 체크리스트로 구성하세요.');
   if (contentType.includes('패치')) lines.push('- 업데이트는 적용 서버와 날짜, 변경 전후, 이용자에게 미치는 영향, 지금 확인할 사항을 구분하세요.');
+  if (communityRelated) lines.push('- 커뮤니티·트렌드 글은 확인한 게시물의 기간과 범위를 밝히고, 반복해서 등장한 관심사와 서로 다른 의견을 함께 정리하세요. 조회수나 일부 댓글만으로 전체 여론을 단정하지 마세요.');
   if (get('purpose') === '검색 유입') lines.push('- 검색 유입을 위한 글은 핵심 질문에 충분히 답했는지 점검하고, 독자의 선택에 필요한 비교 기준이나 실제로 관련 있는 후속 질문만 보완하세요.');
   if (contentType.includes('홍보')) lines.push('- 확인한 실제 기능의 이용 순서를 설명하세요. 확인되지 않은 후기·거래 실적·최저가·수익 보장을 만들지 마세요.');
   if (get('action') === '사이트 기능 이용') lines.push('- 사이트 기능 이용 안내는 글의 주제와 직접 관련된 실제 기능이 확인된 경우에만 넣으세요.');
